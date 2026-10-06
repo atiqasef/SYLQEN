@@ -121,6 +121,8 @@ export function RegisterForm({ googleEnabled }: RegisterFormProps) {
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             placeholder="Create a password"
+            toggleLabelShow="Show password"
+            toggleLabelHide="Hide password"
           />
           <p className="text-xs leading-5 text-muted-foreground">{PASSWORD_HINT}</p>
         </div>
@@ -134,6 +136,8 @@ export function RegisterForm({ googleEnabled }: RegisterFormProps) {
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}
             placeholder="Repeat your password"
+            toggleLabelShow="Show confirm password"
+            toggleLabelHide="Hide confirm password"
           />
         </div>
 

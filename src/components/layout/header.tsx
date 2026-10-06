@@ -8,6 +8,7 @@ import type { SessionContext } from "@/server/auth/types";
 
 type HeaderProps = {
   onMenuClick: () => void;
+  menuOpen?: boolean;
   title?: string;
   description?: string;
   session: SessionContext;
@@ -15,6 +16,7 @@ type HeaderProps = {
 
 export function Header({
   onMenuClick,
+  menuOpen = false,
   title = "Overview",
   description = "Foundation shell for the SYLQEN Business Operating System.",
   session,
@@ -30,6 +32,7 @@ export function Header({
           onClick={onMenuClick}
           aria-label="Open navigation"
           aria-controls="app-sidebar"
+          aria-expanded={menuOpen}
         >
           <MenuIcon aria-hidden="true" />
         </Button>

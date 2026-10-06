@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import * as React from "react";
 import type { ComponentType } from "react";
 
 import {
@@ -20,6 +21,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { primaryNav, secondaryNav, siteConfig, type NavItem } from "@/config/site";
 import { cn } from "@/lib/utils/cn";
+
+const MOBILE_SIDEBAR_QUERY = "(max-width: 1023px)";
 
 const iconByHref: Record<string, ComponentType<{ className?: string }>> = {
   "/": OverviewIcon,
@@ -88,6 +91,19 @@ function NavLink({
 }
 
 export function Sidebar({ open, onClose }: SidebarProps) {
+  const [isMobileViewport, setIsMobileViewport] = React.useState(false);
+
+  React.useEffect(() => {
+    const media = window.matchMedia(MOBILE_SIDEBAR_QUERY);
+    const sync = () => setIsMobileViewport(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
+
+  // Closed drawer must not remain in the tab order off-screen on small viewports.
+  const inertWhenClosed = isMobileViewport && !open;
+
   return (
     <>
       <div
@@ -101,6 +117,8 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
       <aside
         id="app-sidebar"
+        inert={inertWhenClosed ? true : undefined}
+        aria-hidden={inertWhenClosed || undefined}
         className={cn(
           "fixed inset-y-0 left-0 z-50 flex w-[var(--sidebar-width)] flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground",
           "transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] motion-reduce:transition-none",

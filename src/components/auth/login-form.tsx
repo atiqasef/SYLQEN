@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { authClient } from "@/lib/auth-client";
+import { getSafeNextPath } from "@/lib/navigation/safe-next-path";
 import { exploreDemoAction } from "@/server/auth/actions";
 
 type LoginFormProps = {
@@ -31,10 +32,12 @@ export function LoginForm({ googleEnabled, demoEnabled }: LoginFormProps) {
     setPending(true);
     setError(null);
 
+    const nextPath = getSafeNextPath(searchParams.get("next"));
+
     const result = await authClient.signIn.email({
       email,
       password,
-      callbackURL: searchParams.get("next") || "/",
+      callbackURL: nextPath,
     });
 
     setPending(false);
@@ -44,7 +47,7 @@ export function LoginForm({ googleEnabled, demoEnabled }: LoginFormProps) {
       return;
     }
 
-    router.push(searchParams.get("next") || "/");
+    router.push(nextPath);
     router.refresh();
   }
 

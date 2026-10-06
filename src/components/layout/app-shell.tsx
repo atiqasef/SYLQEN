@@ -29,6 +29,7 @@ export function AppShell({
         <div className="flex min-w-0 flex-1 flex-col">
           <Header
             onMenuClick={() => setSidebarOpen(true)}
+            menuOpen={sidebarOpen}
             title={title}
             description={description}
             session={session}

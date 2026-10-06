@@ -119,6 +119,11 @@ export default async function OverviewPage() {
                   autoComplete="email"
                   defaultValue={session.user.email}
                   readOnly={session.user.isDemo}
+                  title={
+                    session.user.isDemo
+                      ? "Demo accounts are read-only"
+                      : undefined
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -129,9 +134,19 @@ export default async function OverviewPage() {
                   autoComplete="organization"
                   defaultValue={session.workspace.name}
                   readOnly={session.user.isDemo}
+                  title={
+                    session.user.isDemo
+                      ? "Demo accounts are read-only"
+                      : undefined
+                  }
                 />
               </div>
             </div>
+            {session.user.isDemo ? (
+              <p className="text-xs leading-5 text-muted-foreground">
+                Demo accounts are read-only. Editing workspace data is disabled.
+              </p>
+            ) : null}
 
             <Dialog>
               <DialogTrigger asChild>
@@ -164,7 +179,7 @@ export default async function OverviewPage() {
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
             <div className="flex justify-between gap-4 border-b border-border pb-3">
-              <span className="text-muted-foreground">Verified email</span>
+              <span className="text-muted-foreground">Email</span>
               <span className="font-medium">{session.user.email}</span>
             </div>
             <div className="flex justify-between gap-4 border-b border-border pb-3">

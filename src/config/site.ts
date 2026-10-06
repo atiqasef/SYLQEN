@@ -3,7 +3,7 @@ export const siteConfig = {
   shortName: "SYLQEN",
   description:
     "AI-powered Business Operating System for operations, CRM, finance, teams, and automation.",
-  url: "https://sylqen.app",
+  url: "https://sylqen.vercel.app",
 } as const;
 
 export type NavItem = {
