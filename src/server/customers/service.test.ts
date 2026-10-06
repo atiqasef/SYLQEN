@@ -5,6 +5,7 @@ import { MongoClient } from "mongodb";
 import { AppError } from "@/lib/errors/app-error";
 import { effectivePermissions } from "@/server/auth/permissions";
 import type { SessionContext } from "@/server/auth/types";
+import { resetCustomerIndexesForTests } from "@/server/customers/repository";
 import {
   createCustomerForSession,
   getCustomerForSession,
@@ -73,6 +74,7 @@ describe("customers service", () => {
   });
 
   beforeEach(async () => {
+    resetCustomerIndexesForTests();
     await client.db().dropDatabase();
     const a = await createWorkspaceWithOwner({
       name: "Workspace A",

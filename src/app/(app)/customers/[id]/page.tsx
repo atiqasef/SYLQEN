@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { isAppError, toAppError } from "@/lib/errors/app-error";
 import { requireVerifiedPageSession } from "@/server/auth/session";
 import { getCustomerForSession } from "@/server/customers/service";
-import { connectMongo } from "@/server/db/mongodb";
 import { cn } from "@/lib/utils/cn";
 
 type CustomerDetailPageProps = {
@@ -65,7 +64,6 @@ export default async function CustomerDetailPage({
   params,
 }: CustomerDetailPageProps) {
   const session = await requireVerifiedPageSession();
-  await connectMongo();
   const { id } = await params;
 
   const canUpdate = session.membership.permissions.includes("customers.update");

@@ -1,5 +1,6 @@
 import "server-only";
 
+import { cache } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -32,10 +33,13 @@ function mapUser(sessionUser: {
 }
 
 /**
- * Trusted session + workspace membership.
- * Derives identity from Better Auth cookies — never from the browser body.
+ * Resolve trusted session + workspace membership once per request.
+ *
+ * Wrapped in React `cache()` so layout + page (and nested helpers) that call
+ * getSession / requireVerifiedPageSession share one DB round-trip within the
+ * same RSC/server request. Not a cross-request or global session cache.
  */
-export async function getSession(): Promise<SessionContext | null> {
+export const getSession = cache(async (): Promise<SessionContext | null> => {
   if (!isMongoConfigured()) {
     return null;
   }
@@ -85,7 +89,7 @@ export async function getSession(): Promise<SessionContext | null> {
       }),
     },
   };
-}
+});
 
 export async function requireSession(): Promise<SessionContext> {
   const session = await getSession();

@@ -109,6 +109,11 @@ Authenticated session
 
 Never authorize from browser-supplied tenant IDs alone.
 
+## Request performance (auth hot path)
+
+- `getSession` is wrapped in React `cache()` so multiple callers in one request share one Better Auth + workspace resolution.
+- Customer `createIndexes` is guarded process-wide; it is not re-run on every Customers list/detail call after the first successful ensure in a warm runtime.
+
 ## Email
 
 `src/server/email` provides:

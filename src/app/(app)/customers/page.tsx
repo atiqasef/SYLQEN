@@ -11,7 +11,6 @@ import { CustomersTable } from "@/features/customers/customers-table";
 import { isAppError, toAppError } from "@/lib/errors/app-error";
 import { requireVerifiedPageSession } from "@/server/auth/session";
 import { listCustomersForSession } from "@/server/customers/service";
-import { connectMongo } from "@/server/db/mongodb";
 
 type CustomersPageProps = {
   searchParams: Promise<{
@@ -27,7 +26,6 @@ function firstParam(value: string | string[] | undefined) {
 
 export default async function CustomersPage({ searchParams }: CustomersPageProps) {
   const session = await requireVerifiedPageSession();
-  await connectMongo();
 
   const params = await searchParams;
   const q = firstParam(params.q);

@@ -11,7 +11,15 @@ import type {
 
 const CUSTOMERS = "customers";
 
-export async function ensureCustomerIndexes() {
+/**
+ * Process-scoped ensure: createIndexes runs at most once per warm runtime
+ * (shared promise). Failures clear the promise so the next call can retry.
+ * Not a per-request DB op and not a cross-process migration framework —
+ * Atlas/index management can also be applied out-of-band if desired.
+ */
+let customerIndexesPromise: Promise<void> | undefined;
+
+async function createCustomerIndexes() {
   const db = getDb();
   await db.collection(CUSTOMERS).createIndexes([
     {
@@ -28,6 +36,22 @@ export async function ensureCustomerIndexes() {
       name: "customers_workspace_name",
     },
   ]);
+}
+
+export async function ensureCustomerIndexes() {
+  if (!customerIndexesPromise) {
+    customerIndexesPromise = createCustomerIndexes().catch((error: unknown) => {
+      customerIndexesPromise = undefined;
+      throw error;
+    });
+  }
+
+  return customerIndexesPromise;
+}
+
+/** Test helper — clear the process-level index ensure guard. */
+export function resetCustomerIndexesForTests() {
+  customerIndexesPromise = undefined;
 }
 
 function escapeRegex(value: string): string {

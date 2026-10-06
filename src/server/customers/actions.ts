@@ -8,7 +8,6 @@ import {
   createCustomerForSession,
   updateCustomerForSession,
 } from "@/server/customers/service";
-import { connectMongo } from "@/server/db/mongodb";
 import { logger } from "@/server/logging/logger";
 
 export type CustomerActionResult =
@@ -46,7 +45,6 @@ export async function createCustomerAction(
   input: unknown,
 ): Promise<CustomerActionResult> {
   try {
-    await connectMongo();
     const session = await requireSession();
     const created = await createCustomerForSession(session, input);
     revalidatePath("/customers");
@@ -61,7 +59,6 @@ export async function updateCustomerAction(
   input: unknown,
 ): Promise<CustomerActionResult> {
   try {
-    await connectMongo();
     const session = await requireSession();
     const updated = await updateCustomerForSession(session, customerId, input);
     revalidatePath("/customers");

@@ -8,7 +8,6 @@ import { CustomerForm } from "@/features/customers/customer-form";
 import { isAppError, toAppError } from "@/lib/errors/app-error";
 import { requireVerifiedPageSession } from "@/server/auth/session";
 import { getCustomerForSession } from "@/server/customers/service";
-import { connectMongo } from "@/server/db/mongodb";
 
 type EditCustomerPageProps = {
   params: Promise<{ id: string }>;
@@ -18,7 +17,6 @@ export default async function EditCustomerPage({
   params,
 }: EditCustomerPageProps) {
   const session = await requireVerifiedPageSession();
-  await connectMongo();
   const { id } = await params;
 
   const canUpdate = session.membership.permissions.includes("customers.update");
