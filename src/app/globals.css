@@ -146,6 +146,11 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
+  --font-sylqen-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji";
+  --font-sylqen-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo,
+    Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
   --font-sans: var(--font-sylqen-sans);
   --font-mono: var(--font-sylqen-mono);
 
