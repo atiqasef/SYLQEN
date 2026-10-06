@@ -13,7 +13,7 @@ src/
   components/
     auth/            Auth experience UI
     ui/ layout/ feedback/ providers/
-  features/          Domain UI modules (customers, products, projects, invoices, …)
+  features/          Domain UI modules (customers, products, projects, invoices, payments, …)
   lib/
     auth.ts          Better Auth server instance
     auth-client.ts   Better Auth React client
@@ -23,6 +23,7 @@ src/
     products/        Product repository + service + actions
     projects/        Project repository + service + actions
     invoices/        Invoice repository + service + actions
+    payments/        Payment repository + service + actions
     db/              MongoDB connection + health
     email/           Email provider boundary (dev/resend)
     workspaces/      Workspace + membership persistence
@@ -74,6 +75,7 @@ Permissions:
 - `products.read` / `products.create` / `products.update`
 - `projects.read` / `projects.create` / `projects.update`
 - `invoices.read` / `invoices.create` / `invoices.update`
+- `payments.read` / `payments.create`
 
 Demo accounts are force-capped to viewer permissions in `effectivePermissions`.
 
@@ -166,9 +168,33 @@ Collection `invoices` (MongoDB native driver):
 
 Search strategy: bounded case-insensitive regex across invoiceNumber and customerNameSnapshot.
 
-Delete, payments, PDF, email, tax, and discounts are intentionally omitted.
+Delete, PDF, email, tax, and discounts are intentionally omitted. Manual payments are handled by the Payments module.
 
 Demo: read/search/detail allowed; create/update forbidden via `invoices.create` / `invoices.update`.
+
+## Payments module
+
+Routes:
+
+- `/payments` — workspace-scoped list with server search + pagination
+- `/payments/new` — record a payment against an invoice
+- `/payments/[id]` — payment detail
+
+Collection `payments` (MongoDB native driver):
+
+- Tenant boundary: `workspaceId` from trusted session (never browser-supplied)
+- Fields: `invoiceId`, `invoiceNumberSnapshot`, `customerId`, `customerNameSnapshot`, `amount`, `currency`, `paymentDate`, `method` (`cash` | `bank_transfer` | `card` | `other`), `reference?`, `notes?`, `createdByUserId`, timestamps
+- Invoice ownership, currency, and remaining balance are resolved server-side
+- Amounts use the same cents-safe helpers as invoices; browser amounts are validated then re-checked against remaining balance
+- Overpayment and fully-paid follow-ups are rejected; settling remaining balance marks the invoice `paid`
+- Indexes: `{ workspaceId, createdAt }`, `{ workspaceId, invoiceId }`, `{ workspaceId, customerId }`, `{ workspaceId, paymentDate }`
+- Domain is provider-agnostic (manual methods now; Stripe/checkout can extend later without replacing the payment model)
+
+Search strategy: bounded case-insensitive regex across invoiceNumberSnapshot, customerNameSnapshot, and reference.
+
+No payment update/delete, gateways, webhooks, refunds, or subscriptions in this phase.
+
+Demo: read/search/detail allowed; create forbidden via `payments.create`.
 
 ## Tenant isolation
 
@@ -188,7 +214,7 @@ Never authorize from browser-supplied tenant IDs alone.
 ## Request performance (auth hot path)
 
 - `getSession` is wrapped in React `cache()` so multiple callers in one request share one Better Auth + workspace resolution.
-- Customer/product/project/invoice `createIndexes` is guarded process-wide; it is not re-run on every list/detail call after the first successful ensure in a warm runtime.
+- Customer/product/project/invoice/payment `createIndexes` is guarded process-wide; it is not re-run on every list/detail call after the first successful ensure in a warm runtime.
 
 ## Email
 

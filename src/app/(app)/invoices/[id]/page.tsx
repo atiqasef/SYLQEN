@@ -9,6 +9,7 @@ import { InvoiceStatusBadge } from "@/features/invoices/invoice-status-badge";
 import { isAppError, toAppError } from "@/lib/errors/app-error";
 import { requireVerifiedPageSession } from "@/server/auth/session";
 import { getInvoiceForSession } from "@/server/invoices/service";
+import { getInvoicePaymentSummaryForSession } from "@/server/payments/service";
 import { cn } from "@/lib/utils/cn";
 
 type InvoiceDetailPageProps = {
@@ -94,6 +95,8 @@ export default async function InvoiceDetailPage({
   const session = await requireVerifiedPageSession();
   const { id } = await params;
   const canUpdate = session.membership.permissions.includes("invoices.update");
+  const canCreatePayment =
+    session.membership.permissions.includes("payments.create");
 
   let invoice;
   try {
@@ -109,6 +112,13 @@ export default async function InvoiceDetailPage({
         description={appError.userMessage}
       />
     );
+  }
+
+  let paymentSummary = null;
+  try {
+    paymentSummary = await getInvoicePaymentSummaryForSession(session, invoice.id);
+  } catch {
+    paymentSummary = null;
   }
 
   const formattedTotal = formatMoney(invoice.total, invoice.currency);
@@ -405,6 +415,65 @@ export default async function InvoiceDetailPage({
             </div>
           </div>
         </section>
+
+        {paymentSummary ? (
+          <section
+            className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-panel"
+            aria-labelledby="invoice-payments-heading"
+          >
+            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border px-4 py-3.5 sm:px-5">
+              <div>
+                <h3
+                  id="invoice-payments-heading"
+                  className="text-sm font-semibold tracking-tight text-foreground"
+                >
+                  Payments
+                </h3>
+                <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                  {paymentSummary.paymentCount === 0
+                    ? "No payments recorded yet."
+                    : `${paymentSummary.paymentCount} payment${paymentSummary.paymentCount === 1 ? "" : "s"} recorded.`}
+                </p>
+              </div>
+              {canCreatePayment && paymentSummary.remaining > 0 ? (
+                <Button asChild size="sm" variant="outline">
+                  <Link href={`/payments/new?invoiceId=${invoice.id}`}>
+                    Record payment
+                  </Link>
+                </Button>
+              ) : null}
+            </div>
+            <dl className="divide-y divide-border">
+              <div className="grid gap-1 px-4 py-3.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4 sm:px-5">
+                <dt className="text-sm text-muted-foreground">Invoice total</dt>
+                <dd className="text-sm font-medium tabular-nums text-foreground">
+                  {formatMoney(
+                    paymentSummary.invoiceTotal,
+                    paymentSummary.currency,
+                  )}
+                </dd>
+              </div>
+              <div className="grid gap-1 px-4 py-3.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4 sm:px-5">
+                <dt className="text-sm text-muted-foreground">Paid</dt>
+                <dd className="text-sm font-medium tabular-nums text-foreground">
+                  {formatMoney(
+                    paymentSummary.amountPaid,
+                    paymentSummary.currency,
+                  )}
+                </dd>
+              </div>
+              <div className="grid gap-1 px-4 py-3.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4 sm:px-5">
+                <dt className="text-sm text-muted-foreground">Remaining</dt>
+                <dd className="text-sm font-semibold tabular-nums text-foreground">
+                  {formatMoney(
+                    paymentSummary.remaining,
+                    paymentSummary.currency,
+                  )}
+                </dd>
+              </div>
+            </dl>
+          </section>
+        ) : null}
 
         {invoice.notes ? (
           <section

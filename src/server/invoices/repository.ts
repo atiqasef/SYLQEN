@@ -233,6 +233,34 @@ export async function findInvoiceInWorkspace(options: {
   });
 }
 
+/** Update invoice status only (e.g. mark paid after settlement). */
+export async function updateInvoiceStatusInWorkspace(options: {
+  workspaceId: string;
+  invoiceId: string;
+  status: InvoiceStatus;
+}): Promise<InvoiceDocument | null> {
+  if (!ObjectId.isValid(options.invoiceId)) {
+    return null;
+  }
+
+  const db = getDb();
+  const result = await db.collection<InvoiceDocument>(INVOICES).findOneAndUpdate(
+    {
+      _id: new ObjectId(options.invoiceId),
+      workspaceId: options.workspaceId,
+    },
+    {
+      $set: {
+        status: options.status,
+        updatedAt: new Date(),
+      },
+    },
+    { returnDocument: "after" },
+  );
+
+  return result ?? null;
+}
+
 export async function listInvoicesInWorkspace(options: {
   workspaceId: string;
   q?: string;

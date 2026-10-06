@@ -92,10 +92,19 @@ Coverage: Vitest (`src/server/projects/service.test.ts`, `src/features/projects/
 
 Coverage: Vitest (`src/server/invoices/service.test.ts`, `src/features/invoices/schemas.test.ts`) and Playwright (`e2e/invoices.spec.ts`).
 
+## Payments module (local)
+
+1. Sign in as a normal user with an existing invoice
+2. Open **Payments** and record / search / paginate / open detail
+3. Confirm remaining balance, overpayment rejection, and the invoice payment summary
+4. Sign in via **Explore Demo** and confirm record is blocked while list/detail remain readable
+
+Coverage: Vitest (`src/server/payments/service.test.ts`, `src/features/payments/schemas.test.ts`) and Playwright (`e2e/payments.spec.ts`).
+
 ### Performance notes (hot path)
 
 - Session/workspace resolution uses React `cache()` for **request-scoped** deduplication (layout + page share one lookup). Not a cross-request cache.
-- Customer/product/project/invoice Mongo indexes are ensured with a **process-level** shared promise. Prefer confirming indexes in Atlas for production; the runtime ensure is a safety net, not a migration framework.
+- Customer/product/project/invoice/payment Mongo indexes are ensured with a **process-level** shared promise. Prefer confirming indexes in Atlas for production; the runtime ensure is a safety net, not a migration framework.
 - Align Vercel function region with the Atlas cluster region in the Vercel/Atlas dashboards (no region pin is committed in-repo).
 
 ## Scripts

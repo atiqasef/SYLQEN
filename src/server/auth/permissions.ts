@@ -21,6 +21,8 @@ export const ALL_PERMISSIONS = [
   "invoices.read",
   "invoices.create",
   "invoices.update",
+  "payments.read",
+  "payments.create",
 ] as const satisfies readonly Permission[];
 
 const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
@@ -41,6 +43,8 @@ const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "invoices.read",
     "invoices.create",
     "invoices.update",
+    "payments.read",
+    "payments.create",
   ],
   viewer: [
     "workspace.read",
@@ -49,6 +53,7 @@ const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "products.read",
     "projects.read",
     "invoices.read",
+    "payments.read",
   ],
 };
 

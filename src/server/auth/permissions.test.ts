@@ -10,6 +10,7 @@ describe("RBAC permissions", () => {
   it("gives owners full workspace permission set", () => {
     expect(permissionsForRole("owner")).toContain("members.remove");
     expect(permissionsForRole("owner")).toContain("workspace.update");
+    expect(permissionsForRole("owner")).toContain("payments.create");
   });
 
   it("keeps viewers read-only for workspace mutations", () => {
@@ -20,6 +21,7 @@ describe("RBAC permissions", () => {
       "products.read",
       "projects.read",
       "invoices.read",
+      "payments.read",
     ]);
     expect(canPerform({ role: "viewer", isDemo: false, permission: "members.invite" })).toBe(
       false,
@@ -36,6 +38,9 @@ describe("RBAC permissions", () => {
     expect(
       canPerform({ role: "viewer", isDemo: false, permission: "invoices.create" }),
     ).toBe(false);
+    expect(
+      canPerform({ role: "viewer", isDemo: false, permission: "payments.create" }),
+    ).toBe(false);
   });
 
   it("caps demo accounts to viewer permissions even if stored as owner", () => {
@@ -48,6 +53,7 @@ describe("RBAC permissions", () => {
       "products.read",
       "projects.read",
       "invoices.read",
+      "payments.read",
     ]);
     expect(
       canPerform({
@@ -84,9 +90,16 @@ describe("RBAC permissions", () => {
         permission: "invoices.update",
       }),
     ).toBe(false);
+    expect(
+      canPerform({
+        role: "owner",
+        isDemo: true,
+        permission: "payments.create",
+      }),
+    ).toBe(false);
   });
 
-  it("allows members to manage customers, products, projects, and invoices", () => {
+  it("allows members to manage customers, products, projects, invoices, and payments", () => {
     expect(
       canPerform({ role: "member", isDemo: false, permission: "customers.create" }),
     ).toBe(true);
@@ -110,6 +123,12 @@ describe("RBAC permissions", () => {
     ).toBe(true);
     expect(
       canPerform({ role: "member", isDemo: false, permission: "invoices.update" }),
+    ).toBe(true);
+    expect(
+      canPerform({ role: "member", isDemo: false, permission: "payments.read" }),
+    ).toBe(true);
+    expect(
+      canPerform({ role: "member", isDemo: false, permission: "payments.create" }),
     ).toBe(true);
   });
 });

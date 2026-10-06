@@ -23,7 +23,9 @@ export type Permission =
   | "projects.update"
   | "invoices.read"
   | "invoices.create"
-  | "invoices.update";
+  | "invoices.update"
+  | "payments.read"
+  | "payments.create";
 
 export type AuthUser = {
   id: string;

@@ -44,6 +44,13 @@ function resolveShellMeta(pathname: string, session: SessionContext) {
     };
   }
 
+  if (pathname.startsWith("/payments")) {
+    return {
+      title: "Payments",
+      description: `${session.workspace.name} · payment records`,
+    };
+  }
+
   return {
     title: "Overview",
     description: `${session.workspace.name} · ${session.membership.role}`,

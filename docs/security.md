@@ -63,4 +63,4 @@ The logger redacts keys that look like passwords, secrets, tokens, API keys, coo
 
 Every tenant-scoped record must carry workspace identity. Isolation is enforced in server data access, not in the UI.
 
-Customer, product, project, and invoice records are scoped by `workspaceId` from the trusted session. List/get/create/update ignore any browser-supplied workspace/owner identifiers. Cross-workspace access returns `NOT_FOUND` (no existence leak across tenants for foreign IDs). Product SKUs and invoice numbers are unique per workspace via compound unique indexes. Invoice totals, product prices/names/SKUs, and invoice numbers are never trusted from browser input.
+Customer, product, project, invoice, and payment records are scoped by `workspaceId` from the trusted session. List/get/create/update ignore any browser-supplied workspace/owner identifiers. Cross-workspace access returns `NOT_FOUND` (no existence leak across tenants for foreign IDs). Product SKUs and invoice numbers are unique per workspace via compound unique indexes. Invoice totals, product prices/names/SKUs, invoice numbers, payment amounts, and remaining balances are never trusted from browser input.
