@@ -1,10 +1,10 @@
 # SYLQEN Security Principles
 
-These principles apply from Phase 1 onward, even before authentication and persistence are implemented.
+These principles apply from Phase 1 onward and are enforced in Phase 2 identity/workspace code.
 
 ## Never trust browser-supplied tenant identity
 
-Future server operations must derive the authenticated user and workspace from a **trusted server session**.
+Server operations must derive the authenticated user and workspace from a **trusted server session**.
 
 Do **not**:
 
@@ -14,16 +14,40 @@ Do **not**:
 
 Do:
 
-- Read session context on the server (`src/server/auth`)
-- Scope every repository query by the session workspace
+- Read session context on the server (`src/server/auth/session.ts`)
+- Resolve membership with `userId` from the session + target workspace
+- Evaluate permissions with `canPerform` / `requirePermission`
 - Treat client IDs as hints at most, never as authority
+
+Cross-workspace access must fail closed with a safe `FORBIDDEN` response.
+
+## Authentication
+
+- Better Auth handles password hashing, sessions, verification tokens, and OAuth
+- Email/password accounts require email verification before app access
+- Google OAuth uses server-side client secrets only
+- Auth cookies are managed by Better Auth (`nextCookies` for server actions)
+- Proxy/middleware cookie checks are optimistic only; layouts re-validate sessions
+
+## Email verification
+
+- Ownership is proven by clicking a verification link, not by email-format checks
+- Any legitimate provider (Gmail, Outlook, Yahoo, custom domains) is acceptable
+- Verification and reset tokens are never written to application logs
+
+## Demo account
+
+- Demo credentials are environment-configured (`DEMO_EMAIL`, `DEMO_PASSWORD`)
+- Demo users are marked `isDemo: true`
+- Authorization caps demo identities to viewer/read-only permissions on the server
+- UI hiding is not sufficient authorization
 
 ## Environment secrets
 
 - Commit `.env.example` only
-- Never commit `.env` or real credentials
+- Never commit `.env`, `.env.local`, or real credentials
 - Prefix only public values with `NEXT_PUBLIC_`
-- Keep MongoDB, auth, Stripe, email, and AI keys server-only
+- Keep MongoDB, Better Auth, Google, Resend, and demo passwords server-only
 
 ## Error disclosure
 
@@ -37,12 +61,4 @@ The logger redacts keys that look like passwords, secrets, tokens, API keys, coo
 
 ## Multi-tenancy
 
-Every tenant-scoped record must carry workspace/organization identity. Isolation is enforced in server data access, not in the UI.
-
-## Authentication boundary
-
-Phase 1 provides types and session helpers without fake login behavior. When auth is added:
-
-- Sessions are server-validated
-- Roles/permissions are evaluated server-side
-- Client portals and API access receive separate authz paths
+Every tenant-scoped record must carry workspace identity. Isolation is enforced in server data access, not in the UI.

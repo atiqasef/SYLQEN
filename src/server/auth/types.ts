@@ -1,25 +1,35 @@
 /**
- * Authentication and authorization boundary.
- * No fake session behavior is implemented in Phase 1.
+ * Authentication and authorization types.
+ * Trusted identity is always derived from the server session.
  */
 
 export type Role = "owner" | "admin" | "member" | "viewer";
 
 export type Permission =
-  | "workspace:read"
-  | "workspace:write"
-  | "billing:manage"
-  | "members:manage"
-  | "ai:use";
+  | "workspace.read"
+  | "workspace.update"
+  | "members.read"
+  | "members.invite"
+  | "members.update"
+  | "members.remove";
 
 export type AuthUser = {
   id: string;
   email: string;
   name: string;
+  emailVerified: boolean;
   imageUrl?: string;
+  isDemo: boolean;
+};
+
+export type WorkspaceSummary = {
+  id: string;
+  name: string;
+  slug: string;
 };
 
 export type WorkspaceMembership = {
+  id: string;
   workspaceId: string;
   userId: string;
   role: Role;
@@ -32,5 +42,6 @@ export type WorkspaceMembership = {
  */
 export type SessionContext = {
   user: AuthUser;
+  workspace: WorkspaceSummary;
   membership: WorkspaceMembership;
 };

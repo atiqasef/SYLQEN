@@ -1,20 +1,42 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import OverviewPage from "@/app/(app)/page";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
+vi.mock("@/server/auth/session", () => ({
+  requireVerifiedPageSession: vi.fn(async () => ({
+    user: {
+      id: "user_1",
+      email: "owner@example.com",
+      name: "Owner Example",
+      emailVerified: true,
+      isDemo: false,
+    },
+    workspace: {
+      id: "ws_1",
+      name: "Example Workspace",
+      slug: "example-workspace",
+    },
+    membership: {
+      id: "mem_1",
+      workspaceId: "ws_1",
+      userId: "user_1",
+      role: "owner",
+      permissions: ["workspace.read", "workspace.update"],
+    },
+  })),
+}));
+
 describe("OverviewPage", () => {
-  it("renders the foundation overview", () => {
-    render(
-      <TooltipProvider>
-        <OverviewPage />
-      </TooltipProvider>,
-    );
+  it("renders the authenticated workspace overview", async () => {
+    const ui = await OverviewPage();
+    render(<TooltipProvider>{ui}</TooltipProvider>);
 
     expect(
-      screen.getByRole("heading", { name: /SYLQEN foundation is ready/i }),
+      screen.getByRole("heading", { name: /Welcome, Owner Example/i }),
     ).toBeInTheDocument();
+    expect(screen.getByText(/Example Workspace/i)).toBeInTheDocument();
     expect(screen.getByText(/No business modules yet/i)).toBeInTheDocument();
   });
 });

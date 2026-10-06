@@ -5,14 +5,21 @@ import * as React from "react";
 import { Header } from "@/components/layout/header";
 import { Sidebar } from "@/components/layout/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import type { SessionContext } from "@/server/auth/types";
 
 type AppShellProps = {
   children: React.ReactNode;
+  session: SessionContext;
   title?: string;
   description?: string;
 };
 
-export function AppShell({ children, title, description }: AppShellProps) {
+export function AppShell({
+  children,
+  session,
+  title,
+  description,
+}: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
   return (
@@ -24,6 +31,7 @@ export function AppShell({ children, title, description }: AppShellProps) {
             onMenuClick={() => setSidebarOpen(true)}
             title={title}
             description={description}
+            session={session}
           />
           <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
             <div className="mx-auto w-full max-w-[var(--content-max)]">

@@ -1,38 +1,45 @@
 # SYLQEN
 
-**AI-powered Business Operating System** — a portfolio-grade foundation for multi-tenant business operations, CRM, finance, teams, analytics, automation, and AI assistance.
+**AI-powered Business Operating System** — portfolio-grade multi-tenant foundation for operations, CRM, finance, teams, analytics, automation, and AI assistance.
 
-> Phase 1 status: **foundation only**. Business modules are not implemented yet.
+> Current status: **Phase 2 — Identity, authentication, email verification, and workspace core.**
+
+Production: [https://sylqen.vercel.app](https://sylqen.vercel.app)
 
 ## Product vision
 
 SYLQEN brings together operations, customers, projects, tasks, finance, invoices, payments, team management, analytics, automation, AI assistance, integrations, notifications, client portals, and API access in one calm, enterprise-grade product experience.
 
-The intended feel is **premium 뿯½ modern 뿯½ intelligent 뿯½ calm 뿯½ enterprise** — comparable in polish to serious modern SaaS, not a generic CRUD starter.
+## What works today
 
-## Current development status
+### Phase 1
 
-Implemented in Phase 1:
+- Next.js App Router foundation
+- Design system + app shell
+- Theme system
+- Server boundaries, logging, AI abstraction
+- Testing/docs baseline
 
-- Next.js App Router + TypeScript + Tailwind CSS foundation
-- Scalable `src/` architecture and documentation
-- Design-system tokens and accessible UI primitives
-- Light / dark / system theme support (no flash on load)
-- Responsive application shell (sidebar, header, placeholders)
-- Motion, loading, empty, error, and not-found foundations
-- Validation / error-handling patterns (Zod + `AppError`)
-- Typed environment configuration
-- Database, auth, and AI architectural boundaries
-- Structured logging with secret redaction
-- Vitest smoke tests
+### Phase 2
 
-Not implemented yet (later phases):
+- Better Auth email/password authentication
+- Email verification gate before app access
+- Google OAuth integration boundary
+- Secure sessions + logout
+- MongoDB-backed users/sessions (Better Auth) + workspaces/memberships
+- Default workspace creation for verified users
+- RBAC (`owner`, `admin`, `member`, `viewer`)
+- Tenant isolation principles enforced in server auth helpers
+- Read-only demo account support via environment configuration
+- Premium login/register/verify/reset experiences
 
-- CRM, customers, projects, tasks
-- Finance, invoices, payments, Stripe
-- Auth sessions, roles UI, client portal
-- Real AI providers, automations, notifications
-- MongoDB schemas and repositories
+## Not implemented yet
+
+- CRM/customers/projects/finance modules
+- Stripe billing
+- Full organization administration UI
+- Real AI assistance product surfaces
+- Client portal
 
 ## Technology stack
 
@@ -40,31 +47,21 @@ Not implemented yet (later phases):
 - React 19 + React Compiler
 - TypeScript (strict)
 - Tailwind CSS 4
-- Radix UI primitives (dialog, dropdown, tooltip, label)
-- Zod
-- next-themes
-- Vitest + Testing Library
+- Better Auth
+- MongoDB Node.js driver
+- Resend (optional email provider)
+- Zod, Vitest, Testing Library
 
 ## Getting started
 
 ```bash
 npm install
 cp .env.example .env.local
+# set MONGODB_URI + BETTER_AUTH_SECRET + BETTER_AUTH_URL
 npm run dev
 ```
 
-Visit [http://localhost:3000](http://localhost:3000).
-
-## Environment setup
-
-Copy `.env.example` to `.env.local`. Defaults keep AI disabled:
-
-```bash
-AI_ENABLED=false
-AI_PROVIDER=mock
-```
-
-Do not commit real secrets. See [docs/development.md](docs/development.md).
+See [docs/development.md](docs/development.md) for full environment setup, Google OAuth, Resend, and demo account configuration.
 
 ## Testing
 

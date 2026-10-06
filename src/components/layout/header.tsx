@@ -4,17 +4,20 @@ import { MenuIcon } from "@/components/layout/icons";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { UserMenu } from "@/components/layout/user-menu";
 import { Button } from "@/components/ui/button";
+import type { SessionContext } from "@/server/auth/types";
 
 type HeaderProps = {
   onMenuClick: () => void;
   title?: string;
   description?: string;
+  session: SessionContext;
 };
 
 export function Header({
   onMenuClick,
   title = "Overview",
   description = "Foundation shell for the SYLQEN Business Operating System.",
+  session,
 }: HeaderProps) {
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-sm">
@@ -42,7 +45,7 @@ export function Header({
 
         <div className="flex items-center gap-1.5 sm:gap-2">
           <ThemeToggle />
-          <UserMenu />
+          <UserMenu session={session} />
         </div>
       </div>
     </header>

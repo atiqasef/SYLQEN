@@ -1,0 +1,113 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import * as React from "react";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { authClient } from "@/lib/auth-client";
+
+type VerifyEmailPanelProps = {
+  initialEmail?: string;
+};
+
+function verificationErrorMessage(error: string | null): string | null {
+  if (!error) {
+    return null;
+  }
+
+  const normalized = error.toLowerCase();
+  if (normalized.includes("expired")) {
+    return "This verification link has expired. Request a new one below.";
+  }
+  if (normalized.includes("invalid")) {
+    return "This verification link is invalid. Request a new one below.";
+  }
+  return "Email verification failed. Request a new link below.";
+}
+
+export function VerifyEmailPanel({ initialEmail = "" }: VerifyEmailPanelProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const emailFromQuery = searchParams.get("email") || "";
+  const [email, setEmail] = React.useState(initialEmail || emailFromQuery);
+  const [status] = React.useState(
+    searchParams.get("registered")
+      ? "Registration successful. Please verify your email address before continuing."
+      : "Please verify your email address before continuing.",
+  );
+  const [error, setError] = React.useState<string | null>(
+    verificationErrorMessage(searchParams.get("error")),
+  );
+  const [pending, setPending] = React.useState(false);
+  const [resentStatus, setResentStatus] = React.useState<string | null>(null);
+
+  async function onResend(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setPending(true);
+    setError(null);
+    setResentStatus(null);
+
+    const result = await authClient.sendVerificationEmail({
+      email,
+      callbackURL: "/",
+    });
+
+    setPending(false);
+
+    if (result.error) {
+      setError(result.error.message || "Unable to resend verification email.");
+      return;
+    }
+
+    setResentStatus("Verification email sent. Check your inbox and spam folder.");
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-[var(--radius-md)] border border-border bg-muted/40 px-4 py-3 text-sm leading-6 text-muted-foreground">
+        {resentStatus ?? status}
+      </div>
+
+      <form className="space-y-4" onSubmit={onResend}>
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            required
+            autoComplete="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+          />
+        </div>
+
+        {error ? (
+          <p role="alert" className="text-sm text-destructive">
+            {error}
+          </p>
+        ) : null}
+
+        <Button type="submit" className="w-full" disabled={pending || !email}>
+          {pending ? "Sending…" : "Resend verification email"}
+        </Button>
+      </form>
+
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={() => router.push("/login")}
+        >
+          Back to sign in
+        </Button>
+        <Button asChild variant="ghost" className="w-full">
+          <Link href="/register">Use a different email</Link>
+        </Button>
+      </div>
+    </div>
+  );
+}

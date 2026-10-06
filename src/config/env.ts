@@ -5,8 +5,6 @@ import { z } from "zod";
  *
  * - `NEXT_PUBLIC_*` values are safe for the browser.
  * - Server-only secrets must never be prefixed with `NEXT_PUBLIC_`.
- * - Future services (MongoDB, auth, Stripe, email, AI, storage, jobs)
- *   are declared here as optional until Phase 2+ wires them up.
  */
 
 const booleanFromEnv = z
@@ -25,13 +23,26 @@ const serverEnvSchema = z.object({
   AI_PROVIDER: z.enum(["mock", "anthropic", "openai"]).default("mock"),
   LOG_LEVEL: z.enum(["debug", "info", "warn", "error"]).default("info"),
 
-  // Reserved for future phases — validated only when present
   MONGODB_URI: z.string().min(1).optional(),
-  AUTH_SECRET: z.string().min(1).optional(),
+  MONGODB_DB_NAME: z.string().min(1).optional(),
+
+  BETTER_AUTH_SECRET: z.string().min(32).optional(),
+  BETTER_AUTH_URL: z.string().url().optional(),
+
+  GOOGLE_CLIENT_ID: z.string().min(1).optional(),
+  GOOGLE_CLIENT_SECRET: z.string().min(1).optional(),
+
+  EMAIL_PROVIDER: z.enum(["dev", "resend"]).default("dev"),
+  RESEND_API_KEY: z.string().min(1).optional(),
+  EMAIL_FROM: z.string().min(1).optional(),
+  EMAIL_CAPTURE_TO_DISK: booleanFromEnv.default(false),
+
+  DEMO_EMAIL: z.string().email().optional(),
+  DEMO_PASSWORD: z.string().min(8).optional(),
+  DEMO_NAME: z.string().min(1).optional(),
+
   STRIPE_SECRET_KEY: z.string().min(1).optional(),
   STRIPE_WEBHOOK_SECRET: z.string().min(1).optional(),
-  EMAIL_FROM: z.string().min(1).optional(),
-  EMAIL_SERVER: z.string().min(1).optional(),
   ANTHROPIC_API_KEY: z.string().min(1).optional(),
   OPENAI_API_KEY: z.string().min(1).optional(),
   STORAGE_BUCKET: z.string().min(1).optional(),
@@ -74,11 +85,20 @@ export function getServerEnv(): ServerEnv {
     AI_PROVIDER: process.env.AI_PROVIDER,
     LOG_LEVEL: process.env.LOG_LEVEL,
     MONGODB_URI: process.env.MONGODB_URI,
-    AUTH_SECRET: process.env.AUTH_SECRET,
+    MONGODB_DB_NAME: process.env.MONGODB_DB_NAME,
+    BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+    BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    EMAIL_PROVIDER: process.env.EMAIL_PROVIDER,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    EMAIL_FROM: process.env.EMAIL_FROM,
+    EMAIL_CAPTURE_TO_DISK: process.env.EMAIL_CAPTURE_TO_DISK,
+    DEMO_EMAIL: process.env.DEMO_EMAIL,
+    DEMO_PASSWORD: process.env.DEMO_PASSWORD,
+    DEMO_NAME: process.env.DEMO_NAME,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
-    EMAIL_FROM: process.env.EMAIL_FROM,
-    EMAIL_SERVER: process.env.EMAIL_SERVER,
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     STORAGE_BUCKET: process.env.STORAGE_BUCKET,
@@ -97,6 +117,24 @@ export function getServerEnv(): ServerEnv {
 }
 
 export const publicEnv = readPublicEnv();
+
+export function getAppBaseUrl(): string {
+  return (
+    getServerEnv().BETTER_AUTH_URL ??
+    publicEnv.NEXT_PUBLIC_APP_URL ??
+    "http://localhost:3000"
+  );
+}
+
+export function isGoogleOAuthConfigured(): boolean {
+  const env = getServerEnv();
+  return Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
+}
+
+export function isDemoConfigured(): boolean {
+  const env = getServerEnv();
+  return Boolean(env.DEMO_EMAIL && env.DEMO_PASSWORD);
+}
 
 /** Reset cached env — intended for tests only. */
 export function resetServerEnvCache() {

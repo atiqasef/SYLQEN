@@ -26,42 +26,49 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { requireVerifiedPageSession } from "@/server/auth/session";
 
 const foundationAreas = [
   {
-    title: "Design system",
-    description: "Tokens, typography, and accessible UI primitives.",
+    title: "Identity",
+    description: "Verified email, Google OAuth boundary, and secure sessions.",
   },
   {
-    title: "App shell",
-    description: "Responsive navigation, header, and theme controls.",
+    title: "Workspaces",
+    description: "Default workspace creation with owner membership.",
   },
   {
-    title: "Server boundaries",
-    description: "Auth, database, AI, logging, and env configuration stubs.",
+    title: "Authorization",
+    description: "Role and permission checks derived from trusted session context.",
   },
   {
-    title: "Quality baseline",
-    description: "TypeScript strictness, linting, tests, and accessibility.",
+    title: "Demo mode",
+    description: "Read-only portfolio demo identity with server-side restrictions.",
   },
 ] as const;
 
-export default function OverviewPage() {
+export default async function OverviewPage() {
+  const session = await requireVerifiedPageSession();
+
   return (
     <div className="space-y-8">
       <section className="space-y-3">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="secondary">Phase 1</Badge>
-          <Badge variant="outline">Foundation only</Badge>
+          <Badge variant="secondary">Phase 2</Badge>
+          <Badge variant="outline">Identity & workspaces</Badge>
+          {session.user.isDemo ? <Badge variant="warning">Demo account</Badge> : null}
         </div>
         <div className="max-w-2xl">
           <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-            SYLQEN foundation is ready
+            Welcome, {session.user.name}
           </h2>
           <p className="mt-3 text-sm leading-7 text-muted-foreground sm:text-base">
-            This workspace establishes the product shell, design system, and
-            architectural boundaries for a multi-tenant Business Operating
-            System. Business modules are intentionally not implemented yet.
+            You are signed in to{" "}
+            <span className="font-medium text-foreground">
+              {session.workspace.name}
+            </span>{" "}
+            as <span className="font-medium text-foreground">{session.membership.role}</span>.
+            Business modules remain placeholders until later phases.
           </p>
         </div>
       </section>
@@ -110,6 +117,8 @@ export default function OverviewPage() {
                   type="email"
                   placeholder="you@company.com"
                   autoComplete="email"
+                  defaultValue={session.user.email}
+                  readOnly={session.user.isDemo}
                 />
               </div>
               <div className="space-y-2">
@@ -118,6 +127,8 @@ export default function OverviewPage() {
                   id="demo-workspace"
                   placeholder="Acme Operations"
                   autoComplete="organization"
+                  defaultValue={session.workspace.name}
+                  readOnly={session.user.isDemo}
                 />
               </div>
             </div>
@@ -146,26 +157,39 @@ export default function OverviewPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Loading foundation</CardTitle>
+            <CardTitle>Session context</CardTitle>
             <CardDescription>
-              Skeleton patterns respect reduced motion preferences.
+              Trusted values derived on the server from your session cookie.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <Skeleton className="h-5 w-2/3" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-5/6" />
-            <Skeleton className="mt-4 h-24 w-full" />
+          <CardContent className="space-y-3 text-sm">
+            <div className="flex justify-between gap-4 border-b border-border pb-3">
+              <span className="text-muted-foreground">Verified email</span>
+              <span className="font-medium">{session.user.email}</span>
+            </div>
+            <div className="flex justify-between gap-4 border-b border-border pb-3">
+              <span className="text-muted-foreground">Role</span>
+              <span className="font-medium">{session.membership.role}</span>
+            </div>
+            <div className="flex justify-between gap-4 border-b border-border pb-3">
+              <span className="text-muted-foreground">Permissions</span>
+              <span className="text-right font-medium">
+                {session.membership.permissions.length}
+              </span>
+            </div>
+            <div className="pt-1">
+              <Skeleton className="h-24 w-full" />
+            </div>
           </CardContent>
         </Card>
       </section>
 
       <EmptyState
         title="No business modules yet"
-        description="CRM, finance, projects, AI assistance, and related product areas will land in later phases on top of this foundation."
+        description="CRM, finance, projects, AI assistance, and related product areas will land in later phases on top of this authenticated workspace core."
         action={
           <Button variant="outline" disabled>
-            Modules arrive in Phase 2+
+            Modules arrive in Phase 3+
           </Button>
         }
       />
