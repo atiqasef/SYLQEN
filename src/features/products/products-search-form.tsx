@@ -63,8 +63,12 @@ export function ProductsSearchForm({ q, pageSize }: ProductsSearchFormProps) {
               autoComplete="off"
               disabled={pending}
               className="pl-9"
+              aria-describedby="products-search-hint"
             />
           </div>
+          <p id="products-search-hint" className="text-xs text-muted-foreground">
+            Server-side search across your workspace catalog.
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {hasQuery ? (

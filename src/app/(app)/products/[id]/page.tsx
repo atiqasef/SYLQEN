@@ -36,14 +36,27 @@ function formatPrice(price: number, currency: string) {
   }
 }
 
+function productMark(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) {
+    return "?";
+  }
+  if (parts.length === 1) {
+    return parts[0]!.slice(0, 2).toUpperCase();
+  }
+  return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
+}
+
 function DetailValue({
   value,
   empty = "Not provided",
   multiline = false,
+  mono = false,
 }: {
   value?: string | null;
   empty?: string;
   multiline?: boolean;
+  mono?: boolean;
 }) {
   if (!value) {
     return <span className="font-normal text-muted-foreground/80">{empty}</span>;
@@ -54,6 +67,7 @@ function DetailValue({
       className={cn(
         "font-medium text-foreground",
         multiline && "whitespace-pre-wrap break-words",
+        mono && "font-mono tracking-wide",
       )}
     >
       {value}
@@ -84,6 +98,13 @@ export default async function ProductDetailPage({
     );
   }
 
+  const formattedPrice = formatPrice(product.price, product.currency);
+  const metaItems = [
+    { label: "SKU", value: product.sku },
+    { label: "Price", value: formattedPrice },
+    { label: "Unit", value: product.unit },
+  ];
+
   return (
     <div className="space-y-6 sm:space-y-8">
       <section className="space-y-4" aria-labelledby="product-detail-heading">
@@ -103,28 +124,61 @@ export default async function ProductDetailPage({
         </nav>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0 space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2
-                id="product-detail-heading"
-                className="truncate text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem] sm:leading-tight"
-              >
-                {product.name}
-              </h2>
-              {session.user.isDemo ? (
-                <Badge variant="warning">Demo read-only</Badge>
-              ) : null}
+          <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+            <div
+              className="flex size-12 shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-border bg-muted text-sm font-semibold tracking-wide text-foreground sm:size-14 sm:text-base"
+              aria-hidden="true"
+            >
+              {productMark(product.name)}
             </div>
-            <p className="font-mono text-sm text-muted-foreground">{product.sku}</p>
-            <p className="text-base font-semibold tabular-nums text-foreground">
-              {formatPrice(product.price, product.currency)}
-              {product.unit ? (
-                <span className="ml-1 text-sm font-normal text-muted-foreground">
-                  / {product.unit}
-                </span>
-              ) : null}
-            </p>
+            <div className="min-w-0 space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2
+                  id="product-detail-heading"
+                  className="truncate text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem] sm:leading-tight"
+                >
+                  {product.name}
+                </h2>
+                {session.user.isDemo ? (
+                  <Badge variant="warning">Demo read-only</Badge>
+                ) : null}
+              </div>
+              <p className="truncate font-mono text-sm tracking-wide text-muted-foreground">
+                {product.sku}
+              </p>
+              <p className="text-lg font-semibold tabular-nums tracking-tight text-foreground">
+                {formattedPrice}
+                {product.unit ? (
+                  <span className="ml-1.5 text-sm font-normal text-muted-foreground">
+                    / {product.unit}
+                  </span>
+                ) : null}
+              </p>
+              <ul className="flex flex-wrap gap-2 pt-0.5">
+                {metaItems.map((item) =>
+                  item.value ? (
+                    <li key={item.label}>
+                      <span className="inline-flex max-w-full items-center gap-1.5 rounded-[var(--radius-sm)] border border-border bg-muted/50 px-2 py-1 text-xs text-muted-foreground">
+                        <span className="font-medium text-foreground/80">
+                          {item.label}
+                        </span>
+                        <span
+                          className={cn(
+                            "truncate",
+                            item.label === "SKU" && "font-mono tracking-wide",
+                            item.label === "Price" && "tabular-nums",
+                          )}
+                        >
+                          {item.value}
+                        </span>
+                      </span>
+                    </li>
+                  ) : null,
+                )}
+              </ul>
+            </div>
           </div>
+
           <div className="flex flex-wrap gap-2 sm:shrink-0">
             <Button asChild variant="outline">
               <Link href="/products">Back to list</Link>
@@ -157,23 +211,15 @@ export default async function ProductDetailPage({
               id="product-info-heading"
               className="text-sm font-semibold tracking-tight text-foreground"
             >
-              Details
+              Catalog details
             </h3>
           </div>
           <dl className="divide-y divide-border">
             {[
-              { label: "SKU", value: product.sku },
-              {
-                label: "Price",
-                value: formatPrice(product.price, product.currency),
-              },
-              { label: "Currency", value: product.currency },
+              { label: "SKU", value: product.sku, mono: true },
+              { label: "Price", value: formattedPrice },
+              { label: "Currency", value: product.currency, mono: true },
               { label: "Unit", value: product.unit },
-              {
-                label: "Description",
-                value: product.description,
-                multiline: true,
-              },
             ].map((field) => (
               <div
                 key={field.label}
@@ -183,12 +229,35 @@ export default async function ProductDetailPage({
                 <dd className="min-w-0 text-sm">
                   <DetailValue
                     value={field.value}
-                    multiline={"multiline" in field && field.multiline}
+                    mono={"mono" in field && field.mono}
                   />
                 </dd>
               </div>
             ))}
           </dl>
+        </section>
+
+        <section
+          className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-panel"
+          aria-labelledby="product-description-heading"
+        >
+          <div className="border-b border-border px-4 py-3.5 sm:px-5">
+            <h3
+              id="product-description-heading"
+              className="text-sm font-semibold tracking-tight text-foreground"
+            >
+              Description
+            </h3>
+          </div>
+          <div className="px-4 py-4 sm:px-5">
+            <p className="text-sm leading-6">
+              <DetailValue
+                value={product.description}
+                multiline
+                empty="No description yet"
+              />
+            </p>
+          </div>
         </section>
 
         <section

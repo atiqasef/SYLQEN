@@ -48,12 +48,6 @@ export function ProductsTable({ products }: ProductsTableProps) {
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase"
-              >
-                SKU
-              </th>
-              <th
-                scope="col"
                 className="px-4 py-3 text-right text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase"
               >
                 Price
@@ -89,13 +83,18 @@ export function ProductsTable({ products }: ProductsTableProps) {
                     <span className="block truncate font-medium text-foreground group-hover:text-primary">
                       {product.name}
                     </span>
+                    <span className="mt-0.5 block truncate font-mono text-xs tracking-wide text-muted-foreground sm:text-[0.8125rem]">
+                      {product.sku}
+                    </span>
                   </Link>
                 </th>
-                <td className="max-w-[10rem] truncate px-4 py-3.5 font-mono text-xs text-muted-foreground">
-                  {product.sku}
-                </td>
-                <td className="px-4 py-3.5 text-right tabular-nums text-muted-foreground">
-                  {formatPrice(product.price, product.currency)}
+                <td className="px-4 py-3.5 text-right">
+                  <span className="block font-medium tabular-nums text-foreground">
+                    {formatPrice(product.price, product.currency)}
+                  </span>
+                  <span className="mt-0.5 block text-[11px] tracking-wide text-muted-foreground uppercase">
+                    {product.currency}
+                  </span>
                 </td>
                 <td className="hidden max-w-[8rem] truncate px-4 py-3.5 text-muted-foreground lg:table-cell">
                   {product.unit ?? (
@@ -132,12 +131,21 @@ export function ProductsTable({ products }: ProductsTableProps) {
                 <span className="block truncate font-medium text-foreground">
                   {product.name}
                 </span>
-                <span className="mt-0.5 block truncate font-mono text-xs text-muted-foreground">
+                <span className="mt-0.5 block truncate font-mono text-xs tracking-wide text-muted-foreground">
                   {product.sku}
                 </span>
-                <span className="mt-1 block truncate text-sm text-muted-foreground">
-                  {formatPrice(product.price, product.currency)}
-                  {product.unit ? ` / ${product.unit}` : ""}
+                <span className="mt-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-sm">
+                  <span className="font-medium tabular-nums text-foreground">
+                    {formatPrice(product.price, product.currency)}
+                  </span>
+                  {product.unit ? (
+                    <span className="text-xs text-muted-foreground">
+                      / {product.unit}
+                    </span>
+                  ) : null}
+                  <span className="text-xs text-muted-foreground">
+                    · {formatDate(product.createdAt)}
+                  </span>
                 </span>
               </span>
               <ChevronRightIcon

@@ -73,9 +73,14 @@ export default async function EditProductPage({
             <Badge variant="warning">Demo read-only</Badge>
           ) : null}
         </div>
-        <p className="max-w-2xl text-sm text-muted-foreground">
+        <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-[0.9375rem] sm:leading-7">
           Updating{" "}
           <span className="font-medium text-foreground">{product.name}</span>
+          <span className="text-muted-foreground">
+            {" "}
+            ({product.sku})
+          </span>
+          . Changes replace the saved record after server validation.
         </p>
       </section>
 

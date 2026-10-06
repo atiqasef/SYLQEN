@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { EmptyState } from "@/components/feedback/empty-state";
 import { ErrorState } from "@/components/feedback/error-state";
-import { PlusIcon } from "@/components/layout/icons";
+import { PackageIcon, PlusIcon } from "@/components/layout/icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProductsPagination } from "@/features/products/products-pagination";
@@ -68,6 +68,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
       {isEmpty ? (
         <EmptyState
+          icon={<PackageIcon className="size-8" />}
           title="No products yet"
           description="Add your first product to start building your workspace catalog."
           action={
@@ -89,6 +90,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
       {noResults ? (
         <EmptyState
+          icon={<PackageIcon className="size-8" />}
           title="No matching products"
           description={`No products matched “${q}”. Try a different name, SKU, or description.`}
           action={
@@ -102,26 +104,28 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       {list.total > 0 ? (
         <section className="space-y-4" aria-labelledby="products-results-heading">
           <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-panel">
-            <div className="border-b border-border px-4 py-3 sm:px-5">
-              <h3
-                id="products-results-heading"
-                className="text-sm font-semibold tracking-tight text-foreground"
-              >
-                Workspace products
-              </h3>
-              <p className="mt-0.5 text-sm text-muted-foreground">
-                <span className="font-medium tabular-nums text-foreground">
-                  {list.total}
-                </span>{" "}
-                {list.total === 1 ? "product" : "products"}
-                {hasQuery ? (
-                  <>
-                    {" "}
-                    matching{" "}
-                    <span className="font-medium text-foreground">“{q}”</span>
-                  </>
-                ) : null}
-              </p>
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3 sm:px-5">
+              <div>
+                <h3
+                  id="products-results-heading"
+                  className="text-sm font-semibold tracking-tight text-foreground"
+                >
+                  Workspace products
+                </h3>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  <span className="font-medium tabular-nums text-foreground">
+                    {list.total}
+                  </span>{" "}
+                  {list.total === 1 ? "product" : "products"}
+                  {hasQuery ? (
+                    <>
+                      {" "}
+                      matching{" "}
+                      <span className="font-medium text-foreground">“{q}”</span>
+                    </>
+                  ) : null}
+                </p>
+              </div>
             </div>
             <div className="sm:px-1">
               <ProductsTable products={list.items} />

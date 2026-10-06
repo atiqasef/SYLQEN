@@ -20,6 +20,8 @@ type ProductFormProps = {
   mode: "create" | "edit";
   productId?: string;
   initialValues?: Partial<ProductInput>;
+  readOnly?: boolean;
+  readOnlyMessage?: string;
   cancelHref: string;
 };
 
@@ -41,6 +43,8 @@ export function ProductForm({
   mode,
   productId,
   initialValues,
+  readOnly = false,
+  readOnlyMessage,
   cancelHref,
 }: ProductFormProps) {
   const router = useRouter();
@@ -58,8 +62,14 @@ export function ProductForm({
   const [fieldErrors, setFieldErrors] = React.useState<FieldErrors>();
   const [pending, setPending] = React.useState(false);
 
+  const disabled = pending || readOnly;
+
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (readOnly) {
+      return;
+    }
+
     setPending(true);
     setError(null);
     setFieldErrors(undefined);
@@ -97,19 +107,22 @@ export function ProductForm({
       noValidate
       aria-busy={pending}
     >
+      {readOnly && readOnlyMessage ? (
+        <AuthAlert>{readOnlyMessage}</AuthAlert>
+      ) : null}
       {error ? <AuthAlert>{error}</AuthAlert> : null}
 
       <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-panel">
         <div className="border-b border-border px-4 py-3.5 sm:px-5">
           <h3 className="text-sm font-semibold tracking-tight text-foreground">
-            Product details
+            Product identity
           </h3>
           <p className="mt-1 text-xs leading-5 text-muted-foreground sm:text-sm">
             Name and SKU identify this product in your workspace catalog.
           </p>
         </div>
 
-        <fieldset disabled={pending} className="space-y-5 px-4 py-5 sm:px-5">
+        <fieldset disabled={disabled} className="space-y-5 px-4 py-5 sm:px-5">
           <legend className="sr-only">
             {mode === "create" ? "Create product" : "Edit product"}
           </legend>
@@ -133,7 +146,7 @@ export function ProductForm({
                 aria-describedby={
                   fieldError(fieldErrors, "name")
                     ? "product-name-error"
-                    : undefined
+                    : "product-name-hint"
                 }
               />
               {fieldError(fieldErrors, "name") ? (
@@ -144,7 +157,11 @@ export function ProductForm({
                 >
                   {fieldError(fieldErrors, "name")}
                 </p>
-              ) : null}
+              ) : (
+                <FieldHint id="product-name-hint">
+                  Primary display name for this catalog item.
+                </FieldHint>
+              )}
             </div>
 
             <div className="space-y-2 sm:col-span-2">
@@ -162,6 +179,8 @@ export function ProductForm({
                 onChange={(event) => setSku(event.target.value)}
                 placeholder="SVC-HOUR-001"
                 autoCapitalize="characters"
+                spellCheck={false}
+                className="font-mono text-sm tracking-wide uppercase"
                 aria-invalid={Boolean(fieldError(fieldErrors, "sku"))}
                 aria-describedby={
                   fieldError(fieldErrors, "sku")
@@ -179,11 +198,28 @@ export function ProductForm({
                 </p>
               ) : (
                 <FieldHint id="product-sku-hint">
-                  Unique within your workspace. Normalized to uppercase.
+                  Must be unique within your workspace. Saved in uppercase.
                 </FieldHint>
               )}
             </div>
+          </div>
+        </fieldset>
+      </div>
 
+      <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-panel">
+        <div className="border-b border-border px-4 py-3.5 sm:px-5">
+          <h3 className="text-sm font-semibold tracking-tight text-foreground">
+            Pricing
+          </h3>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground sm:text-sm">
+            List price and billing unit for this product.
+          </p>
+        </div>
+
+        <fieldset disabled={disabled} className="space-y-5 px-4 py-5 sm:px-5">
+          <legend className="sr-only">Product pricing</legend>
+
+          <div className="grid gap-5 sm:grid-cols-2">
             <div className="space-y-2">
               <div className="flex items-baseline justify-between gap-3">
                 <Label htmlFor="product-price">Price</Label>
@@ -201,12 +237,13 @@ export function ProductForm({
                 required
                 value={price}
                 onChange={(event) => setPrice(event.target.value)}
-                placeholder="150"
+                placeholder="150.00"
+                className="tabular-nums"
                 aria-invalid={Boolean(fieldError(fieldErrors, "price"))}
                 aria-describedby={
                   fieldError(fieldErrors, "price")
                     ? "product-price-error"
-                    : undefined
+                    : "product-price-hint"
                 }
               />
               {fieldError(fieldErrors, "price") ? (
@@ -217,7 +254,11 @@ export function ProductForm({
                 >
                   {fieldError(fieldErrors, "price")}
                 </p>
-              ) : null}
+              ) : (
+                <FieldHint id="product-price-hint">
+                  Non-negative amount in the selected currency.
+                </FieldHint>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -235,6 +276,9 @@ export function ProductForm({
                 value={currency}
                 onChange={(event) => setCurrency(event.target.value)}
                 placeholder="USD"
+                autoCapitalize="characters"
+                spellCheck={false}
+                className="font-mono uppercase tracking-wide"
                 aria-invalid={Boolean(fieldError(fieldErrors, "currency"))}
                 aria-describedby={
                   fieldError(fieldErrors, "currency")
@@ -257,7 +301,7 @@ export function ProductForm({
               )}
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 sm:col-span-2">
               <div className="flex items-baseline justify-between gap-3">
                 <Label htmlFor="product-unit">Unit</Label>
                 <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
@@ -269,28 +313,79 @@ export function ProductForm({
                 name="unit"
                 value={unit}
                 onChange={(event) => setUnit(event.target.value)}
-                placeholder="hour"
+                placeholder="hour, seat, license…"
                 aria-invalid={Boolean(fieldError(fieldErrors, "unit"))}
+                aria-describedby={
+                  fieldError(fieldErrors, "unit")
+                    ? "product-unit-error"
+                    : "product-unit-hint"
+                }
               />
+              {fieldError(fieldErrors, "unit") ? (
+                <p
+                  id="product-unit-error"
+                  className="text-xs text-destructive"
+                  role="alert"
+                >
+                  {fieldError(fieldErrors, "unit")}
+                </p>
+              ) : (
+                <FieldHint id="product-unit-hint">
+                  How this product is measured or billed.
+                </FieldHint>
+              )}
             </div>
+          </div>
+        </fieldset>
+      </div>
 
-            <div className="space-y-2 sm:col-span-2">
-              <div className="flex items-baseline justify-between gap-3">
-                <Label htmlFor="product-description">Description</Label>
-                <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-                  Optional
-                </span>
-              </div>
-              <Textarea
-                id="product-description"
-                name="description"
-                rows={4}
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                placeholder="Short description for your team"
-                aria-invalid={Boolean(fieldError(fieldErrors, "description"))}
-              />
+      <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-panel">
+        <div className="border-b border-border px-4 py-3.5 sm:px-5">
+          <h3 className="text-sm font-semibold tracking-tight text-foreground">
+            Additional information
+          </h3>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground sm:text-sm">
+            Optional context that helps your team recognize this product.
+          </p>
+        </div>
+
+        <fieldset disabled={disabled} className="space-y-5 px-4 py-5 sm:px-5">
+          <legend className="sr-only">Additional product information</legend>
+
+          <div className="space-y-2">
+            <div className="flex items-baseline justify-between gap-3">
+              <Label htmlFor="product-description">Description</Label>
+              <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                Optional
+              </span>
             </div>
+            <Textarea
+              id="product-description"
+              name="description"
+              rows={4}
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder="Short description for your team"
+              aria-invalid={Boolean(fieldError(fieldErrors, "description"))}
+              aria-describedby={
+                fieldError(fieldErrors, "description")
+                  ? "product-description-error"
+                  : "product-description-hint"
+              }
+            />
+            {fieldError(fieldErrors, "description") ? (
+              <p
+                id="product-description-error"
+                className="text-xs text-destructive"
+                role="alert"
+              >
+                {fieldError(fieldErrors, "description")}
+              </p>
+            ) : (
+              <FieldHint id="product-description-hint">
+                Visible to workspace members with product access.
+              </FieldHint>
+            )}
           </div>
         </fieldset>
       </div>
@@ -304,7 +399,7 @@ export function ProductForm({
         <Button type="button" variant="ghost" asChild>
           <Link href={cancelHref}>Cancel</Link>
         </Button>
-        <Button type="submit" disabled={pending} className="sm:min-w-[9.5rem]">
+        <Button type="submit" disabled={disabled} className="sm:min-w-[9.5rem]">
           {pending
             ? mode === "create"
               ? "Creating…"
