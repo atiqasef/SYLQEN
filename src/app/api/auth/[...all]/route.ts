@@ -1,8 +1,13 @@
 import { toNextJsHandler } from "better-auth/next-js";
 
-import { getAppBaseUrl, isEmailDeliveryConfigured } from "@/config/env";
+import {
+  getAppBaseUrl,
+  isEmailDeliveryConfigured,
+  isProductionRuntime,
+} from "@/config/env";
 import { isAppError } from "@/lib/errors/app-error";
 import { getAuth } from "@/lib/auth";
+import { requiresOutboundEmail } from "@/server/auth/email-routes";
 import { connectMongo, isMongoConfigured } from "@/server/db/mongodb";
 import { getEmailDeliveryDiagnostics } from "@/server/email";
 import { logger } from "@/server/logging/logger";
@@ -83,6 +88,26 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const path = new URL(request.url).pathname;
+
+  if (
+    requiresOutboundEmail(path) &&
+    isProductionRuntime() &&
+    !isEmailDeliveryConfigured()
+  ) {
+    logger.error("Auth API POST rejected: production email not configured", {
+      path,
+      ...authDiagnostics(request),
+    });
+    return Response.json(
+      {
+        message:
+          "Email delivery is not configured. Set EMAIL_PROVIDER=resend, RESEND_API_KEY, and EMAIL_FROM in Vercel Production.",
+        code: "EMAIL_NOT_CONFIGURED",
+      },
+      { status: 503 },
+    );
+  }
+
   try {
     await ensureDb();
     const handlers = toNextJsHandler(getAuth());
