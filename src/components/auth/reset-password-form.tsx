@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 
+import { AuthAlert, AuthStatus } from "@/components/auth/auth-form-message";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -61,18 +62,29 @@ export function ResetPasswordForm() {
   if (!token && !errorParam) {
     return (
       <div className="space-y-4">
-        <p role="alert" className="text-sm text-destructive">
-          This reset link is incomplete. Request a new one.
-        </p>
+        <AuthAlert>This reset link is incomplete. Request a new one.</AuthAlert>
         <Button asChild className="w-full">
           <Link href="/forgot-password">Request reset link</Link>
         </Button>
+        <p className="text-center text-sm text-muted-foreground">
+          <Link
+            href="/login"
+            className="font-medium text-primary underline-offset-4 transition-ui hover:underline"
+          >
+            Back to sign in
+          </Link>
+        </p>
       </div>
     );
   }
 
   return (
-    <form className="space-y-4" onSubmit={onSubmit}>
+    <form
+      className="space-y-4"
+      onSubmit={onSubmit}
+      noValidate
+      aria-busy={pending}
+    >
       <div className="space-y-2">
         <Label htmlFor="password">New password</Label>
         <PasswordInput
@@ -81,7 +93,21 @@ export function ResetPasswordForm() {
           required
           value={password}
           onChange={(event) => setPassword(event.target.value)}
+          placeholder="Create a new password"
+          toggleLabelShow="Show new password"
+          toggleLabelHide="Hide new password"
+          disabled={pending || success}
+          aria-describedby="reset-password-hint"
+          aria-invalid={
+            error?.toLowerCase().includes("password") || undefined
+          }
         />
+        <p
+          id="reset-password-hint"
+          className="text-xs leading-5 text-muted-foreground"
+        >
+          Use at least 8 characters.
+        </p>
       </div>
       <div className="space-y-2">
         <Label htmlFor="confirmPassword">Confirm new password</Label>
@@ -91,23 +117,31 @@ export function ResetPasswordForm() {
           required
           value={confirmPassword}
           onChange={(event) => setConfirmPassword(event.target.value)}
+          placeholder="Repeat your new password"
+          toggleLabelShow="Show confirm password"
+          toggleLabelHide="Hide confirm password"
+          disabled={pending || success}
+          aria-invalid={error?.toLowerCase().includes("match") || undefined}
         />
       </div>
 
-      {error ? (
-        <p role="alert" className="text-sm text-destructive">
-          {error}
-        </p>
-      ) : null}
+      {error ? <AuthAlert>{error}</AuthAlert> : null}
       {success ? (
-        <p role="status" className="text-sm text-muted-foreground">
-          Password updated. Redirecting to sign in…
-        </p>
+        <AuthStatus>Password updated. Redirecting to sign in…</AuthStatus>
       ) : null}
 
       <Button type="submit" className="w-full" disabled={pending || success}>
         {pending ? "Updating…" : "Update password"}
       </Button>
+
+      <p className="text-center text-sm text-muted-foreground">
+        <Link
+          href="/login"
+          className="font-medium text-primary underline-offset-4 transition-ui hover:underline"
+        >
+          Back to sign in
+        </Link>
+      </p>
     </form>
   );
 }

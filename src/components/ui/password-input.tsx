@@ -31,7 +31,7 @@ export function PasswordInput({
         type="button"
         variant="ghost"
         size="sm"
-        className="absolute top-1/2 right-1 h-8 -translate-y-1/2 px-2 text-xs text-muted-foreground"
+        className="absolute top-1/2 right-1 h-8 -translate-y-1/2 px-2.5 text-xs font-medium text-muted-foreground hover:text-foreground"
         onClick={() => setVisible((value) => !value)}
         aria-label={visible ? toggleLabelHide : toggleLabelShow}
         aria-pressed={visible}

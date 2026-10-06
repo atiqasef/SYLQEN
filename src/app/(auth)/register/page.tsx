@@ -15,7 +15,7 @@ export default async function RegisterPage() {
   return (
     <AuthShell
       title="Create your SYLQEN account"
-      description="Register with email and password to start using your workspace."
+      description="Register with email and password to start your workspace."
     >
       <RegisterForm googleEnabled={isGoogleOAuthConfigured()} />
     </AuthShell>

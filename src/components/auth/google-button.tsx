@@ -25,7 +25,13 @@ export function GoogleButton({
 }: GoogleButtonProps) {
   if (!enabled) {
     return (
-      <Button type="button" variant="outline" className="w-full" disabled>
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full justify-center"
+        disabled
+        aria-disabled="true"
+      >
         <GoogleMark />
         Google sign-in not configured
       </Button>
@@ -36,7 +42,7 @@ export function GoogleButton({
     <Button
       type="button"
       variant="outline"
-      className="w-full"
+      className="w-full justify-center"
       onClick={() =>
         authClient.signIn.social({
           provider: "google",

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 
+import { AuthAlert } from "@/components/auth/auth-form-message";
 import { GoogleButton } from "@/components/auth/google-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,8 @@ export function LoginForm({ googleEnabled, demoEnabled }: LoginFormProps) {
   const [error, setError] = React.useState<string | null>(null);
   const [pending, setPending] = React.useState(false);
   const [demoPending, setDemoPending] = React.useState(false);
+
+  const busy = pending || demoPending;
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -67,16 +70,21 @@ export function LoginForm({ googleEnabled, demoEnabled }: LoginFormProps) {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <GoogleButton enabled={googleEnabled} />
 
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
-        <div className="h-px flex-1 bg-border" />
+        <div className="h-px flex-1 bg-border" aria-hidden="true" />
         <span>or continue with email</span>
-        <div className="h-px flex-1 bg-border" />
+        <div className="h-px flex-1 bg-border" aria-hidden="true" />
       </div>
 
-      <form className="space-y-4" onSubmit={onSubmit} noValidate>
+      <form
+        className="space-y-4"
+        onSubmit={onSubmit}
+        noValidate
+        aria-busy={pending}
+      >
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
@@ -87,6 +95,8 @@ export function LoginForm({ googleEnabled, demoEnabled }: LoginFormProps) {
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             placeholder="you@company.com"
+            disabled={busy}
+            aria-invalid={Boolean(error) || undefined}
           />
         </div>
 
@@ -95,7 +105,7 @@ export function LoginForm({ googleEnabled, demoEnabled }: LoginFormProps) {
             <Label htmlFor="password">Password</Label>
             <Link
               href="/forgot-password"
-              className="text-xs font-medium text-primary hover:underline"
+              className="text-xs font-medium text-primary underline-offset-4 transition-ui hover:underline"
             >
               Forgot password?
             </Link>
@@ -107,16 +117,14 @@ export function LoginForm({ googleEnabled, demoEnabled }: LoginFormProps) {
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             placeholder="Enter your password"
+            disabled={busy}
+            aria-invalid={Boolean(error) || undefined}
           />
         </div>
 
-        {error ? (
-          <p role="alert" className="text-sm text-destructive">
-            {error}
-          </p>
-        ) : null}
+        {error ? <AuthAlert>{error}</AuthAlert> : null}
 
-        <Button type="submit" className="w-full" disabled={pending}>
+        <Button type="submit" className="w-full" disabled={busy}>
           {pending ? "Signing in…" : "Continue with email"}
         </Button>
       </form>
@@ -126,7 +134,7 @@ export function LoginForm({ googleEnabled, demoEnabled }: LoginFormProps) {
           type="button"
           variant="secondary"
           className="w-full"
-          disabled={!demoEnabled || demoPending}
+          disabled={!demoEnabled || busy}
           onClick={onDemo}
         >
           {demoPending ? "Opening demo…" : "Explore Demo"}
@@ -141,7 +149,10 @@ export function LoginForm({ googleEnabled, demoEnabled }: LoginFormProps) {
 
       <p className="text-center text-sm text-muted-foreground">
         New to SYLQEN?{" "}
-        <Link href="/register" className="font-medium text-primary hover:underline">
+        <Link
+          href="/register"
+          className="font-medium text-primary underline-offset-4 transition-ui hover:underline"
+        >
           Create an account
         </Link>
       </p>

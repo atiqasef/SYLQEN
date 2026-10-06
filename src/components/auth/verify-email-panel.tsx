@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 
+import { AuthAlert, AuthStatus } from "@/components/auth/auth-form-message";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,9 +38,6 @@ export function VerifyEmailPanel({
   const searchParams = useSearchParams();
   const emailFromQuery = searchParams.get("email") || "";
   const [email, setEmail] = React.useState(initialEmail || emailFromQuery);
-  const [status] = React.useState(
-    "Email verification is optional right now. You can continue into SYLQEN without verifying.",
-  );
   const [error, setError] = React.useState<string | null>(
     verificationErrorMessage(searchParams.get("error")),
   );
@@ -83,12 +81,18 @@ export function VerifyEmailPanel({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-[var(--radius-md)] border border-border bg-muted/40 px-4 py-3 text-sm leading-6 text-muted-foreground">
-        {resentStatus ?? status}
-      </div>
+    <div className="space-y-5">
+      <AuthStatus>
+        {resentStatus ??
+          "Verification is optional right now. You can continue using SYLQEN without verifying."}
+      </AuthStatus>
 
-      <form className="space-y-4" onSubmit={onResend}>
+      <form
+        className="space-y-4"
+        onSubmit={onResend}
+        noValidate
+        aria-busy={pending}
+      >
         <div className="space-y-2">
           <Label htmlFor="email">Email</Label>
           <Input
@@ -98,14 +102,19 @@ export function VerifyEmailPanel({
             autoComplete="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
+            placeholder="you@company.com"
+            disabled={pending}
+            aria-invalid={Boolean(error) || undefined}
           />
+          {!emailDeliveryConfigured ? (
+            <p className="text-xs leading-5 text-muted-foreground">
+              Outbound email is not configured in this environment, so resend is
+              unavailable.
+            </p>
+          ) : null}
         </div>
 
-        {error ? (
-          <p role="alert" className="text-sm text-destructive">
-            {error}
-          </p>
-        ) : null}
+        {error ? <AuthAlert>{error}</AuthAlert> : null}
 
         <Button
           type="submit"
