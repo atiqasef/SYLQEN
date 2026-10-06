@@ -41,11 +41,34 @@ export default async function EditCustomerPage({
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      <section className="space-y-2" aria-labelledby="edit-customer-heading">
+      <section className="space-y-3" aria-labelledby="edit-customer-heading">
+        <nav aria-label="Breadcrumb">
+          <ol className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+            <li>
+              <Link
+                href="/customers"
+                className="transition-ui hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                Customers
+              </Link>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li className="min-w-0">
+              <Link
+                href={`/customers/${customer.id}`}
+                className="truncate transition-ui hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {customer.name}
+              </Link>
+            </li>
+            <li aria-hidden="true">/</li>
+            <li className="font-medium text-foreground">Edit</li>
+          </ol>
+        </nav>
         <div className="flex flex-wrap items-center gap-2">
           <h2
             id="edit-customer-heading"
-            className="text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem]"
+            className="text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem] sm:leading-tight"
           >
             Edit customer
           </h2>
@@ -53,22 +76,18 @@ export default async function EditCustomerPage({
             <Badge variant="warning">Demo read-only</Badge>
           ) : null}
         </div>
-        <p className="max-w-2xl text-sm text-muted-foreground">
+        <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-[0.9375rem] sm:leading-7">
           Updating{" "}
-          <span className="font-medium text-foreground">{customer.name}</span>
+          <span className="font-medium text-foreground">{customer.name}</span>.
+          Changes replace the saved record after server validation.
         </p>
       </section>
 
       {!canUpdate ? (
-        <div className="space-y-4">
-          <p
-            role="status"
-            className="rounded-[var(--radius-md)] border border-border bg-muted/70 px-3 py-2.5 text-sm text-muted-foreground"
-          >
+        <div className="space-y-4 rounded-[var(--radius-lg)] border border-border bg-card p-5 shadow-panel">
+          <p role="status" className="text-sm leading-6 text-muted-foreground">
             You do not have permission to edit customers
-            {session.user.isDemo
-              ? ". Demo accounts are read-only."
-              : "."}
+            {session.user.isDemo ? ". Demo accounts are read-only." : "."}
           </p>
           <Button asChild variant="outline">
             <Link href={`/customers/${customer.id}`}>Back to customer</Link>

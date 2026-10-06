@@ -1,6 +1,8 @@
 import Link from "next/link";
 
+import { ChevronRightIcon } from "@/components/layout/icons";
 import type { CustomerDTO } from "@/server/customers/types";
+import { cn } from "@/lib/utils/cn";
 
 type CustomersTableProps = {
   customers: CustomerDTO[];
@@ -21,24 +23,37 @@ function formatDate(iso: string) {
 export function CustomersTable({ customers }: CustomersTableProps) {
   return (
     <>
-      <div className="hidden overflow-x-auto md:block">
-        <table className="w-full min-w-[36rem] border-collapse text-left text-sm">
+      <div className="hidden md:block">
+        <table className="w-full min-w-0 border-collapse text-left text-sm">
+          <caption className="sr-only">Customers in your workspace</caption>
           <thead>
-            <tr className="border-b border-border text-xs uppercase tracking-wide text-muted-foreground">
-              <th scope="col" className="px-3 py-3 font-medium">
-                Name
+            <tr className="border-b border-border">
+              <th
+                scope="col"
+                className="px-4 py-3 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase"
+              >
+                Customer
               </th>
-              <th scope="col" className="px-3 py-3 font-medium">
-                Email
-              </th>
-              <th scope="col" className="px-3 py-3 font-medium">
+              <th
+                scope="col"
+                className="px-4 py-3 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase"
+              >
                 Company
               </th>
-              <th scope="col" className="px-3 py-3 font-medium">
+              <th
+                scope="col"
+                className="hidden px-4 py-3 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase lg:table-cell"
+              >
                 Phone
               </th>
-              <th scope="col" className="px-3 py-3 font-medium">
+              <th
+                scope="col"
+                className="px-4 py-3 text-right text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase"
+              >
                 Added
+              </th>
+              <th scope="col" className="w-10 px-2 py-3">
+                <span className="sr-only">Open</span>
               </th>
             </tr>
           </thead>
@@ -46,25 +61,43 @@ export function CustomersTable({ customers }: CustomersTableProps) {
             {customers.map((customer) => (
               <tr
                 key={customer.id}
-                className="border-b border-border last:border-0 hover:bg-muted/40"
+                className="group border-b border-border last:border-0 transition-ui hover:bg-muted/45"
               >
-                <th scope="row" className="px-3 py-3 font-medium text-foreground">
+                <th scope="row" className="px-4 py-3.5 font-normal">
                   <Link
                     href={`/customers/${customer.id}`}
-                    className="text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="block min-w-0 rounded-[var(--radius-sm)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    {customer.name}
+                    <span className="block truncate font-medium text-foreground group-hover:text-primary">
+                      {customer.name}
+                    </span>
+                    <span className="mt-0.5 block truncate text-xs text-muted-foreground sm:text-sm">
+                      {customer.email}
+                    </span>
                   </Link>
                 </th>
-                <td className="px-3 py-3 text-muted-foreground">{customer.email}</td>
-                <td className="px-3 py-3 text-muted-foreground">
-                  {customer.company ?? "—"}
+                <td className="max-w-[12rem] truncate px-4 py-3.5 text-muted-foreground">
+                  {customer.company ?? (
+                    <span className="text-muted-foreground/70">—</span>
+                  )}
                 </td>
-                <td className="px-3 py-3 text-muted-foreground">
-                  {customer.phone ?? "—"}
+                <td className="hidden max-w-[10rem] truncate px-4 py-3.5 text-muted-foreground lg:table-cell">
+                  {customer.phone ?? (
+                    <span className="text-muted-foreground/70">—</span>
+                  )}
                 </td>
-                <td className="px-3 py-3 tabular-nums text-muted-foreground">
+                <td className="px-4 py-3.5 text-right tabular-nums text-muted-foreground">
                   {formatDate(customer.createdAt)}
+                </td>
+                <td className="px-2 py-3.5 text-muted-foreground" aria-hidden="true">
+                  <span
+                    className={cn(
+                      "inline-flex size-8 items-center justify-center rounded-[var(--radius-sm)]",
+                      "opacity-50 transition-ui group-hover:opacity-100 group-hover:text-primary",
+                    )}
+                  >
+                    <ChevronRightIcon className="size-4" />
+                  </span>
                 </td>
               </tr>
             ))}
@@ -77,17 +110,27 @@ export function CustomersTable({ customers }: CustomersTableProps) {
           <li key={customer.id}>
             <Link
               href={`/customers/${customer.id}`}
-              className="block px-1 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex items-start gap-3 px-3 py-3.5 transition-ui hover:bg-muted/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
             >
-              <p className="font-medium text-foreground">{customer.name}</p>
-              <p className="mt-0.5 truncate text-sm text-muted-foreground">
-                {customer.email}
-              </p>
-              {customer.company ? (
-                <p className="mt-0.5 truncate text-sm text-muted-foreground">
-                  {customer.company}
-                </p>
-              ) : null}
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-medium text-foreground">
+                  {customer.name}
+                </span>
+                <span className="mt-0.5 block truncate text-sm text-muted-foreground">
+                  {customer.email}
+                </span>
+                {(customer.company || customer.phone) && (
+                  <span className="mt-1 block truncate text-xs text-muted-foreground">
+                    {[customer.company, customer.phone]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </span>
+                )}
+              </span>
+              <ChevronRightIcon
+                className="mt-1 size-4 shrink-0 text-muted-foreground"
+                aria-hidden="true"
+              />
             </Link>
           </li>
         ))}

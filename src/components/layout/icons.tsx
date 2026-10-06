@@ -98,6 +98,47 @@ export function ChevronDownIcon({ className, ...props }: IconProps) {
   );
 }
 
+export function ChevronRightIcon({ className, ...props }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={base(className)} {...props}>
+      <path
+        d="M9 6l6 6-6 6"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export function PlusIcon({ className, ...props }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={base(className)} {...props}>
+      <path
+        d="M12 5v14M5 12h14"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function SearchIcon({ className, ...props }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={base(className)} {...props}>
+      <circle cx="11" cy="11" r="6.25" stroke="currentColor" strokeWidth="1.75" />
+      <path
+        d="M16.5 16.5 20 20"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export function OverviewIcon({ className, ...props }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={base(className)} {...props}>

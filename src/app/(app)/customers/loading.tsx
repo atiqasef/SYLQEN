@@ -1,5 +1,5 @@
-import { LoadingState } from "@/components/feedback/loading-state";
+import { CustomersLoadingState } from "@/features/customers/customers-loading-state";
 
 export default function CustomersLoading() {
-  return <LoadingState label="Loading customers" />;
+  return <CustomersLoadingState label="Loading customers" />;
 }

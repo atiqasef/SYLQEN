@@ -39,15 +39,18 @@ export function CustomersPagination({ result, q }: CustomersPaginationProps) {
 
   return (
     <nav
-      className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+      className="flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between"
       aria-label="Customer list pagination"
     >
       <p className="text-sm text-muted-foreground">
         Showing{" "}
-        <span className="font-medium text-foreground">
+        <span className="font-medium tabular-nums text-foreground">
           {from}–{to}
         </span>{" "}
-        of <span className="font-medium text-foreground">{result.total}</span>
+        of{" "}
+        <span className="font-medium tabular-nums text-foreground">
+          {result.total}
+        </span>
       </p>
       <div className="flex items-center gap-2">
         {hasPrev ? (
@@ -58,6 +61,7 @@ export function CustomersPagination({ result, q }: CustomersPaginationProps) {
                 q,
                 pageSize: result.pageSize,
               })}
+              rel="prev"
             >
               Previous
             </Link>
@@ -67,7 +71,10 @@ export function CustomersPagination({ result, q }: CustomersPaginationProps) {
             Previous
           </Button>
         )}
-        <span className="px-1 text-sm tabular-nums text-muted-foreground">
+        <span
+          className="min-w-[5.5rem] text-center text-sm tabular-nums text-muted-foreground"
+          aria-current="page"
+        >
           Page {result.page} of {result.pageCount}
         </span>
         {hasNext ? (
@@ -78,6 +85,7 @@ export function CustomersPagination({ result, q }: CustomersPaginationProps) {
                 q,
                 pageSize: result.pageSize,
               })}
+              rel="next"
             >
               Next
             </Link>
