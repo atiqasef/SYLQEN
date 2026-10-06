@@ -23,6 +23,13 @@ function resolveShellMeta(pathname: string, session: SessionContext) {
     };
   }
 
+  if (pathname.startsWith("/products")) {
+    return {
+      title: "Products",
+      description: `${session.workspace.name} · product catalog`,
+    };
+  }
+
   return {
     title: "Overview",
     description: `${session.workspace.name} · ${session.membership.role}`,

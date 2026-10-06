@@ -21,6 +21,7 @@ export type NavItem = {
 export const primaryNav: NavItem[] = [
   { title: "Overview", href: "/" },
   { title: "Customers", href: "/customers" },
+  { title: "Products", href: "/products" },
   { title: "Projects", href: "/projects", comingSoon: true, disabled: true },
   { title: "Finance", href: "/finance", comingSoon: true, disabled: true },
   { title: "Team", href: "/team", comingSoon: true, disabled: true },

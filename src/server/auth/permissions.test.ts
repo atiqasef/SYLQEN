@@ -17,6 +17,7 @@ describe("RBAC permissions", () => {
       "workspace.read",
       "members.read",
       "customers.read",
+      "products.read",
     ]);
     expect(canPerform({ role: "viewer", isDemo: false, permission: "members.invite" })).toBe(
       false,
@@ -24,12 +25,20 @@ describe("RBAC permissions", () => {
     expect(
       canPerform({ role: "viewer", isDemo: false, permission: "customers.create" }),
     ).toBe(false);
+    expect(
+      canPerform({ role: "viewer", isDemo: false, permission: "products.create" }),
+    ).toBe(false);
   });
 
   it("caps demo accounts to viewer permissions even if stored as owner", () => {
     expect(
       effectivePermissions({ role: "owner", isDemo: true }),
-    ).toEqual(["workspace.read", "members.read", "customers.read"]);
+    ).toEqual([
+      "workspace.read",
+      "members.read",
+      "customers.read",
+      "products.read",
+    ]);
     expect(
       canPerform({
         role: "owner",
@@ -44,14 +53,27 @@ describe("RBAC permissions", () => {
         permission: "customers.create",
       }),
     ).toBe(false);
+    expect(
+      canPerform({
+        role: "owner",
+        isDemo: true,
+        permission: "products.update",
+      }),
+    ).toBe(false);
   });
 
-  it("allows members to manage customers", () => {
+  it("allows members to manage customers and products", () => {
     expect(
       canPerform({ role: "member", isDemo: false, permission: "customers.create" }),
     ).toBe(true);
     expect(
       canPerform({ role: "member", isDemo: false, permission: "customers.update" }),
+    ).toBe(true);
+    expect(
+      canPerform({ role: "member", isDemo: false, permission: "products.create" }),
+    ).toBe(true);
+    expect(
+      canPerform({ role: "member", isDemo: false, permission: "products.update" }),
     ).toBe(true);
   });
 });

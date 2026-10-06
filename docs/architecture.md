@@ -13,13 +13,14 @@ src/
   components/
     auth/            Auth experience UI
     ui/ layout/ feedback/ providers/
-  features/          Domain UI modules (customers, …)
+  features/          Domain UI modules (customers, products, …)
   lib/
     auth.ts          Better Auth server instance
     auth-client.ts   Better Auth React client
   server/
     auth/            Session, permissions, demo, actions
     customers/       Customer repository + service + actions
+    products/        Product repository + service + actions
     db/              MongoDB connection + health
     email/           Email provider boundary (dev/resend)
     workspaces/      Workspace + membership persistence
@@ -68,6 +69,7 @@ Permissions:
 - `workspace.read` / `workspace.update`
 - `members.read` / `members.invite` / `members.update` / `members.remove`
 - `customers.read` / `customers.create` / `customers.update`
+- `products.read` / `products.create` / `products.update`
 
 Demo accounts are force-capped to viewer permissions in `effectivePermissions`.
 
@@ -94,6 +96,30 @@ Delete is intentionally omitted — no established product delete pattern/permis
 
 Demo: read/search/detail allowed; create/update forbidden via `customers.create` / `customers.update`.
 
+## Products module
+
+Routes:
+
+- `/products` — workspace-scoped list with server search + pagination
+- `/products/new` — create
+- `/products/[id]` — detail
+- `/products/[id]/edit` — update
+
+Collection `products` (MongoDB native driver):
+
+- Tenant boundary: `workspaceId` from trusted session (never browser-supplied)
+- Fields: `name`, `sku` (normalized uppercase), `description?`, `price`, `currency` (ISO 4217), `unit?`, `createdByUserId`, timestamps
+- Indexes: `{ workspaceId, createdAt }`, unique `{ workspaceId, sku }`, `{ workspaceId, name }`
+- Index ensure uses the same process-level shared promise pattern as Customers
+
+Search strategy: bounded case-insensitive regex across name, SKU, description.
+
+SKU uniqueness is enforced by application conflict checks and the unique compound index.
+
+Delete is intentionally omitted — no established delete permission pattern.
+
+Demo: read/search/detail allowed; create/update forbidden via `products.create` / `products.update`.
+
 ## Tenant isolation
 
 Authorization path:
@@ -112,7 +138,7 @@ Never authorize from browser-supplied tenant IDs alone.
 ## Request performance (auth hot path)
 
 - `getSession` is wrapped in React `cache()` so multiple callers in one request share one Better Auth + workspace resolution.
-- Customer `createIndexes` is guarded process-wide; it is not re-run on every Customers list/detail call after the first successful ensure in a warm runtime.
+- Customer/product `createIndexes` is guarded process-wide; it is not re-run on every list/detail call after the first successful ensure in a warm runtime.
 
 ## Email
 

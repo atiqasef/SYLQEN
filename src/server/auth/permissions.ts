@@ -12,6 +12,9 @@ export const ALL_PERMISSIONS = [
   "customers.read",
   "customers.create",
   "customers.update",
+  "products.read",
+  "products.create",
+  "products.update",
 ] as const satisfies readonly Permission[];
 
 const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
@@ -23,8 +26,16 @@ const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
     "customers.read",
     "customers.create",
     "customers.update",
+    "products.read",
+    "products.create",
+    "products.update",
   ],
-  viewer: ["workspace.read", "members.read", "customers.read"],
+  viewer: [
+    "workspace.read",
+    "members.read",
+    "customers.read",
+    "products.read",
+  ],
 };
 
 export function permissionsForRole(role: Role): Permission[] {

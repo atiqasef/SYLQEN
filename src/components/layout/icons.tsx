@@ -184,6 +184,25 @@ export function FolderIcon({ className, ...props }: IconProps) {
   );
 }
 
+export function PackageIcon({ className, ...props }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={base(className)} {...props}>
+      <path
+        d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5v-9Z"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12 12v9M3.5 7.5 12 12l8.5-4.5"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function FinanceIcon({ className, ...props }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={base(className)} {...props}>

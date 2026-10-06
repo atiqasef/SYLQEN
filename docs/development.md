@@ -61,10 +61,20 @@ Open [http://localhost:3000](http://localhost:3000) — unauthenticated visitors
 
 Tenant isolation and demo write rejection are covered by Vitest (`src/server/customers/service.test.ts`) and Playwright (`e2e/customers.spec.ts`).
 
+## Products module (local)
+
+1. Sign in as a normal user
+2. Open **Products** from the primary nav
+3. Create / search / paginate / edit / open detail
+4. Confirm duplicate SKUs are rejected within the same workspace
+5. Sign in via **Explore Demo** and confirm create/edit are blocked while list/detail remain readable
+
+Coverage: Vitest (`src/server/products/service.test.ts`, `src/features/products/schemas.test.ts`) and Playwright (`e2e/products.spec.ts`).
+
 ### Performance notes (hot path)
 
 - Session/workspace resolution uses React `cache()` for **request-scoped** deduplication (layout + page share one lookup). Not a cross-request cache.
-- Customer Mongo indexes are ensured with a **process-level** shared promise (`ensureCustomerIndexes`). Prefer confirming indexes in Atlas for production; the runtime ensure is a safety net, not a migration framework.
+- Customer/product Mongo indexes are ensured with a **process-level** shared promise. Prefer confirming indexes in Atlas for production; the runtime ensure is a safety net, not a migration framework.
 - Align Vercel function region with the Atlas cluster region in the Vercel/Atlas dashboards (no region pin is committed in-repo).
 
 ## Scripts

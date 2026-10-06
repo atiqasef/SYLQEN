@@ -14,7 +14,10 @@ export type Permission =
   | "members.remove"
   | "customers.read"
   | "customers.create"
-  | "customers.update";
+  | "customers.update"
+  | "products.read"
+  | "products.create"
+  | "products.update";
 
 export type AuthUser = {
   id: string;

@@ -12,6 +12,7 @@ import {
   FinanceIcon,
   FolderIcon,
   OverviewIcon,
+  PackageIcon,
   PlugIcon,
   SettingsIcon,
   TeamIcon,
@@ -27,6 +28,7 @@ const MOBILE_SIDEBAR_QUERY = "(max-width: 1023px)";
 const iconByHref: Record<string, ComponentType<{ className?: string }>> = {
   "/": OverviewIcon,
   "/customers": UsersIcon,
+  "/products": PackageIcon,
   "/projects": FolderIcon,
   "/finance": FinanceIcon,
   "/team": TeamIcon,
