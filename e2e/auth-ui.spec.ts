@@ -1,0 +1,37 @@
+import { expect, test } from "@playwright/test";
+
+import { passwordField } from "./helpers";
+
+test.describe("authentication UI", () => {
+  test("register form renders and validates short passwords", async ({
+    page,
+  }) => {
+    await page.goto("/register");
+
+    await page.getByLabel("Name").fill("E2E Tester");
+    await page.getByLabel("Email").fill("e2e-user@example.test");
+    await passwordField(page, "password").fill("short");
+    await passwordField(page, "confirmPassword").fill("short");
+    await page.getByRole("button", { name: "Create account" }).click();
+
+    await expect(page.locator("p[role='alert']")).toContainText(
+      /Password must be at least 8 characters/i,
+    );
+    await expect(page).toHaveURL(/\/register/);
+  });
+
+  test("login form shows an error for invalid credentials", async ({
+    page,
+  }) => {
+    await page.goto("/login");
+
+    await page.getByLabel("Email").fill("nobody@example.test");
+    await passwordField(page, "password").fill("definitely-wrong-password");
+    await page.getByRole("button", { name: "Continue with email" }).click();
+
+    const alert = page.locator("p[role='alert']");
+    await expect(alert).toBeVisible();
+    await expect(alert).not.toHaveText("");
+    await expect(page).toHaveURL(/\/login/);
+  });
+});

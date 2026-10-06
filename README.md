@@ -50,7 +50,7 @@ SYLQEN brings together operations, customers, projects, tasks, finance, invoices
 - Better Auth
 - MongoDB Node.js driver
 - Resend (optional email provider)
-- Zod, Vitest, Testing Library
+- Zod, Vitest, Testing Library, Playwright (browser E2E)
 
 ## Getting started
 
@@ -65,12 +65,24 @@ See [docs/development.md](docs/development.md) for full environment setup, Googl
 
 ## Testing
 
+- **Vitest** — unit/integration tests (`src/**`)
+- **Playwright** — critical browser E2E against an ephemeral local server (memory Mongo), never production
+
 ```bash
 npm run test:run
+npm run test:e2e
 npm run typecheck
 npm run lint
 npm run build
 ```
+
+First-time Playwright browser install:
+
+```bash
+npx playwright install chromium
+```
+
+See [docs/development.md](docs/development.md#testing) for E2E isolation details.
 
 ## Documentation
 

@@ -63,6 +63,41 @@ Open [http://localhost:3000](http://localhost:3000) — unauthenticated visitors
 | `npm run typecheck` | TypeScript |
 | `npm run test` | Vitest watch |
 | `npm run test:run` | Vitest CI run |
+| `npm run test:e2e` | Build + Playwright Chromium E2E |
+| `npm run test:e2e:ui` | Build + Playwright UI mode |
+
+## Testing
+
+### Vitest (unit / integration)
+
+```bash
+npm run test:run
+```
+
+Covers `src/**` logic, components, and server helpers. Does not drive a real browser.
+
+### Playwright (browser E2E)
+
+```bash
+npx playwright install chromium   # once per machine
+npm run test:e2e
+```
+
+Playwright boots an **ephemeral** stack:
+
+1. `mongodb-memory-server` (isolated DB, destroyed when the run ends)
+2. `next start` on `http://127.0.0.1:3100` with deterministic fixture env
+3. Chromium against that local server only
+
+Isolation guarantees:
+
+- Does **not** use production Atlas / Vercel MongoDB
+- Does **not** use production Better Auth secrets
+- Does **not** send real email (`EMAIL_PROVIDER=dev`)
+- Demo credentials are local fixtures only (see `e2e/fixtures/env.mjs`)
+- Intentionally **not** run against `https://sylqen.vercel.app`
+
+Optional: set `E2E_PORT` (default `3100`) to change the local port.
 
 ## Vercel configuration
 
