@@ -5,6 +5,7 @@ import { ErrorState } from "@/components/feedback/error-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PROJECT_STATUS_LABELS } from "@/features/projects/schemas";
+import { ProjectStatusBadge } from "@/features/projects/project-status-badge";
 import { isAppError, toAppError } from "@/lib/errors/app-error";
 import { requireVerifiedPageSession } from "@/server/auth/session";
 import { getProjectForSession } from "@/server/projects/service";
@@ -40,6 +41,17 @@ function formatDateOnly(value?: string) {
   } catch {
     return value;
   }
+}
+
+function projectMark(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) {
+    return "?";
+  }
+  if (parts.length === 1) {
+    return parts[0]!.slice(0, 2).toUpperCase();
+  }
+  return `${parts[0]![0] ?? ""}${parts[1]![0] ?? ""}`.toUpperCase();
 }
 
 function DetailValue({
@@ -90,6 +102,15 @@ export default async function ProjectDetailPage({
     );
   }
 
+  const startLabel = formatDateOnly(project.startDate);
+  const dueLabel = formatDateOnly(project.dueDate);
+  const metaItems = [
+    { label: "Status", value: PROJECT_STATUS_LABELS[project.status] },
+    { label: "Client", value: project.clientName },
+    { label: "Start", value: startLabel },
+    { label: "Due", value: dueLabel },
+  ];
+
   return (
     <div className="space-y-6 sm:space-y-8">
       <section className="space-y-4" aria-labelledby="project-detail-heading">
@@ -109,23 +130,58 @@ export default async function ProjectDetailPage({
         </nav>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0 space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2
-                id="project-detail-heading"
-                className="truncate text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem] sm:leading-tight"
-              >
-                {project.name}
-              </h2>
-              {session.user.isDemo ? (
-                <Badge variant="warning">Demo read-only</Badge>
-              ) : null}
+          <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+            <div
+              className="flex size-12 shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-border bg-muted text-sm font-semibold tracking-wide text-foreground sm:size-14 sm:text-base"
+              aria-hidden="true"
+            >
+              {projectMark(project.name)}
             </div>
-            <p className="text-sm text-muted-foreground">
-              {PROJECT_STATUS_LABELS[project.status]}
-              {project.clientName ? ` · ${project.clientName}` : ""}
-            </p>
+            <div className="min-w-0 space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2
+                  id="project-detail-heading"
+                  className="truncate text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem] sm:leading-tight"
+                >
+                  {project.name}
+                </h2>
+                <ProjectStatusBadge status={project.status} />
+                {session.user.isDemo ? (
+                  <Badge variant="warning">Demo read-only</Badge>
+                ) : null}
+              </div>
+              {project.clientName ? (
+                <p className="truncate text-sm text-muted-foreground">
+                  {project.clientName}
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground/80">No client set</p>
+              )}
+              <ul className="flex flex-wrap gap-2 pt-0.5">
+                {metaItems.map((item) =>
+                  item.value ? (
+                    <li key={item.label}>
+                      <span className="inline-flex max-w-full items-center gap-1.5 rounded-[var(--radius-sm)] border border-border bg-muted/50 px-2 py-1 text-xs text-muted-foreground">
+                        <span className="font-medium text-foreground/80">
+                          {item.label}
+                        </span>
+                        <span
+                          className={cn(
+                            "truncate",
+                            (item.label === "Start" || item.label === "Due") &&
+                              "tabular-nums",
+                          )}
+                        >
+                          {item.value}
+                        </span>
+                      </span>
+                    </li>
+                  ) : null,
+                )}
+              </ul>
+            </div>
           </div>
+
           <div className="flex flex-wrap gap-2 sm:shrink-0">
             <Button asChild variant="outline">
               <Link href="/projects">Back to list</Link>
@@ -158,29 +214,20 @@ export default async function ProjectDetailPage({
               id="project-info-heading"
               className="text-sm font-semibold tracking-tight text-foreground"
             >
-              Details
+              Project details
             </h3>
           </div>
           <dl className="divide-y divide-border">
+            <div className="grid gap-1 px-4 py-3.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4 sm:px-5">
+              <dt className="text-sm text-muted-foreground">Status</dt>
+              <dd className="min-w-0 text-sm">
+                <ProjectStatusBadge status={project.status} />
+              </dd>
+            </div>
             {[
-              {
-                label: "Status",
-                value: PROJECT_STATUS_LABELS[project.status],
-              },
               { label: "Client", value: project.clientName },
-              {
-                label: "Start date",
-                value: formatDateOnly(project.startDate),
-              },
-              {
-                label: "Due date",
-                value: formatDateOnly(project.dueDate),
-              },
-              {
-                label: "Description",
-                value: project.description,
-                multiline: true,
-              },
+              { label: "Start date", value: startLabel },
+              { label: "Due date", value: dueLabel },
             ].map((field) => (
               <div
                 key={field.label}
@@ -188,14 +235,34 @@ export default async function ProjectDetailPage({
               >
                 <dt className="text-sm text-muted-foreground">{field.label}</dt>
                 <dd className="min-w-0 text-sm">
-                  <DetailValue
-                    value={field.value}
-                    multiline={"multiline" in field && field.multiline}
-                  />
+                  <DetailValue value={field.value} />
                 </dd>
               </div>
             ))}
           </dl>
+        </section>
+
+        <section
+          className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-panel"
+          aria-labelledby="project-description-heading"
+        >
+          <div className="border-b border-border px-4 py-3.5 sm:px-5">
+            <h3
+              id="project-description-heading"
+              className="text-sm font-semibold tracking-tight text-foreground"
+            >
+              Description
+            </h3>
+          </div>
+          <div className="px-4 py-4 sm:px-5">
+            <p className="text-sm leading-6">
+              <DetailValue
+                value={project.description}
+                multiline
+                empty="No description yet"
+              />
+            </p>
+          </div>
         </section>
 
         <section

@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { EmptyState } from "@/components/feedback/empty-state";
 import { ErrorState } from "@/components/feedback/error-state";
-import { PlusIcon } from "@/components/layout/icons";
+import { FolderIcon, PlusIcon } from "@/components/layout/icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProjectsPagination } from "@/features/projects/projects-pagination";
@@ -68,6 +68,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
 
       {isEmpty ? (
         <EmptyState
+          icon={<FolderIcon className="size-8" />}
           title="No projects yet"
           description="Add your first project to start tracking work in this workspace."
           action={
@@ -89,6 +90,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
 
       {noResults ? (
         <EmptyState
+          icon={<FolderIcon className="size-8" />}
           title="No matching projects"
           description={`No projects matched “${q}”. Try a different name, client, or description.`}
           action={
@@ -102,26 +104,28 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
       {list.total > 0 ? (
         <section className="space-y-4" aria-labelledby="projects-results-heading">
           <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-panel">
-            <div className="border-b border-border px-4 py-3 sm:px-5">
-              <h3
-                id="projects-results-heading"
-                className="text-sm font-semibold tracking-tight text-foreground"
-              >
-                Workspace projects
-              </h3>
-              <p className="mt-0.5 text-sm text-muted-foreground">
-                <span className="font-medium tabular-nums text-foreground">
-                  {list.total}
-                </span>{" "}
-                {list.total === 1 ? "project" : "projects"}
-                {hasQuery ? (
-                  <>
-                    {" "}
-                    matching{" "}
-                    <span className="font-medium text-foreground">“{q}”</span>
-                  </>
-                ) : null}
-              </p>
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3 sm:px-5">
+              <div>
+                <h3
+                  id="projects-results-heading"
+                  className="text-sm font-semibold tracking-tight text-foreground"
+                >
+                  Workspace projects
+                </h3>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  <span className="font-medium tabular-nums text-foreground">
+                    {list.total}
+                  </span>{" "}
+                  {list.total === 1 ? "project" : "projects"}
+                  {hasQuery ? (
+                    <>
+                      {" "}
+                      matching{" "}
+                      <span className="font-medium text-foreground">“{q}”</span>
+                    </>
+                  ) : null}
+                </p>
+              </div>
             </div>
             <div className="sm:px-1">
               <ProjectsTable projects={list.items} />

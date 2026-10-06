@@ -24,6 +24,8 @@ type ProjectFormProps = {
   mode: "create" | "edit";
   projectId?: string;
   initialValues?: Partial<ProjectInput>;
+  readOnly?: boolean;
+  readOnlyMessage?: string;
   cancelHref: string;
 };
 
@@ -52,6 +54,8 @@ export function ProjectForm({
   mode,
   projectId,
   initialValues,
+  readOnly = false,
+  readOnlyMessage,
   cancelHref,
 }: ProjectFormProps) {
   const router = useRouter();
@@ -73,8 +77,14 @@ export function ProjectForm({
   const [fieldErrors, setFieldErrors] = React.useState<FieldErrors>();
   const [pending, setPending] = React.useState(false);
 
+  const disabled = pending || readOnly;
+
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (readOnly) {
+      return;
+    }
+
     setPending(true);
     setError(null);
     setFieldErrors(undefined);
@@ -112,19 +122,22 @@ export function ProjectForm({
       noValidate
       aria-busy={pending}
     >
+      {readOnly && readOnlyMessage ? (
+        <AuthAlert>{readOnlyMessage}</AuthAlert>
+      ) : null}
       {error ? <AuthAlert>{error}</AuthAlert> : null}
 
       <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-panel">
         <div className="border-b border-border px-4 py-3.5 sm:px-5">
           <h3 className="text-sm font-semibold tracking-tight text-foreground">
-            Project details
+            Project identity
           </h3>
           <p className="mt-1 text-xs leading-5 text-muted-foreground sm:text-sm">
             Name and status identify this project in your workspace.
           </p>
         </div>
 
-        <fieldset disabled={pending} className="space-y-5 px-4 py-5 sm:px-5">
+        <fieldset disabled={disabled} className="space-y-5 px-4 py-5 sm:px-5">
           <legend className="sr-only">
             {mode === "create" ? "Create project" : "Edit project"}
           </legend>
@@ -148,7 +161,7 @@ export function ProjectForm({
                 aria-describedby={
                   fieldError(fieldErrors, "name")
                     ? "project-name-error"
-                    : undefined
+                    : "project-name-hint"
                 }
               />
               {fieldError(fieldErrors, "name") ? (
@@ -159,7 +172,11 @@ export function ProjectForm({
                 >
                   {fieldError(fieldErrors, "name")}
                 </p>
-              ) : null}
+              ) : (
+                <FieldHint id="project-name-hint">
+                  Primary display name for this project.
+                </FieldHint>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -182,7 +199,7 @@ export function ProjectForm({
                 aria-describedby={
                   fieldError(fieldErrors, "status")
                     ? "project-status-error"
-                    : undefined
+                    : "project-status-hint"
                 }
               >
                 {PROJECT_STATUSES.map((value) => (
@@ -199,7 +216,11 @@ export function ProjectForm({
                 >
                   {fieldError(fieldErrors, "status")}
                 </p>
-              ) : null}
+              ) : (
+                <FieldHint id="project-status-hint">
+                  Current delivery state for this project.
+                </FieldHint>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -216,9 +237,44 @@ export function ProjectForm({
                 onChange={(event) => setClientName(event.target.value)}
                 placeholder="Acme Operations"
                 aria-invalid={Boolean(fieldError(fieldErrors, "clientName"))}
+                aria-describedby={
+                  fieldError(fieldErrors, "clientName")
+                    ? "project-client-error"
+                    : "project-client-hint"
+                }
               />
+              {fieldError(fieldErrors, "clientName") ? (
+                <p
+                  id="project-client-error"
+                  className="text-xs text-destructive"
+                  role="alert"
+                >
+                  {fieldError(fieldErrors, "clientName")}
+                </p>
+              ) : (
+                <FieldHint id="project-client-hint">
+                  Organization or contact this work is for.
+                </FieldHint>
+              )}
             </div>
+          </div>
+        </fieldset>
+      </div>
 
+      <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-panel">
+        <div className="border-b border-border px-4 py-3.5 sm:px-5">
+          <h3 className="text-sm font-semibold tracking-tight text-foreground">
+            Schedule
+          </h3>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground sm:text-sm">
+            Optional start and due dates for planning.
+          </p>
+        </div>
+
+        <fieldset disabled={disabled} className="space-y-5 px-4 py-5 sm:px-5">
+          <legend className="sr-only">Project schedule</legend>
+
+          <div className="grid gap-5 sm:grid-cols-2">
             <div className="space-y-2">
               <div className="flex items-baseline justify-between gap-3">
                 <Label htmlFor="project-start-date">Start date</Label>
@@ -232,6 +288,7 @@ export function ProjectForm({
                 type="date"
                 value={startDate}
                 onChange={(event) => setStartDate(event.target.value)}
+                className="tabular-nums"
                 aria-invalid={Boolean(fieldError(fieldErrors, "startDate"))}
                 aria-describedby={
                   fieldError(fieldErrors, "startDate")
@@ -263,6 +320,7 @@ export function ProjectForm({
                 type="date"
                 value={dueDate}
                 onChange={(event) => setDueDate(event.target.value)}
+                className="tabular-nums"
                 aria-invalid={Boolean(fieldError(fieldErrors, "dueDate"))}
                 aria-describedby={
                   fieldError(fieldErrors, "dueDate")
@@ -284,24 +342,57 @@ export function ProjectForm({
                 </FieldHint>
               )}
             </div>
+          </div>
+        </fieldset>
+      </div>
 
-            <div className="space-y-2 sm:col-span-2">
-              <div className="flex items-baseline justify-between gap-3">
-                <Label htmlFor="project-description">Description</Label>
-                <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-                  Optional
-                </span>
-              </div>
-              <Textarea
-                id="project-description"
-                name="description"
-                rows={4}
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                placeholder="Short summary for your team"
-                aria-invalid={Boolean(fieldError(fieldErrors, "description"))}
-              />
+      <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-panel">
+        <div className="border-b border-border px-4 py-3.5 sm:px-5">
+          <h3 className="text-sm font-semibold tracking-tight text-foreground">
+            Additional information
+          </h3>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground sm:text-sm">
+            Optional context that helps your team recognize this project.
+          </p>
+        </div>
+
+        <fieldset disabled={disabled} className="space-y-5 px-4 py-5 sm:px-5">
+          <legend className="sr-only">Additional project information</legend>
+
+          <div className="space-y-2">
+            <div className="flex items-baseline justify-between gap-3">
+              <Label htmlFor="project-description">Description</Label>
+              <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+                Optional
+              </span>
             </div>
+            <Textarea
+              id="project-description"
+              name="description"
+              rows={4}
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder="Short summary for your team"
+              aria-invalid={Boolean(fieldError(fieldErrors, "description"))}
+              aria-describedby={
+                fieldError(fieldErrors, "description")
+                  ? "project-description-error"
+                  : "project-description-hint"
+              }
+            />
+            {fieldError(fieldErrors, "description") ? (
+              <p
+                id="project-description-error"
+                className="text-xs text-destructive"
+                role="alert"
+              >
+                {fieldError(fieldErrors, "description")}
+              </p>
+            ) : (
+              <FieldHint id="project-description-hint">
+                Visible to workspace members with project access.
+              </FieldHint>
+            )}
           </div>
         </fieldset>
       </div>
@@ -315,7 +406,7 @@ export function ProjectForm({
         <Button type="button" variant="ghost" asChild>
           <Link href={cancelHref}>Cancel</Link>
         </Button>
-        <Button type="submit" disabled={pending} className="sm:min-w-[9.5rem]">
+        <Button type="submit" disabled={disabled} className="sm:min-w-[9.5rem]">
           {pending
             ? mode === "create"
               ? "Creating…"

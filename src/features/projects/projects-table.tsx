@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { ChevronRightIcon } from "@/components/layout/icons";
-import { PROJECT_STATUS_LABELS } from "@/features/projects/schemas";
+import { ProjectStatusBadge } from "@/features/projects/project-status-badge";
 import type { ProjectDTO } from "@/server/projects/types";
 import { cn } from "@/lib/utils/cn";
 
@@ -54,6 +54,12 @@ export function ProjectsTable({ projects }: ProjectsTableProps) {
               </th>
               <th
                 scope="col"
+                className="hidden px-4 py-3 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase xl:table-cell"
+              >
+                Start
+              </th>
+              <th
+                scope="col"
                 className="px-4 py-3 text-right text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase"
               >
                 Due
@@ -77,18 +83,23 @@ export function ProjectsTable({ projects }: ProjectsTableProps) {
                     <span className="block truncate font-medium text-foreground group-hover:text-primary">
                       {project.name}
                     </span>
-                    {project.startDate ? (
-                      <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                        Starts {formatDate(project.startDate)}
+                    {project.clientName ? (
+                      <span className="mt-0.5 block truncate text-xs text-muted-foreground sm:text-[0.8125rem]">
+                        {project.clientName}
                       </span>
                     ) : null}
                   </Link>
                 </th>
-                <td className="px-4 py-3.5 text-muted-foreground">
-                  {PROJECT_STATUS_LABELS[project.status]}
+                <td className="px-4 py-3.5">
+                  <ProjectStatusBadge status={project.status} />
                 </td>
                 <td className="hidden max-w-[12rem] truncate px-4 py-3.5 text-muted-foreground lg:table-cell">
                   {project.clientName ?? (
+                    <span className="text-muted-foreground/70">—</span>
+                  )}
+                </td>
+                <td className="hidden px-4 py-3.5 tabular-nums text-muted-foreground xl:table-cell">
+                  {formatDate(project.startDate) ?? (
                     <span className="text-muted-foreground/70">—</span>
                   )}
                 </td>
@@ -120,19 +131,28 @@ export function ProjectsTable({ projects }: ProjectsTableProps) {
               href={`/projects/${project.id}`}
               className="flex items-start gap-3 px-3 py-3.5 transition-ui hover:bg-muted/45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
             >
-              <span className="min-w-0 flex-1">
-                <span className="block truncate font-medium text-foreground">
-                  {project.name}
+              <span className="min-w-0 flex-1 space-y-1.5">
+                <span className="flex flex-wrap items-center gap-2">
+                  <span className="min-w-0 truncate font-medium text-foreground">
+                    {project.name}
+                  </span>
+                  <ProjectStatusBadge status={project.status} />
                 </span>
-                <span className="mt-0.5 block truncate text-sm text-muted-foreground">
-                  {PROJECT_STATUS_LABELS[project.status]}
-                  {project.clientName ? ` · ${project.clientName}` : ""}
-                </span>
-                {project.dueDate ? (
-                  <span className="mt-1 block truncate text-xs text-muted-foreground">
-                    Due {formatDate(project.dueDate)}
+                {project.clientName ? (
+                  <span className="block truncate text-sm text-muted-foreground">
+                    {project.clientName}
                   </span>
                 ) : null}
+                <span className="block truncate text-xs text-muted-foreground">
+                  {[
+                    project.startDate
+                      ? `Starts ${formatDate(project.startDate)}`
+                      : null,
+                    project.dueDate ? `Due ${formatDate(project.dueDate)}` : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ") || "No dates set"}
+                </span>
               </span>
               <ChevronRightIcon
                 className="mt-1 size-4 shrink-0 text-muted-foreground"

@@ -5,6 +5,7 @@ import { ErrorState } from "@/components/feedback/error-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProjectForm } from "@/features/projects/project-form";
+import { ProjectStatusBadge } from "@/features/projects/project-status-badge";
 import { isAppError, toAppError } from "@/lib/errors/app-error";
 import { requireVerifiedPageSession } from "@/server/auth/session";
 import { getProjectForSession } from "@/server/projects/service";
@@ -69,13 +70,24 @@ export default async function EditProjectPage({
           >
             Edit project
           </h2>
+          <ProjectStatusBadge status={project.status} />
           {session.user.isDemo ? (
             <Badge variant="warning">Demo read-only</Badge>
           ) : null}
         </div>
-        <p className="max-w-2xl text-sm text-muted-foreground">
+        <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-[0.9375rem] sm:leading-7">
           Updating{" "}
           <span className="font-medium text-foreground">{project.name}</span>
+          {project.clientName ? (
+            <>
+              {" "}
+              for{" "}
+              <span className="font-medium text-foreground">
+                {project.clientName}
+              </span>
+            </>
+          ) : null}
+          . Changes replace the saved record after server validation.
         </p>
       </section>
 

@@ -63,8 +63,12 @@ export function ProjectsSearchForm({ q, pageSize }: ProjectsSearchFormProps) {
               autoComplete="off"
               disabled={pending}
               className="pl-9"
+              aria-describedby="projects-search-hint"
             />
           </div>
+          <p id="projects-search-hint" className="text-xs text-muted-foreground">
+            Server-side search across your workspace projects.
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {hasQuery ? (

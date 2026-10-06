@@ -37,12 +37,12 @@ export default async function NewProjectPage() {
             <Badge variant="warning">Demo read-only</Badge>
           ) : null}
         </div>
-        <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
-          Create a project in{" "}
+        <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-[0.9375rem] sm:leading-7">
+          Create a project record in{" "}
           <span className="font-medium text-foreground">
             {session.workspace.name}
           </span>
-          .
+          . Required fields are validated on the server before saving.
         </p>
       </section>
 
