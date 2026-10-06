@@ -182,6 +182,29 @@ export async function findProductBySkuInWorkspace(options: {
   return db.collection<ProductDocument>(PRODUCTS).findOne(filter);
 }
 
+/** Resolve multiple products in one workspace-scoped query. */
+export async function findProductsByIdsInWorkspace(options: {
+  workspaceId: string;
+  productIds: string[];
+}): Promise<ProductDocument[]> {
+  const objectIds = options.productIds
+    .filter((id) => ObjectId.isValid(id))
+    .map((id) => new ObjectId(id));
+
+  if (objectIds.length === 0) {
+    return [];
+  }
+
+  const db = getDb();
+  return db
+    .collection<ProductDocument>(PRODUCTS)
+    .find({
+      workspaceId: options.workspaceId,
+      _id: { $in: objectIds },
+    })
+    .toArray();
+}
+
 export async function listProductsInWorkspace(options: {
   workspaceId: string;
   q?: string;

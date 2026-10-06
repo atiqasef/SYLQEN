@@ -81,10 +81,21 @@ Coverage: Vitest (`src/server/products/service.test.ts`, `src/features/products/
 
 Coverage: Vitest (`src/server/projects/service.test.ts`, `src/features/projects/schemas.test.ts`) and Playwright (`e2e/projects.spec.ts`).
 
+## Invoices module (local)
+
+1. Sign in as a normal user
+2. Ensure at least one Customer and Product exist
+3. Open **Invoices** and create / search / paginate / edit / open detail
+4. Confirm invoice numbers increment (`INV-000001`, …) and totals match qty × product price
+5. Change a product price and confirm existing invoice line snapshots stay unchanged
+6. Sign in via **Explore Demo** and confirm create/edit are blocked while list/detail remain readable
+
+Coverage: Vitest (`src/server/invoices/service.test.ts`, `src/features/invoices/schemas.test.ts`) and Playwright (`e2e/invoices.spec.ts`).
+
 ### Performance notes (hot path)
 
 - Session/workspace resolution uses React `cache()` for **request-scoped** deduplication (layout + page share one lookup). Not a cross-request cache.
-- Customer/product/project Mongo indexes are ensured with a **process-level** shared promise. Prefer confirming indexes in Atlas for production; the runtime ensure is a safety net, not a migration framework.
+- Customer/product/project/invoice Mongo indexes are ensured with a **process-level** shared promise. Prefer confirming indexes in Atlas for production; the runtime ensure is a safety net, not a migration framework.
 - Align Vercel function region with the Atlas cluster region in the Vercel/Atlas dashboards (no region pin is committed in-repo).
 
 ## Scripts

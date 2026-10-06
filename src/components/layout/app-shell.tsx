@@ -37,6 +37,13 @@ function resolveShellMeta(pathname: string, session: SessionContext) {
     };
   }
 
+  if (pathname.startsWith("/invoices")) {
+    return {
+      title: "Invoices",
+      description: `${session.workspace.name} · invoice records`,
+    };
+  }
+
   return {
     title: "Overview",
     description: `${session.workspace.name} · ${session.membership.role}`,

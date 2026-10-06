@@ -30,6 +30,7 @@ const iconByHref: Record<string, ComponentType<{ className?: string }>> = {
   "/customers": UsersIcon,
   "/products": PackageIcon,
   "/projects": FolderIcon,
+  "/invoices": FinanceIcon,
   "/finance": FinanceIcon,
   "/team": TeamIcon,
   "/analytics": ChartIcon,

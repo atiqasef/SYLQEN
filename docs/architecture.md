@@ -13,7 +13,7 @@ src/
   components/
     auth/            Auth experience UI
     ui/ layout/ feedback/ providers/
-  features/          Domain UI modules (customers, products, projects, …)
+  features/          Domain UI modules (customers, products, projects, invoices, …)
   lib/
     auth.ts          Better Auth server instance
     auth-client.ts   Better Auth React client
@@ -22,6 +22,7 @@ src/
     customers/       Customer repository + service + actions
     products/        Product repository + service + actions
     projects/        Project repository + service + actions
+    invoices/        Invoice repository + service + actions
     db/              MongoDB connection + health
     email/           Email provider boundary (dev/resend)
     workspaces/      Workspace + membership persistence
@@ -72,6 +73,7 @@ Permissions:
 - `customers.read` / `customers.create` / `customers.update`
 - `products.read` / `products.create` / `products.update`
 - `projects.read` / `projects.create` / `projects.update`
+- `invoices.read` / `invoices.create` / `invoices.update`
 
 Demo accounts are force-capped to viewer permissions in `effectivePermissions`.
 
@@ -144,6 +146,30 @@ Delete is intentionally omitted — no established delete permission pattern.
 
 Demo: read/search/detail allowed; create/update forbidden via `projects.create` / `projects.update`.
 
+## Invoices module
+
+Routes:
+
+- `/invoices` — workspace-scoped list with server search + pagination
+- `/invoices/new` — create
+- `/invoices/[id]` — detail
+- `/invoices/[id]/edit` — update
+
+Collection `invoices` (MongoDB native driver):
+
+- Tenant boundary: `workspaceId` from trusted session (never browser-supplied)
+- Fields: `invoiceNumber`, `customerId`, `customerNameSnapshot`, `status` (`draft` | `sent` | `paid` | `overdue`), dates, `currency`, `notes?`, `lineItems[]` (product snapshots + qty/price/lineTotal), `subtotal`, `total`, `createdByUserId`, timestamps
+- Line items store product name/SKU/unitPrice snapshots so later product edits do not rewrite history
+- Totals are calculated server-side from resolved products (browser totals are ignored)
+- Invoice numbers (`INV-000001`) come from an atomic workspace counter in `counters` (`invoiceNumber:{workspaceId}`)
+- Indexes: unique `{ workspaceId, invoiceNumber }`, `{ workspaceId, createdAt }`, `{ workspaceId, customerId }`, `{ workspaceId, status }`, `{ workspaceId, customerNameSnapshot }`
+
+Search strategy: bounded case-insensitive regex across invoiceNumber and customerNameSnapshot.
+
+Delete, payments, PDF, email, tax, and discounts are intentionally omitted.
+
+Demo: read/search/detail allowed; create/update forbidden via `invoices.create` / `invoices.update`.
+
 ## Tenant isolation
 
 Authorization path:
@@ -162,7 +188,7 @@ Never authorize from browser-supplied tenant IDs alone.
 ## Request performance (auth hot path)
 
 - `getSession` is wrapped in React `cache()` so multiple callers in one request share one Better Auth + workspace resolution.
-- Customer/product/project `createIndexes` is guarded process-wide; it is not re-run on every list/detail call after the first successful ensure in a warm runtime.
+- Customer/product/project/invoice `createIndexes` is guarded process-wide; it is not re-run on every list/detail call after the first successful ensure in a warm runtime.
 
 ## Email
 

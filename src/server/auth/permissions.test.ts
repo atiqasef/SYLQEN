@@ -19,6 +19,7 @@ describe("RBAC permissions", () => {
       "customers.read",
       "products.read",
       "projects.read",
+      "invoices.read",
     ]);
     expect(canPerform({ role: "viewer", isDemo: false, permission: "members.invite" })).toBe(
       false,
@@ -32,6 +33,9 @@ describe("RBAC permissions", () => {
     expect(
       canPerform({ role: "viewer", isDemo: false, permission: "projects.create" }),
     ).toBe(false);
+    expect(
+      canPerform({ role: "viewer", isDemo: false, permission: "invoices.create" }),
+    ).toBe(false);
   });
 
   it("caps demo accounts to viewer permissions even if stored as owner", () => {
@@ -43,6 +47,7 @@ describe("RBAC permissions", () => {
       "customers.read",
       "products.read",
       "projects.read",
+      "invoices.read",
     ]);
     expect(
       canPerform({
@@ -72,9 +77,16 @@ describe("RBAC permissions", () => {
         permission: "projects.update",
       }),
     ).toBe(false);
+    expect(
+      canPerform({
+        role: "owner",
+        isDemo: true,
+        permission: "invoices.update",
+      }),
+    ).toBe(false);
   });
 
-  it("allows members to manage customers, products, and projects", () => {
+  it("allows members to manage customers, products, projects, and invoices", () => {
     expect(
       canPerform({ role: "member", isDemo: false, permission: "customers.create" }),
     ).toBe(true);
@@ -92,6 +104,12 @@ describe("RBAC permissions", () => {
     ).toBe(true);
     expect(
       canPerform({ role: "member", isDemo: false, permission: "projects.update" }),
+    ).toBe(true);
+    expect(
+      canPerform({ role: "member", isDemo: false, permission: "invoices.create" }),
+    ).toBe(true);
+    expect(
+      canPerform({ role: "member", isDemo: false, permission: "invoices.update" }),
     ).toBe(true);
   });
 });
