@@ -30,6 +30,13 @@ function resolveShellMeta(pathname: string, session: SessionContext) {
     };
   }
 
+  if (pathname.startsWith("/projects")) {
+    return {
+      title: "Projects",
+      description: `${session.workspace.name} · project records`,
+    };
+  }
+
   return {
     title: "Overview",
     description: `${session.workspace.name} · ${session.membership.role}`,

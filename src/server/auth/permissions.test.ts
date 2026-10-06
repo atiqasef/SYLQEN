@@ -18,6 +18,7 @@ describe("RBAC permissions", () => {
       "members.read",
       "customers.read",
       "products.read",
+      "projects.read",
     ]);
     expect(canPerform({ role: "viewer", isDemo: false, permission: "members.invite" })).toBe(
       false,
@@ -27,6 +28,9 @@ describe("RBAC permissions", () => {
     ).toBe(false);
     expect(
       canPerform({ role: "viewer", isDemo: false, permission: "products.create" }),
+    ).toBe(false);
+    expect(
+      canPerform({ role: "viewer", isDemo: false, permission: "projects.create" }),
     ).toBe(false);
   });
 
@@ -38,6 +42,7 @@ describe("RBAC permissions", () => {
       "members.read",
       "customers.read",
       "products.read",
+      "projects.read",
     ]);
     expect(
       canPerform({
@@ -60,9 +65,16 @@ describe("RBAC permissions", () => {
         permission: "products.update",
       }),
     ).toBe(false);
+    expect(
+      canPerform({
+        role: "owner",
+        isDemo: true,
+        permission: "projects.update",
+      }),
+    ).toBe(false);
   });
 
-  it("allows members to manage customers and products", () => {
+  it("allows members to manage customers, products, and projects", () => {
     expect(
       canPerform({ role: "member", isDemo: false, permission: "customers.create" }),
     ).toBe(true);
@@ -74,6 +86,12 @@ describe("RBAC permissions", () => {
     ).toBe(true);
     expect(
       canPerform({ role: "member", isDemo: false, permission: "products.update" }),
+    ).toBe(true);
+    expect(
+      canPerform({ role: "member", isDemo: false, permission: "projects.create" }),
+    ).toBe(true);
+    expect(
+      canPerform({ role: "member", isDemo: false, permission: "projects.update" }),
     ).toBe(true);
   });
 });

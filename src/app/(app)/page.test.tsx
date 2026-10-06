@@ -42,8 +42,8 @@ describe("OverviewPage", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/More modules coming/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /Open Customers/i }),
-    ).toHaveAttribute("href", "/customers");
+      screen.getByRole("link", { name: /Open Projects/i }),
+    ).toHaveAttribute("href", "/projects");
     expect(screen.getAllByText("Standard").length).toBeGreaterThan(0);
   });
 });

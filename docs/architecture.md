@@ -13,7 +13,7 @@ src/
   components/
     auth/            Auth experience UI
     ui/ layout/ feedback/ providers/
-  features/          Domain UI modules (customers, products, …)
+  features/          Domain UI modules (customers, products, projects, …)
   lib/
     auth.ts          Better Auth server instance
     auth-client.ts   Better Auth React client
@@ -21,6 +21,7 @@ src/
     auth/            Session, permissions, demo, actions
     customers/       Customer repository + service + actions
     products/        Product repository + service + actions
+    projects/        Project repository + service + actions
     db/              MongoDB connection + health
     email/           Email provider boundary (dev/resend)
     workspaces/      Workspace + membership persistence
@@ -70,6 +71,7 @@ Permissions:
 - `members.read` / `members.invite` / `members.update` / `members.remove`
 - `customers.read` / `customers.create` / `customers.update`
 - `products.read` / `products.create` / `products.update`
+- `projects.read` / `projects.create` / `projects.update`
 
 Demo accounts are force-capped to viewer permissions in `effectivePermissions`.
 
@@ -120,6 +122,28 @@ Delete is intentionally omitted — no established delete permission pattern.
 
 Demo: read/search/detail allowed; create/update forbidden via `products.create` / `products.update`.
 
+## Projects module
+
+Routes:
+
+- `/projects` — workspace-scoped list with server search + pagination
+- `/projects/new` — create
+- `/projects/[id]` — detail
+- `/projects/[id]/edit` — update
+
+Collection `projects` (MongoDB native driver):
+
+- Tenant boundary: `workspaceId` from trusted session (never browser-supplied)
+- Fields: `name`, `description?`, `status` (`planning` | `active` | `on_hold` | `completed`), `clientName?`, `startDate?` / `dueDate?` (UTC date-only), `createdByUserId`, timestamps
+- Indexes: `{ workspaceId, createdAt }`, `{ workspaceId, name }`, `{ workspaceId, status }`
+- Index ensure uses the same process-level shared promise pattern as Customers/Products
+
+Search strategy: bounded case-insensitive regex across name, clientName, description.
+
+Delete is intentionally omitted — no established delete permission pattern.
+
+Demo: read/search/detail allowed; create/update forbidden via `projects.create` / `projects.update`.
+
 ## Tenant isolation
 
 Authorization path:
@@ -138,7 +162,7 @@ Never authorize from browser-supplied tenant IDs alone.
 ## Request performance (auth hot path)
 
 - `getSession` is wrapped in React `cache()` so multiple callers in one request share one Better Auth + workspace resolution.
-- Customer/product `createIndexes` is guarded process-wide; it is not re-run on every list/detail call after the first successful ensure in a warm runtime.
+- Customer/product/project `createIndexes` is guarded process-wide; it is not re-run on every list/detail call after the first successful ensure in a warm runtime.
 
 ## Email
 

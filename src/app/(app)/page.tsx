@@ -91,7 +91,8 @@ export default async function OverviewPage() {
             <span className="font-medium text-foreground">
               {session.membership.role}
             </span>
-            . Customers is available; other business modules remain placeholders.
+            . Customers, Products, and Projects are available; other modules remain
+            placeholders.
           </p>
         </div>
       </section>
@@ -289,10 +290,10 @@ export default async function OverviewPage() {
 
       <EmptyState
         title="More modules coming"
-        description="Customers is live. Finance, projects, AI assistance, and related product areas will land in later phases on this authenticated workspace core."
+        description="Customers, Products, and Projects are live. Finance, AI assistance, and related product areas will land in later phases on this authenticated workspace core."
         action={
           <Button asChild variant="outline">
-            <Link href="/customers">Open Customers</Link>
+            <Link href="/projects">Open Projects</Link>
           </Button>
         }
       />
