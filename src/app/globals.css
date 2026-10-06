@@ -1,0 +1,263 @@
+@import "tailwindcss";
+
+/*
+  SYLQEN design tokens
+  Visual direction: premium, calm, enterprise, highly readable.
+  Accent: deep teal — intelligent without purple/glow tropes.
+*/
+
+:root {
+  --background: #f5f6f8;
+  --foreground: #12171c;
+  --card: #ffffff;
+  --card-foreground: #12171c;
+  --popover: #ffffff;
+  --popover-foreground: #12171c;
+
+  --primary: #0f6e72;
+  --primary-foreground: #ffffff;
+  --primary-hover: #0c585b;
+
+  --secondary: #e9eef2;
+  --secondary-foreground: #1a2330;
+
+  --muted: #eef1f4;
+  --muted-foreground: #5b6775;
+
+  --accent: #e4eef0;
+  --accent-foreground: #0f6e72;
+
+  --destructive: #b42318;
+  --destructive-foreground: #ffffff;
+
+  --success: #177245;
+  --success-foreground: #ffffff;
+
+  --warning: #b54708;
+  --warning-foreground: #ffffff;
+
+  --border: #dde3ea;
+  --input: #dde3ea;
+  --ring: #0f6e72;
+
+  --sidebar: #10151a;
+  --sidebar-foreground: #e7ecf1;
+  --sidebar-muted: #8b97a5;
+  --sidebar-accent: #1a222b;
+  --sidebar-border: #1f2832;
+  --sidebar-ring: #2dd4bf;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  --shadow-sm: 0 1px 2px rgb(16 21 26 / 0.04);
+  --shadow-md: 0 4px 16px rgb(16 21 26 / 0.06);
+  --shadow-lg: 0 12px 32px rgb(16 21 26 / 0.08);
+
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 300ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --sidebar-width: 16rem;
+  --sidebar-width-collapsed: 4.5rem;
+  --header-height: 3.5rem;
+  --content-max: 72rem;
+}
+
+.dark {
+  --background: #0b0e11;
+  --foreground: #e8edf2;
+  --card: #12171c;
+  --card-foreground: #e8edf2;
+  --popover: #151b21;
+  --popover-foreground: #e8edf2;
+
+  --primary: #2aa8ad;
+  --primary-foreground: #041416;
+  --primary-hover: #3bb8bd;
+
+  --secondary: #1a222b;
+  --secondary-foreground: #e8edf2;
+
+  --muted: #171d23;
+  --muted-foreground: #9aa6b4;
+
+  --accent: #163033;
+  --accent-foreground: #7dd3d7;
+
+  --destructive: #f04438;
+  --destructive-foreground: #ffffff;
+
+  --success: #32d583;
+  --success-foreground: #052e1a;
+
+  --warning: #fdb022;
+  --warning-foreground: #2e1a05;
+
+  --border: #24303a;
+  --input: #24303a;
+  --ring: #2aa8ad;
+
+  --sidebar: #080a0c;
+  --sidebar-foreground: #e8edf2;
+  --sidebar-muted: #8b97a5;
+  --sidebar-accent: #151b21;
+  --sidebar-border: #1a222b;
+  --sidebar-ring: #2aa8ad;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.35);
+  --shadow-md: 0 4px 16px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 12px 32px rgb(0 0 0 / 0.45);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --font-sans: var(--font-sylqen-sans);
+  --font-mono: var(--font-sylqen-mono);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply h-full scroll-smooth;
+  }
+
+  body {
+    @apply min-h-full bg-background font-sans text-foreground antialiased;
+    font-feature-settings: "ss01" on, "cv11" on;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--primary) 28%, transparent);
+  }
+}
+
+@keyframes sylqen-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sylqen-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes sylqen-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes sylqen-scale-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+@layer utilities {
+  .shadow-elevated {
+    box-shadow: var(--shadow-md);
+  }
+
+  .shadow-panel {
+    box-shadow: var(--shadow-sm);
+  }
+
+  .transition-ui {
+    transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+    transition-duration: var(--duration-base);
+    transition-timing-function: var(--ease-standard);
+  }
+
+  .animate-sylqen-overlay[data-state="open"] {
+    animation: sylqen-fade-in var(--duration-base) var(--ease-out);
+  }
+
+  .animate-sylqen-overlay[data-state="closed"] {
+    animation: sylqen-fade-out var(--duration-fast) var(--ease-standard);
+  }
+
+  .animate-sylqen-content[data-state="open"] {
+    animation: sylqen-scale-in var(--duration-base) var(--ease-out);
+  }
+
+  .animate-sylqen-content[data-state="closed"] {
+    animation: sylqen-scale-out var(--duration-fast) var(--ease-standard);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .transition-ui {
+      transition: none !important;
+    }
+
+    .animate-sylqen-overlay,
+    .animate-sylqen-content,
+    .animate-pulse {
+      animation: none !important;
+    }
+  }
+}
