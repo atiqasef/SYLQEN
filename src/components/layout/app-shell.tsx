@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import * as React from "react";
 
 import { Header } from "@/components/layout/header";
@@ -14,12 +15,30 @@ type AppShellProps = {
   description?: string;
 };
 
+function resolveShellMeta(pathname: string, session: SessionContext) {
+  if (pathname.startsWith("/customers")) {
+    return {
+      title: "Customers",
+      description: `${session.workspace.name} · customer records`,
+    };
+  }
+
+  return {
+    title: "Overview",
+    description: `${session.workspace.name} · ${session.membership.role}`,
+  };
+}
+
 export function AppShell({
   children,
   session,
   title,
   description,
 }: AppShellProps) {
+  const pathname = usePathname();
+  const derived = resolveShellMeta(pathname, session);
+  const resolvedTitle = title ?? derived.title;
+  const resolvedDescription = description ?? derived.description;
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
   const closeSidebar = React.useCallback(() => {
@@ -51,8 +70,8 @@ export function AppShell({
           <Header
             onMenuClick={() => setSidebarOpen(true)}
             menuOpen={sidebarOpen}
-            title={title}
-            description={description}
+            title={resolvedTitle}
+            description={resolvedDescription}
             session={session}
           />
           <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">

@@ -30,6 +30,22 @@ export async function exploreDemo(page: Page) {
   ).toBeVisible();
 }
 
+export async function registerUser(
+  page: Page,
+  options: { name: string; email: string; password: string },
+) {
+  await page.goto("/register");
+  await page.getByLabel("Name").fill(options.name);
+  await page.getByLabel("Email").fill(options.email);
+  await passwordField(page, "password").fill(options.password);
+  await passwordField(page, "confirmPassword").fill(options.password);
+  await page.getByRole("button", { name: "Create account" }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(
+    page.getByRole("heading", { name: new RegExp(`Welcome, ${options.name}`, "i") }),
+  ).toBeVisible();
+}
+
 export async function signOut(page: Page) {
   const signOutItem = page.getByRole("menuitem", { name: "Sign out" });
   if (!(await signOutItem.isVisible().catch(() => false))) {

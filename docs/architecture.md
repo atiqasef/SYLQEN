@@ -13,12 +13,13 @@ src/
   components/
     auth/            Auth experience UI
     ui/ layout/ feedback/ providers/
-  features/          Future domain modules
+  features/          Domain UI modules (customers, …)
   lib/
     auth.ts          Better Auth server instance
     auth-client.ts   Better Auth React client
   server/
     auth/            Session, permissions, demo, actions
+    customers/       Customer repository + service + actions
     db/              MongoDB connection + health
     email/           Email provider boundary (dev/resend)
     workspaces/      Workspace + membership persistence
@@ -62,12 +63,36 @@ Collections:
 
 Roles: `owner`, `admin`, `member`, `viewer`
 
-Initial permissions:
+Permissions:
 
 - `workspace.read` / `workspace.update`
 - `members.read` / `members.invite` / `members.update` / `members.remove`
+- `customers.read` / `customers.create` / `customers.update`
 
 Demo accounts are force-capped to viewer permissions in `effectivePermissions`.
+
+## Customers module
+
+Routes:
+
+- `/customers` — workspace-scoped list with server search + pagination
+- `/customers/new` — create
+- `/customers/[id]` — detail
+- `/customers/[id]/edit` — update
+
+Collection `customers` (MongoDB native driver):
+
+- Tenant boundary: `workspaceId` from trusted session (never browser-supplied)
+- Fields: `name`, `email`, `phone?`, `company?`, `address?`, `notes?`, `createdByUserId`, timestamps
+- Indexes: `{ workspaceId, createdAt }`, unique `{ workspaceId, email }`, `{ workspaceId, name }`
+
+Search strategy: bounded case-insensitive regex (`q` max 100 chars, escaped) across name, email, company, phone. No external search engine.
+
+Pagination: server-side `page` + `pageSize` (default 20, max 50).
+
+Delete is intentionally omitted — no established product delete pattern/permission yet.
+
+Demo: read/search/detail allowed; create/update forbidden via `customers.create` / `customers.update`.
 
 ## Tenant isolation
 

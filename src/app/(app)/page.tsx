@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { EmptyState } from "@/components/feedback/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -89,7 +91,7 @@ export default async function OverviewPage() {
             <span className="font-medium text-foreground">
               {session.membership.role}
             </span>
-            . Business modules remain placeholders until later phases.
+            . Customers is available; other business modules remain placeholders.
           </p>
         </div>
       </section>
@@ -286,11 +288,11 @@ export default async function OverviewPage() {
       </section>
 
       <EmptyState
-        title="No business modules yet"
-        description="CRM, finance, projects, AI assistance, and related product areas will land in later phases on top of this authenticated workspace core."
+        title="More modules coming"
+        description="Customers is live. Finance, projects, AI assistance, and related product areas will land in later phases on this authenticated workspace core."
         action={
-          <Button type="button" variant="outline" disabled>
-            Modules arrive in Phase 3+
+          <Button asChild variant="outline">
+            <Link href="/customers">Open Customers</Link>
           </Button>
         }
       />

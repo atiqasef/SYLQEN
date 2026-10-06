@@ -10,13 +10,5 @@ export default async function AppLayout({
 }) {
   const session = await requireVerifiedPageSession();
 
-  return (
-    <AppShell
-      session={session}
-      title="Overview"
-      description={`${session.workspace.name} · ${session.membership.role}`}
-    >
-      {children}
-    </AppShell>
-  );
+  return <AppShell session={session}>{children}</AppShell>;
 }

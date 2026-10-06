@@ -40,7 +40,10 @@ describe("OverviewPage", () => {
     expect(
       screen.getByRole("heading", { name: /Workspace foundation/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/No business modules yet/i)).toBeInTheDocument();
+    expect(screen.getByText(/More modules coming/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Open Customers/i }),
+    ).toHaveAttribute("href", "/customers");
     expect(screen.getAllByText("Standard").length).toBeGreaterThan(0);
   });
 });

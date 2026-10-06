@@ -52,6 +52,15 @@ Open [http://localhost:3000](http://localhost:3000) — unauthenticated visitors
 5. Optional: Explore Demo when demo env vars are set
 6. Optional: Google sign-in when Google credentials are set
 
+## Customers module (local)
+
+1. Sign in as a normal user
+2. Open **Customers** from the primary nav
+3. Create / search / paginate / edit / open detail
+4. Sign in via **Explore Demo** and confirm create/edit are blocked while list/detail remain readable
+
+Tenant isolation and demo write rejection are covered by Vitest (`src/server/customers/service.test.ts`) and Playwright (`e2e/customers.spec.ts`).
+
 ## Scripts
 
 | Command | Purpose |

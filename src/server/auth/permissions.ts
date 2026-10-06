@@ -9,20 +9,22 @@ export const ALL_PERMISSIONS = [
   "members.invite",
   "members.update",
   "members.remove",
+  "customers.read",
+  "customers.create",
+  "customers.update",
 ] as const satisfies readonly Permission[];
 
 const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {
   owner: ALL_PERMISSIONS,
-  admin: [
+  admin: ALL_PERMISSIONS,
+  member: [
     "workspace.read",
-    "workspace.update",
     "members.read",
-    "members.invite",
-    "members.update",
-    "members.remove",
+    "customers.read",
+    "customers.create",
+    "customers.update",
   ],
-  member: ["workspace.read", "members.read"],
-  viewer: ["workspace.read", "members.read"],
+  viewer: ["workspace.read", "members.read", "customers.read"],
 };
 
 export function permissionsForRole(role: Role): Permission[] {
