@@ -1,9 +1,14 @@
 "use client";
 
-import { MenuIcon } from "@/components/layout/icons";
+import { BellIcon, MenuIcon } from "@/components/layout/icons";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { UserMenu } from "@/components/layout/user-menu";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { SessionContext } from "@/server/auth/types";
 
 type HeaderProps = {
@@ -23,12 +28,12 @@ export function Header({
 }: HeaderProps) {
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background">
-      <div className="flex h-[var(--header-height)] items-center gap-3 px-4 sm:px-6 lg:px-8">
+      <div className="flex h-[var(--header-height)] items-center gap-2 px-3 sm:gap-3 sm:px-6 lg:px-8">
         <Button
           type="button"
           variant="ghost"
           size="icon"
-          className="lg:hidden"
+          className="shrink-0 lg:hidden"
           onClick={onMenuClick}
           aria-label="Open navigation"
           aria-controls="app-sidebar"
@@ -46,7 +51,25 @@ export function Header({
           </p>
         </div>
 
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex shrink-0 items-center gap-0.5 sm:gap-1">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <span className="inline-flex">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="text-muted-foreground"
+                  disabled
+                  aria-disabled="true"
+                  aria-label="Notifications (coming soon)"
+                >
+                  <BellIcon aria-hidden="true" />
+                </Button>
+              </span>
+            </TooltipTrigger>
+            <TooltipContent>Notifications coming soon</TooltipContent>
+          </Tooltip>
           <ThemeToggle />
           <UserMenu session={session} />
         </div>

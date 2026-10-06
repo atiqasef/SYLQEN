@@ -50,6 +50,18 @@ describe("Sidebar", () => {
     );
   });
 
+  it("exposes aria-current on the active overview link", async () => {
+    mockMatchMedia(false);
+
+    render(<Sidebar open={false} onClose={() => {}} />);
+
+    await waitFor(() => {
+      expect(
+        document.querySelector('a[href="/"][aria-current="page"]'),
+      ).not.toBeNull();
+    });
+  });
+
   it("keeps the desktop sidebar interactive while the mobile drawer flag is closed", async () => {
     mockMatchMedia(false);
 

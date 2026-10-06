@@ -41,6 +41,13 @@ type SidebarProps = {
   onClose: () => void;
 };
 
+function isActivePath(pathname: string, href: string) {
+  if (href === "/") {
+    return pathname === "/";
+  }
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 function NavLink({
   item,
   onNavigate,
@@ -49,25 +56,38 @@ function NavLink({
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
-  const active = pathname === item.href;
+  const active = !item.disabled && isActivePath(pathname, item.href);
   const Icon = iconByHref[item.href] ?? OverviewIcon;
 
   const className = cn(
-    "group flex items-center gap-3 rounded-[var(--radius-md)] px-3 py-2 text-sm transition-ui",
+    "group relative flex items-center gap-2.5 rounded-[var(--radius-md)] px-2.5 py-1.5 text-sm transition-ui",
     active
-      ? "bg-sidebar-accent text-sidebar-foreground"
-      : "text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground",
-    item.disabled && "cursor-not-allowed opacity-60 hover:bg-transparent hover:text-sidebar-muted",
+      ? "bg-sidebar-accent font-medium text-sidebar-foreground"
+      : "text-sidebar-muted hover:bg-sidebar-accent/80 hover:text-sidebar-foreground",
+    item.disabled &&
+      "cursor-not-allowed opacity-55 hover:bg-transparent hover:text-sidebar-muted",
   );
 
   const content = (
     <>
-      <Icon className="size-[1.05rem]" aria-hidden="true" />
-      <span className="flex-1 truncate">{item.title}</span>
+      {active ? (
+        <span
+          aria-hidden="true"
+          className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-sidebar-ring"
+        />
+      ) : null}
+      <Icon
+        className={cn(
+          "size-4",
+          active ? "text-sidebar-ring" : "text-current",
+        )}
+        aria-hidden="true"
+      />
+      <span className="min-w-0 flex-1 truncate">{item.title}</span>
       {item.comingSoon ? (
         <Badge
           variant="muted"
-          className="border-0 bg-white/8 px-1.5 py-0 text-[10px] text-sidebar-muted"
+          className="border-0 bg-white/8 px-1.5 py-0 text-[10px] font-medium text-sidebar-muted"
         >
           Soon
         </Badge>
@@ -84,9 +104,37 @@ function NavLink({
   }
 
   return (
-    <Link href={item.href} className={className} onClick={onNavigate}>
+    <Link
+      href={item.href}
+      className={className}
+      onClick={onNavigate}
+      aria-current={active ? "page" : undefined}
+    >
       {content}
     </Link>
+  );
+}
+
+function NavSection({
+  label,
+  items,
+  onNavigate,
+  className,
+}: {
+  label: string;
+  items: NavItem[];
+  onNavigate?: () => void;
+  className?: string;
+}) {
+  return (
+    <div className={cn("space-y-0.5", className)}>
+      <p className="px-2.5 pb-1.5 text-[11px] font-medium tracking-[0.12em] text-sidebar-muted uppercase">
+        {label}
+      </p>
+      {items.map((item) => (
+        <NavLink key={item.href} item={item} onNavigate={onNavigate} />
+      ))}
+    </div>
   );
 }
 
@@ -101,6 +149,21 @@ export function Sidebar({ open, onClose }: SidebarProps) {
     return () => media.removeEventListener("change", sync);
   }, []);
 
+  React.useEffect(() => {
+    if (!open || !isMobileViewport) {
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [open, isMobileViewport, onClose]);
+
   // Closed drawer must not remain in the tab order off-screen on small viewports.
   const inertWhenClosed = isMobileViewport && !open;
 
@@ -108,7 +171,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
     <>
       <div
         className={cn(
-          "fixed inset-0 z-40 bg-black/40 transition-opacity lg:hidden",
+          "fixed inset-0 z-40 bg-black/45 transition-opacity lg:hidden",
           open ? "opacity-100" : "pointer-events-none opacity-0",
         )}
         onClick={onClose}
@@ -126,19 +189,19 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="flex h-[var(--header-height)] items-center justify-between gap-3 border-b border-sidebar-border px-4">
+        <div className="flex h-[var(--header-height)] items-center justify-between gap-2 border-b border-sidebar-border px-3 sm:px-3.5">
           <Link
             href="/"
-            className="flex min-w-0 items-center gap-2.5"
+            className="flex min-w-0 items-center gap-2.5 rounded-[var(--radius-md)] px-0.5 transition-ui"
             onClick={onClose}
           >
             <span
-              className="flex size-8 items-center justify-center rounded-[0.55rem] bg-sidebar-ring/15 text-sm font-semibold tracking-tight text-sidebar-ring"
+              className="flex size-8 shrink-0 items-center justify-center rounded-[0.55rem] bg-sidebar-ring/15 text-sm font-semibold tracking-tight text-sidebar-ring"
               aria-hidden="true"
             >
               S
             </span>
-            <span className="truncate">
+            <span className="min-w-0 truncate">
               <span className="block text-sm font-semibold tracking-[0.08em]">
                 {siteConfig.name}
               </span>
@@ -151,7 +214,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
             type="button"
             variant="ghost"
             size="icon"
-            className="text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground lg:hidden"
+            className="shrink-0 text-sidebar-muted hover:bg-sidebar-accent hover:text-sidebar-foreground lg:hidden"
             onClick={onClose}
             aria-label="Close navigation"
           >
@@ -160,37 +223,29 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         </div>
 
         <nav
-          className="flex flex-1 flex-col gap-6 overflow-y-auto px-3 py-4"
+          className="flex flex-1 flex-col gap-5 overflow-y-auto px-2.5 py-3"
           aria-label="Primary"
         >
-          <div className="space-y-1">
-            <p className="px-3 pb-2 text-[11px] font-medium tracking-[0.12em] text-sidebar-muted uppercase">
-              Workspace
-            </p>
-            {primaryNav.map((item) => (
-              <NavLink key={item.href} item={item} onNavigate={onClose} />
-            ))}
-          </div>
-
-          <div className="mt-auto space-y-1">
-            <p className="px-3 pb-2 text-[11px] font-medium tracking-[0.12em] text-sidebar-muted uppercase">
-              System
-            </p>
-            {secondaryNav.map((item) => (
-              <NavLink key={item.href} item={item} onNavigate={onClose} />
-            ))}
-          </div>
+          <NavSection
+            label="Workspace"
+            items={primaryNav}
+            onNavigate={onClose}
+          />
+          <NavSection
+            label="System"
+            items={secondaryNav}
+            onNavigate={onClose}
+            className="mt-auto"
+          />
         </nav>
 
-        <div className="border-t border-sidebar-border p-4">
-          <div className="rounded-[var(--radius-md)] bg-sidebar-accent px-3 py-3">
-            <p className="text-xs font-medium text-sidebar-foreground">
-              Foundation phase
-            </p>
-            <p className="mt-1 text-xs leading-5 text-sidebar-muted">
-              Modules are placeholders until later phases.
-            </p>
-          </div>
+        <div className="border-t border-sidebar-border px-3.5 py-3">
+          <p className="text-xs font-medium text-sidebar-foreground">
+            Foundation phase
+          </p>
+          <p className="mt-1 text-xs leading-5 text-sidebar-muted">
+            Modules are placeholders until later phases.
+          </p>
         </div>
       </aside>
     </>

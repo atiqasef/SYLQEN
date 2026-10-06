@@ -22,10 +22,31 @@ export function AppShell({
 }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
+  const closeSidebar = React.useCallback(() => {
+    setSidebarOpen(false);
+  }, []);
+
+  React.useEffect(() => {
+    if (!sidebarOpen) {
+      return;
+    }
+
+    const media = window.matchMedia("(max-width: 1023px)");
+    if (!media.matches) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [sidebarOpen]);
+
   return (
     <TooltipProvider delayDuration={200}>
       <div className="flex min-h-full bg-background">
-        <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <Sidebar open={sidebarOpen} onClose={closeSidebar} />
         <div className="flex min-w-0 flex-1 flex-col">
           <Header
             onMenuClick={() => setSidebarOpen(true)}
