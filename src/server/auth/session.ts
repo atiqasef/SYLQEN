@@ -3,7 +3,7 @@ import "server-only";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { auth } from "@/lib/auth";
+import { getAuth } from "@/lib/auth";
 import { AppError } from "@/lib/errors/app-error";
 import { effectivePermissions } from "@/server/auth/permissions";
 import type { SessionContext } from "@/server/auth/types";
@@ -42,7 +42,7 @@ export async function getSession(): Promise<SessionContext | null> {
 
   await connectMongo();
 
-  const session = await auth.api.getSession({
+  const session = await getAuth().api.getSession({
     headers: await headers(),
   });
 

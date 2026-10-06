@@ -1,6 +1,6 @@
 import { toNextJsHandler } from "better-auth/next-js";
 
-import { auth } from "@/lib/auth";
+import { getAuth } from "@/lib/auth";
 import { connectMongo } from "@/server/db/mongodb";
 
 async function ensureDb() {
@@ -9,12 +9,12 @@ async function ensureDb() {
 
 export async function GET(request: Request) {
   await ensureDb();
-  const handlers = toNextJsHandler(auth);
+  const handlers = toNextJsHandler(getAuth());
   return handlers.GET(request);
 }
 
 export async function POST(request: Request) {
   await ensureDb();
-  const handlers = toNextJsHandler(auth);
+  const handlers = toNextJsHandler(getAuth());
   return handlers.POST(request);
 }

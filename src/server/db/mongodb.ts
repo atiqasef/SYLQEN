@@ -11,16 +11,57 @@ declare global {
   var __sylqenMongoPromise: Promise<MongoClient> | undefined;
 }
 
+/**
+ * Strip accidental wrappers from env paste (Vercel/dashboard quotes, whitespace).
+ * Does not decode, rewrite credentials, or invent a connection string.
+ */
+export function normalizeMongoUri(raw: string): string {
+  let value = raw.trim();
+
+  if (
+    (value.startsWith('"') && value.endsWith('"')) ||
+    (value.startsWith("'") && value.endsWith("'"))
+  ) {
+    value = value.slice(1, -1).trim();
+  }
+
+  return value;
+}
+
+/**
+ * Secret-free scheme check. Never logs the URI or credentials.
+ */
+export function assertMongoUriShape(uri: string): void {
+  if (
+    !uri.startsWith("mongodb://") &&
+    !uri.startsWith("mongodb+srv://")
+  ) {
+    throw new AppError({
+      code: "INTERNAL_ERROR",
+      message:
+        "MONGODB_URI must start with mongodb:// or mongodb+srv:// (check for accidental quotes, whitespace, or a missing scheme in the environment variable).",
+      userMessage: "Database is not available. Please try again later.",
+    });
+  }
+}
+
 function resolveMongoUri(): string {
-  return (
+  const raw =
     getServerEnv().MONGODB_URI ??
     process.env.MONGODB_URI ??
-    "mongodb://127.0.0.1:27017/sylqen"
-  );
+    "mongodb://127.0.0.1:27017/sylqen";
+
+  const uri = normalizeMongoUri(raw);
+  assertMongoUriShape(uri);
+  return uri;
 }
 
 export function isMongoConfigured(): boolean {
-  return Boolean(getServerEnv().MONGODB_URI ?? process.env.MONGODB_URI);
+  const raw = getServerEnv().MONGODB_URI ?? process.env.MONGODB_URI;
+  if (!raw) {
+    return false;
+  }
+  return normalizeMongoUri(raw).length > 0;
 }
 
 export function getMongoClient(): MongoClient {
@@ -28,9 +69,26 @@ export function getMongoClient(): MongoClient {
     return global.__sylqenMongoClient;
   }
 
-  const client = new MongoClient(resolveMongoUri(), {
-    maxPoolSize: 10,
-  });
+  const uri = resolveMongoUri();
+
+  let client: MongoClient;
+  try {
+    client = new MongoClient(uri, {
+      maxPoolSize: 10,
+    });
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : "unknown";
+    logger.error("MongoDB client rejected MONGODB_URI", {
+      reason,
+      hint: "Ensure the value has no surrounding quotes, leading/trailing whitespace, a valid mongodb:// or mongodb+srv:// scheme, and that any special characters in the password are percent-encoded.",
+    });
+    throw new AppError({
+      code: "INTERNAL_ERROR",
+      message:
+        "MONGODB_URI is syntactically invalid. Remove surrounding quotes/whitespace, use mongodb:// or mongodb+srv://, and percent-encode special characters in the password. Do not paste Atlas placeholders like <password> unless replaced.",
+      userMessage: "Database is not available. Please try again later.",
+    });
+  }
 
   global.__sylqenMongoClient = client;
   return client;

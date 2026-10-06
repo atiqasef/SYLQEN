@@ -4,7 +4,7 @@ import { APIError } from "better-auth/api";
 import { headers } from "next/headers";
 
 import { getServerEnv, isDemoConfigured } from "@/config/env";
-import { auth } from "@/lib/auth";
+import { getAuth } from "@/lib/auth";
 import { AppError } from "@/lib/errors/app-error";
 import { logger } from "@/server/logging/logger";
 import { connectMongo, getDb } from "@/server/db/mongodb";
@@ -39,7 +39,7 @@ export async function ensureDemoAccount(): Promise<{
 
   if (!existing) {
     try {
-      await auth.api.signUpEmail({
+      await getAuth().api.signUpEmail({
         body: {
           email,
           password,
@@ -109,7 +109,7 @@ export async function signInDemoAccount() {
   const { email } = await ensureDemoAccount();
   const env = getServerEnv();
 
-  return auth.api.signInEmail({
+  return getAuth().api.signInEmail({
     body: {
       email,
       password: env.DEMO_PASSWORD!,

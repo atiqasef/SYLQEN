@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { isDemoConfigured } from "@/config/env";
-import { auth } from "@/lib/auth";
+import { getAuth } from "@/lib/auth";
 import { toAppError } from "@/lib/errors/app-error";
 import { signInDemoAccount } from "@/server/auth/demo";
 import { connectMongo } from "@/server/db/mongodb";
@@ -16,7 +16,7 @@ export type ActionResult =
 
 export async function signOutAction(): Promise<void> {
   await connectMongo();
-  await auth.api.signOut({
+  await getAuth().api.signOut({
     headers: await headers(),
   });
   redirect("/login");
