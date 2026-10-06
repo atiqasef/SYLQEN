@@ -11,6 +11,7 @@ import { authClient } from "@/lib/auth-client";
 
 type VerifyEmailPanelProps = {
   initialEmail?: string;
+  emailDeliveryConfigured?: boolean;
 };
 
 function verificationErrorMessage(error: string | null): string | null {
@@ -28,7 +29,10 @@ function verificationErrorMessage(error: string | null): string | null {
   return "Email verification failed. Request a new link below.";
 }
 
-export function VerifyEmailPanel({ initialEmail = "" }: VerifyEmailPanelProps) {
+export function VerifyEmailPanel({
+  initialEmail = "",
+  emailDeliveryConfigured = true,
+}: VerifyEmailPanelProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const emailFromQuery = searchParams.get("email") || "";
@@ -50,6 +54,14 @@ export function VerifyEmailPanel({ initialEmail = "" }: VerifyEmailPanelProps) {
     setError(null);
     setResentStatus(null);
 
+    if (!emailDeliveryConfigured) {
+      setPending(false);
+      setError(
+        "Email delivery is not configured. Set EMAIL_PROVIDER=resend, RESEND_API_KEY, and EMAIL_FROM in Vercel Production.",
+      );
+      return;
+    }
+
     const result = await authClient.sendVerificationEmail({
       email,
       callbackURL: "/",
@@ -58,7 +70,14 @@ export function VerifyEmailPanel({ initialEmail = "" }: VerifyEmailPanelProps) {
     setPending(false);
 
     if (result.error) {
-      setError(result.error.message || "Unable to resend verification email.");
+      const code =
+        "code" in result.error && typeof result.error.code === "string"
+          ? result.error.code
+          : null;
+      const details = [result.error.message, code ? `(${code})` : null]
+        .filter(Boolean)
+        .join(" ");
+      setError(details || "Unable to resend verification email.");
       return;
     }
 
@@ -90,7 +109,11 @@ export function VerifyEmailPanel({ initialEmail = "" }: VerifyEmailPanelProps) {
           </p>
         ) : null}
 
-        <Button type="submit" className="w-full" disabled={pending || !email}>
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={pending || !email || !emailDeliveryConfigured}
+        >
           {pending ? "Sending…" : "Resend verification email"}
         </Button>
       </form>

@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   getServerEnv,
   isDemoConfigured,
+  isEmailDeliveryConfigured,
   isGoogleOAuthConfigured,
   resetServerEnvCache,
 } from "@/config/env";
@@ -14,6 +15,7 @@ describe("getServerEnv", () => {
     delete process.env.AI_PROVIDER;
     delete process.env.LOG_LEVEL;
     delete process.env.EMAIL_PROVIDER;
+    delete process.env.RESEND_API_KEY;
     delete process.env.GOOGLE_CLIENT_ID;
     delete process.env.GOOGLE_CLIENT_SECRET;
     delete process.env.DEMO_EMAIL;
@@ -46,5 +48,17 @@ describe("getServerEnv", () => {
 
     expect(isGoogleOAuthConfigured()).toBe(true);
     expect(isDemoConfigured()).toBe(true);
+  });
+
+  it("requires both EMAIL_PROVIDER=resend and RESEND_API_KEY for delivery", () => {
+    expect(isEmailDeliveryConfigured()).toBe(false);
+
+    process.env.EMAIL_PROVIDER = "resend";
+    resetServerEnvCache();
+    expect(isEmailDeliveryConfigured()).toBe(false);
+
+    process.env.RESEND_API_KEY = "re_test_key";
+    resetServerEnvCache();
+    expect(isEmailDeliveryConfigured()).toBe(true);
   });
 });

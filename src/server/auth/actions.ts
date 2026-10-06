@@ -24,9 +24,13 @@ export async function signOutAction(): Promise<void> {
 
 export async function exploreDemoAction(): Promise<ActionResult> {
   if (!isDemoConfigured()) {
+    logger.error("Explore Demo blocked: DEMO_* env vars missing in this runtime", {
+      demoConfigured: false,
+    });
     return {
       ok: false,
-      error: "Demo access is not configured for this environment.",
+      error:
+        "Demo access is not configured for this environment. Set DEMO_EMAIL and DEMO_PASSWORD in Vercel Production.",
       code: "DEMO_UNAVAILABLE",
     };
   }

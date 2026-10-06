@@ -16,9 +16,13 @@ const PASSWORD_HINT =
 
 type RegisterFormProps = {
   googleEnabled: boolean;
+  emailDeliveryConfigured?: boolean;
 };
 
-export function RegisterForm({ googleEnabled }: RegisterFormProps) {
+export function RegisterForm({
+  googleEnabled,
+  emailDeliveryConfigured = true,
+}: RegisterFormProps) {
   const router = useRouter();
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -30,6 +34,13 @@ export function RegisterForm({ googleEnabled }: RegisterFormProps) {
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+
+    if (!emailDeliveryConfigured) {
+      setError(
+        "Email delivery is not configured. Set EMAIL_PROVIDER=resend, RESEND_API_KEY, and EMAIL_FROM in Vercel Production.",
+      );
+      return;
+    }
 
     if (password.length < 8) {
       setError("Password must be at least 8 characters.");
@@ -144,7 +155,11 @@ export function RegisterForm({ googleEnabled }: RegisterFormProps) {
           </p>
         ) : null}
 
-        <Button type="submit" className="w-full" disabled={pending}>
+        <Button
+          type="submit"
+          className="w-full"
+          disabled={pending || !emailDeliveryConfigured}
+        >
           {pending ? "Creating account…" : "Create account"}
         </Button>
       </form>
