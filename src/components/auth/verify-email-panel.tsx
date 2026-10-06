@@ -38,9 +38,7 @@ export function VerifyEmailPanel({
   const emailFromQuery = searchParams.get("email") || "";
   const [email, setEmail] = React.useState(initialEmail || emailFromQuery);
   const [status] = React.useState(
-    searchParams.get("registered")
-      ? "Registration successful. Please verify your email address before continuing."
-      : "Please verify your email address before continuing.",
+    "Email verification is optional right now. You can continue into SYLQEN without verifying.",
   );
   const [error, setError] = React.useState<string | null>(
     verificationErrorMessage(searchParams.get("error")),

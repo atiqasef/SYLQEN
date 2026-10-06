@@ -23,7 +23,6 @@ export function LoginForm({ googleEnabled, demoEnabled }: LoginFormProps) {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
-  const [info, setInfo] = React.useState<string | null>(null);
   const [pending, setPending] = React.useState(false);
   const [demoPending, setDemoPending] = React.useState(false);
 
@@ -31,7 +30,6 @@ export function LoginForm({ googleEnabled, demoEnabled }: LoginFormProps) {
     event.preventDefault();
     setPending(true);
     setError(null);
-    setInfo(null);
 
     const result = await authClient.signIn.email({
       email,
@@ -42,11 +40,6 @@ export function LoginForm({ googleEnabled, demoEnabled }: LoginFormProps) {
     setPending(false);
 
     if (result.error) {
-      if (result.error.status === 403) {
-        setInfo("Please verify your email address before continuing.");
-        router.push(`/verify-email?email=${encodeURIComponent(email)}`);
-        return;
-      }
       setError(result.error.message || "Invalid email or password.");
       return;
     }
@@ -117,11 +110,6 @@ export function LoginForm({ googleEnabled, demoEnabled }: LoginFormProps) {
         {error ? (
           <p role="alert" className="text-sm text-destructive">
             {error}
-          </p>
-        ) : null}
-        {info ? (
-          <p role="status" className="text-sm text-muted-foreground">
-            {info}
           </p>
         ) : null}
 

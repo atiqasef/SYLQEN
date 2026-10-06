@@ -6,8 +6,10 @@ import {
   getAppBaseUrl,
   getServerEnv,
   getTrustedOrigins,
+  isEmailDeliveryConfigured,
   isGoogleOAuthConfigured,
 } from "@/config/env";
+import { EMAIL_VERIFICATION_REQUIRED } from "@/lib/auth-policy";
 import {
   getEmailDeliveryDiagnostics,
   resetPasswordEmailContent,
@@ -17,6 +19,8 @@ import {
 import { getDb, getMongoClient } from "@/server/db/mongodb";
 import { logger } from "@/server/logging/logger";
 import { ensureDefaultWorkspaceForUser } from "@/server/workspaces/service";
+
+export { EMAIL_VERIFICATION_REQUIRED } from "@/lib/auth-policy";
 
 function mongoAdapterOptions() {
   // Opt-in only: createIndex + multi-doc transactions are unsafe together on
@@ -35,6 +39,20 @@ async function deliverAuthEmail(input: {
   purpose: "verification" | "password-reset";
 }) {
   const diagnostics = getEmailDeliveryDiagnostics();
+
+  // Optional verification emails are no-ops until Resend is configured.
+  if (
+    input.purpose === "verification" &&
+    !isEmailDeliveryConfigured()
+  ) {
+    logger.info("Skipping verification email; delivery not configured", {
+      purpose: input.purpose,
+      provider: diagnostics.provider,
+      deliveryConfigured: false,
+    });
+    return;
+  }
+
   try {
     await sendEmail({
       to: input.to,
@@ -97,7 +115,7 @@ function createAuth() {
     },
     emailAndPassword: {
       enabled: true,
-      requireEmailVerification: true,
+      requireEmailVerification: EMAIL_VERIFICATION_REQUIRED,
       minPasswordLength: 8,
       maxPasswordLength: 128,
       sendResetPassword: async ({ user, url }) => {
@@ -112,8 +130,9 @@ function createAuth() {
       },
     },
     emailVerification: {
-      sendOnSignUp: true,
-      sendOnSignIn: true,
+      // Kept for future activation; portfolio stage does not auto-send.
+      sendOnSignUp: EMAIL_VERIFICATION_REQUIRED,
+      sendOnSignIn: EMAIL_VERIFICATION_REQUIRED,
       autoSignInAfterVerification: true,
       sendVerificationEmail: async ({ user, url }) => {
         const content = verificationEmailContent(url);
@@ -144,19 +163,16 @@ function createAuth() {
       user: {
         create: {
           after: async (user) => {
-            // Google / already-verified users get a workspace immediately.
-            if (user.emailVerified) {
-              try {
-                await ensureDefaultWorkspaceForUser({
-                  userId: user.id,
-                  name: user.name,
-                });
-              } catch (error) {
-                logger.error("Failed to create workspace for verified user", {
-                  userId: user.id,
-                  error: error instanceof Error ? error.message : "unknown",
-                });
-              }
+            try {
+              await ensureDefaultWorkspaceForUser({
+                userId: user.id,
+                name: user.name,
+              });
+            } catch (error) {
+              logger.error("Failed to create workspace for new user", {
+                userId: user.id,
+                error: error instanceof Error ? error.message : "unknown",
+              });
             }
           },
         },

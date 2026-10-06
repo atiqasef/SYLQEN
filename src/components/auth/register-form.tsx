@@ -16,13 +16,9 @@ const PASSWORD_HINT =
 
 type RegisterFormProps = {
   googleEnabled: boolean;
-  emailDeliveryConfigured?: boolean;
 };
 
-export function RegisterForm({
-  googleEnabled,
-  emailDeliveryConfigured = true,
-}: RegisterFormProps) {
+export function RegisterForm({ googleEnabled }: RegisterFormProps) {
   const router = useRouter();
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -34,13 +30,6 @@ export function RegisterForm({
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
-
-    if (!emailDeliveryConfigured) {
-      setError(
-        "Email delivery is not configured. Set EMAIL_PROVIDER=resend, RESEND_API_KEY, and EMAIL_FROM in Vercel Production.",
-      );
-      return;
-    }
 
     if (password.length < 8) {
       setError("Password must be at least 8 characters.");
@@ -59,7 +48,7 @@ export function RegisterForm({
         name,
         email,
         password,
-        callbackURL: "/verify-email",
+        callbackURL: "/",
       });
 
       if (result.error) {
@@ -74,9 +63,8 @@ export function RegisterForm({
         return;
       }
 
-      router.push(
-        `/verify-email?email=${encodeURIComponent(email)}&registered=1`,
-      );
+      router.push("/");
+      router.refresh();
     } catch (error) {
       setError(
         error instanceof Error && error.message
@@ -155,11 +143,7 @@ export function RegisterForm({
           </p>
         ) : null}
 
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={pending || !emailDeliveryConfigured}
-        >
+        <Button type="submit" className="w-full" disabled={pending}>
           {pending ? "Creating account…" : "Create account"}
         </Button>
       </form>

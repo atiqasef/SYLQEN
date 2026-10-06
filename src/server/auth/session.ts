@@ -54,7 +54,7 @@ export async function getSession(): Promise<SessionContext | null> {
 
   let workspaceContext = await getPrimaryWorkspaceForUser(user.id);
 
-  if (!workspaceContext && user.emailVerified) {
+  if (!workspaceContext) {
     workspaceContext = await ensureDefaultWorkspaceForUser({
       userId: user.id,
       name: user.name,
@@ -101,28 +101,22 @@ export async function requireSession(): Promise<SessionContext> {
   return session;
 }
 
+/**
+ * Portfolio stage: email verification is optional and must not block access.
+ * Kept as an alias so call sites remain stable when verification is re-enabled.
+ */
 export async function requireVerifiedSession(): Promise<SessionContext> {
-  const session = await requireSession();
-
-  if (!session.user.emailVerified) {
-    throw new AppError({
-      code: "FORBIDDEN",
-      message: "Email verification required",
-      userMessage: "Please verify your email address before continuing.",
-    });
-  }
-
-  return session;
+  return requireSession();
 }
 
 export async function requireWorkspaceContext(): Promise<SessionContext> {
-  return requireVerifiedSession();
+  return requireSession();
 }
 
 export async function requirePermission(
   permission: SessionContext["membership"]["permissions"][number],
 ): Promise<SessionContext> {
-  const session = await requireVerifiedSession();
+  const session = await requireSession();
 
   if (!session.membership.permissions.includes(permission)) {
     throw new AppError({
@@ -137,11 +131,8 @@ export async function requirePermission(
 
 export async function redirectIfAuthenticated() {
   const session = await getSession();
-  if (session?.user.emailVerified) {
+  if (session) {
     redirect("/");
-  }
-  if (session && !session.user.emailVerified) {
-    redirect("/verify-email");
   }
 }
 
@@ -150,10 +141,6 @@ export async function requireVerifiedPageSession(): Promise<SessionContext> {
 
   if (!session) {
     redirect("/login");
-  }
-
-  if (!session.user.emailVerified) {
-    redirect("/verify-email");
   }
 
   return session;
