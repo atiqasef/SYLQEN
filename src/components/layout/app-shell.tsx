@@ -34,7 +34,7 @@ export function AppShell({
             description={description}
             session={session}
           />
-          <main className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
+          <main className="flex-1 px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
             <div className="mx-auto w-full max-w-[var(--content-max)]">
               {children}
             </div>

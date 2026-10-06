@@ -18,11 +18,11 @@ export function ErrorState({
     <div
       role="alert"
       className={cn(
-        "flex flex-col items-start gap-4 rounded-[var(--radius-lg)] border border-border bg-card p-6 shadow-panel",
+        "flex flex-col items-start gap-4 rounded-[var(--radius-lg)] border border-border bg-card p-5 shadow-panel sm:p-6",
         className,
       )}
     >
-      <div>
+      <div className="min-w-0">
         <h2 className="text-base font-semibold tracking-tight text-foreground">
           {title}
         </h2>

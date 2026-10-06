@@ -36,7 +36,11 @@ describe("OverviewPage", () => {
     expect(
       screen.getByRole("heading", { name: /Welcome, Owner Example/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Example Workspace/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Example Workspace/i).length).toBeGreaterThan(0);
+    expect(
+      screen.getByRole("heading", { name: /Workspace foundation/i }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/No business modules yet/i)).toBeInTheDocument();
+    expect(screen.getAllByText("Standard").length).toBeGreaterThan(0);
   });
 });

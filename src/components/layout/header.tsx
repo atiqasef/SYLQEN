@@ -22,8 +22,8 @@ export function Header({
   session,
 }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-sm">
-      <div className="flex h-[var(--header-height)] items-center gap-3 px-4 sm:px-6">
+    <header className="sticky top-0 z-30 border-b border-border bg-background">
+      <div className="flex h-[var(--header-height)] items-center gap-3 px-4 sm:px-6 lg:px-8">
         <Button
           type="button"
           variant="ghost"
@@ -38,10 +38,10 @@ export function Header({
         </Button>
 
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-sm font-semibold tracking-tight sm:text-base">
+          <h1 className="truncate text-sm font-semibold tracking-tight text-foreground sm:text-[0.9375rem]">
             {title}
           </h1>
-          <p className="hidden truncate text-xs text-muted-foreground sm:block">
+          <p className="mt-0.5 hidden truncate text-xs text-muted-foreground sm:block">
             {description}
           </p>
         </div>
