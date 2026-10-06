@@ -43,23 +43,38 @@ export function RegisterForm({ googleEnabled }: RegisterFormProps) {
 
     setPending(true);
 
-    const result = await authClient.signUp.email({
-      name,
-      email,
-      password,
-      callbackURL: "/verify-email",
-    });
+    try {
+      const result = await authClient.signUp.email({
+        name,
+        email,
+        password,
+        callbackURL: "/verify-email",
+      });
 
-    setPending(false);
+      if (result.error) {
+        const code =
+          "code" in result.error && typeof result.error.code === "string"
+            ? result.error.code
+            : null;
+        const details = [result.error.message, code ? `(${code})` : null]
+          .filter(Boolean)
+          .join(" ");
+        setError(details || "Unable to create your account.");
+        return;
+      }
 
-    if (result.error) {
-      setError(result.error.message || "Unable to create your account.");
-      return;
+      router.push(
+        `/verify-email?email=${encodeURIComponent(email)}&registered=1`,
+      );
+    } catch (error) {
+      setError(
+        error instanceof Error && error.message
+          ? error.message
+          : "Unable to create your account.",
+      );
+    } finally {
+      setPending(false);
     }
-
-    router.push(
-      `/verify-email?email=${encodeURIComponent(email)}&registered=1`,
-    );
   }
 
   return (

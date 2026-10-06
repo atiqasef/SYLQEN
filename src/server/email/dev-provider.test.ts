@@ -9,6 +9,8 @@ import {
 describe("DevEmailProvider", () => {
   beforeEach(() => {
     clearDevEmailOutbox();
+    delete process.env.VERCEL_ENV;
+    delete process.env.VERCEL;
   });
 
   it("captures emails without requiring an external provider", async () => {

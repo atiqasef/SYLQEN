@@ -118,12 +118,51 @@ export function getServerEnv(): ServerEnv {
 
 export const publicEnv = readPublicEnv();
 
+/** Strip trailing slashes so origin checks match browser Origin headers. */
+export function normalizeAppUrl(url: string): string {
+  return url.trim().replace(/\/+$/, "");
+}
+
 export function getAppBaseUrl(): string {
-  return (
+  return normalizeAppUrl(
     getServerEnv().BETTER_AUTH_URL ??
-    publicEnv.NEXT_PUBLIC_APP_URL ??
-    "http://localhost:3000"
+      publicEnv.NEXT_PUBLIC_APP_URL ??
+      "http://localhost:3000",
   );
+}
+
+/**
+ * Origins trusted by Better Auth. Includes both BETTER_AUTH_URL and
+ * NEXT_PUBLIC_APP_URL when they differ (trailing-slash / alias drift).
+ */
+export function getTrustedOrigins(): string[] {
+  const origins = new Set<string>();
+  origins.add(getAppBaseUrl());
+
+  const publicUrl = publicEnv.NEXT_PUBLIC_APP_URL;
+  if (publicUrl) {
+    origins.add(normalizeAppUrl(publicUrl));
+  }
+
+  const authUrl = getServerEnv().BETTER_AUTH_URL;
+  if (authUrl) {
+    origins.add(normalizeAppUrl(authUrl));
+  }
+
+  return [...origins];
+}
+
+export function isProductionRuntime(): boolean {
+  return (
+    process.env.VERCEL_ENV === "production" ||
+    (process.env.NODE_ENV === "production" && Boolean(process.env.VERCEL))
+  );
+}
+
+/** True when a real outbound email provider is configured. */
+export function isEmailDeliveryConfigured(): boolean {
+  const env = getServerEnv();
+  return env.EMAIL_PROVIDER === "resend" && Boolean(env.RESEND_API_KEY);
 }
 
 export function isGoogleOAuthConfigured(): boolean {

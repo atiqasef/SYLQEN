@@ -5,9 +5,11 @@ import { nextCookies } from "better-auth/next-js";
 import {
   getAppBaseUrl,
   getServerEnv,
+  getTrustedOrigins,
   isGoogleOAuthConfigured,
 } from "@/config/env";
 import {
+  getEmailDeliveryDiagnostics,
   resetPasswordEmailContent,
   sendEmail,
   verificationEmailContent,
@@ -15,6 +17,47 @@ import {
 import { getDb, getMongoClient } from "@/server/db/mongodb";
 import { logger } from "@/server/logging/logger";
 import { ensureDefaultWorkspaceForUser } from "@/server/workspaces/service";
+
+function mongoAdapterOptions() {
+  // Opt-in only: createIndex + multi-doc transactions are unsafe together on
+  // cold serverless starts. Atlas can enable with MONGODB_USE_TRANSACTIONS=true.
+  if (process.env.MONGODB_USE_TRANSACTIONS === "true") {
+    return { client: getMongoClient() };
+  }
+  return undefined;
+}
+
+async function deliverAuthEmail(input: {
+  to: string;
+  subject: string;
+  html: string;
+  text: string;
+  purpose: "verification" | "password-reset";
+}) {
+  const diagnostics = getEmailDeliveryDiagnostics();
+  try {
+    await sendEmail({
+      to: input.to,
+      subject: input.subject,
+      html: input.html,
+      text: input.text,
+    });
+    logger.info("Auth email delivered", {
+      purpose: input.purpose,
+      provider: diagnostics.provider,
+      deliveryConfigured: diagnostics.deliveryConfigured,
+    });
+  } catch (error) {
+    logger.error("Auth email delivery failed", {
+      purpose: input.purpose,
+      provider: diagnostics.provider,
+      deliveryConfigured: diagnostics.deliveryConfigured,
+      productionRuntime: diagnostics.productionRuntime,
+      error: error instanceof Error ? error.message : "unknown",
+    });
+    throw error;
+  }
+}
 
 function buildSocialProviders() {
   const env = getServerEnv();
@@ -41,14 +84,7 @@ function createAuth() {
     secret:
       getServerEnv().BETTER_AUTH_SECRET ??
       "dev-only-sylqen-secret-change-me-32+",
-    database: mongodbAdapter(
-      getDb(),
-      // Atlas/replica-set deployments can enable transactions. Standalone and
-      // memory-server test environments should set MONGODB_USE_TRANSACTIONS=false.
-      process.env.MONGODB_USE_TRANSACTIONS === "false"
-        ? undefined
-        : { client: getMongoClient() },
-    ),
+    database: mongodbAdapter(getDb(), mongoAdapterOptions()),
     user: {
       additionalFields: {
         isDemo: {
@@ -66,11 +102,12 @@ function createAuth() {
       maxPasswordLength: 128,
       sendResetPassword: async ({ user, url }) => {
         const content = resetPasswordEmailContent(url);
-        void sendEmail({
+        await deliverAuthEmail({
           to: user.email,
           subject: content.subject,
           html: content.html,
           text: content.text,
+          purpose: "password-reset",
         });
       },
     },
@@ -80,11 +117,12 @@ function createAuth() {
       autoSignInAfterVerification: true,
       sendVerificationEmail: async ({ user, url }) => {
         const content = verificationEmailContent(url);
-        void sendEmail({
+        await deliverAuthEmail({
           to: user.email,
           subject: content.subject,
           html: content.html,
           text: content.text,
+          purpose: "verification",
         });
       },
       afterEmailVerification: async (user) => {
@@ -128,7 +166,7 @@ function createAuth() {
       expiresIn: 60 * 60 * 24 * 7,
       updateAge: 60 * 60 * 24,
     },
-    trustedOrigins: [getAppBaseUrl()],
+    trustedOrigins: getTrustedOrigins(),
     plugins: [nextCookies()],
   });
 }

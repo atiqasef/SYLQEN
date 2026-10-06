@@ -1,6 +1,11 @@
 import "server-only";
 
-import { getServerEnv } from "@/config/env";
+import {
+  getServerEnv,
+  isEmailDeliveryConfigured,
+  isProductionRuntime,
+} from "@/config/env";
+import { logger } from "@/server/logging/logger";
 
 import { DevEmailProvider } from "./dev-provider";
 import { createResendProvider } from "./resend-provider";
@@ -14,6 +19,7 @@ export {
 } from "./dev-provider";
 
 let cached: EmailProvider | null = null;
+let productionMisconfigLogged = false;
 
 export function getEmailProvider(): EmailProvider {
   if (cached) {
@@ -25,6 +31,14 @@ export function getEmailProvider(): EmailProvider {
   if (env.EMAIL_PROVIDER === "resend" && env.RESEND_API_KEY) {
     cached = createResendProvider();
   } else {
+    if (isProductionRuntime() && !productionMisconfigLogged) {
+      productionMisconfigLogged = true;
+      logger.error("Production email delivery is not configured", {
+        emailProvider: env.EMAIL_PROVIDER,
+        resendConfigured: Boolean(env.RESEND_API_KEY),
+        hint: "Set EMAIL_PROVIDER=resend, RESEND_API_KEY, and EMAIL_FROM in Vercel Production.",
+      });
+    }
     cached = new DevEmailProvider();
   }
 
@@ -33,6 +47,15 @@ export function getEmailProvider(): EmailProvider {
 
 export async function sendEmail(input: SendEmailInput): Promise<void> {
   await getEmailProvider().send(input);
+}
+
+export function getEmailDeliveryDiagnostics() {
+  const env = getServerEnv();
+  return {
+    provider: isEmailDeliveryConfigured() ? "resend" : env.EMAIL_PROVIDER,
+    deliveryConfigured: isEmailDeliveryConfigured(),
+    productionRuntime: isProductionRuntime(),
+  };
 }
 
 export function resetEmailProviderCache() {
