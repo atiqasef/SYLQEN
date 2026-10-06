@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { EmptyState } from "@/components/feedback/empty-state";
 import { ErrorState } from "@/components/feedback/error-state";
-import { PlusIcon } from "@/components/layout/icons";
+import { FinanceIcon, PlusIcon } from "@/components/layout/icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { InvoicesPagination } from "@/features/invoices/invoices-pagination";
@@ -68,8 +68,9 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
 
       {isEmpty ? (
         <EmptyState
+          icon={<FinanceIcon className="size-8" />}
           title="No invoices yet"
-          description="Create an invoice from an existing customer and products."
+          description="Create your first invoice from an existing customer and catalog products."
           action={
             canCreate ? (
               <Button asChild>
@@ -89,8 +90,9 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
 
       {noResults ? (
         <EmptyState
+          icon={<FinanceIcon className="size-8" />}
           title="No matching invoices"
-          description={`No invoices matched “${q}”. Try a different invoice number or customer.`}
+          description={`No invoices matched “${q}”. Try a different invoice number or customer name.`}
           action={
             <Button asChild variant="outline">
               <Link href="/invoices">Clear search</Link>
@@ -102,26 +104,28 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
       {list.total > 0 ? (
         <section className="space-y-4" aria-labelledby="invoices-results-heading">
           <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-panel">
-            <div className="border-b border-border px-4 py-3 sm:px-5">
-              <h3
-                id="invoices-results-heading"
-                className="text-sm font-semibold tracking-tight text-foreground"
-              >
-                Workspace invoices
-              </h3>
-              <p className="mt-0.5 text-sm text-muted-foreground">
-                <span className="font-medium tabular-nums text-foreground">
-                  {list.total}
-                </span>{" "}
-                {list.total === 1 ? "invoice" : "invoices"}
-                {hasQuery ? (
-                  <>
-                    {" "}
-                    matching{" "}
-                    <span className="font-medium text-foreground">“{q}”</span>
-                  </>
-                ) : null}
-              </p>
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3 sm:px-5">
+              <div>
+                <h3
+                  id="invoices-results-heading"
+                  className="text-sm font-semibold tracking-tight text-foreground"
+                >
+                  Workspace invoices
+                </h3>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  <span className="font-medium tabular-nums text-foreground">
+                    {list.total}
+                  </span>{" "}
+                  {list.total === 1 ? "invoice" : "invoices"}
+                  {hasQuery ? (
+                    <>
+                      {" "}
+                      matching{" "}
+                      <span className="font-medium text-foreground">“{q}”</span>
+                    </>
+                  ) : null}
+                </p>
+              </div>
             </div>
             <div className="sm:px-1">
               <InvoicesTable invoices={list.items} />
@@ -157,8 +161,8 @@ function InvoicesPageHeader({
             {isDemo ? <Badge variant="warning">Demo read-only</Badge> : null}
           </div>
           <p className="text-sm leading-6 text-muted-foreground sm:text-[0.9375rem] sm:leading-7">
-            Create and manage workspace invoices with customer and product line
-            items. Totals are calculated on the server.
+            Bill customers with product line items. Invoice numbers and totals
+            are calculated on the server and scoped to your workspace.
           </p>
         </div>
         {canCreate ? (

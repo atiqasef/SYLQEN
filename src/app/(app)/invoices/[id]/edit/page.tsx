@@ -82,16 +82,16 @@ export default async function EditInvoicePage({
             <Badge variant="warning">Demo read-only</Badge>
           ) : null}
         </div>
-        <p className="max-w-2xl text-sm text-muted-foreground">
+        <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-[0.9375rem] sm:leading-7">
           Updating{" "}
-          <span className="font-mono font-medium text-foreground">
+          <span className="font-mono font-medium tracking-wide text-foreground">
             {invoice.invoiceNumber}
           </span>{" "}
           for{" "}
           <span className="font-medium text-foreground">
             {invoice.customerNameSnapshot}
           </span>
-          .
+          . Line-item prices are re-resolved from current products on save.
         </p>
       </section>
 

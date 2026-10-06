@@ -44,12 +44,13 @@ export default async function NewInvoicePage() {
             <Badge variant="warning">Demo read-only</Badge>
           ) : null}
         </div>
-        <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+        <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-[0.9375rem] sm:leading-7">
           Create an invoice in{" "}
           <span className="font-medium text-foreground">
             {session.workspace.name}
           </span>
-          . Invoice numbers and totals are assigned on the server.
+          . Select a customer, add product line items, and the server assigns the
+          invoice number and authoritative totals.
         </p>
       </section>
 

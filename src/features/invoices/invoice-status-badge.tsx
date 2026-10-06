@@ -20,6 +20,7 @@ type InvoiceStatusBadgeProps = {
   className?: string;
 };
 
+/** Compact status chip with readable text label (not color-only). */
 export function InvoiceStatusBadge({
   status,
   className,

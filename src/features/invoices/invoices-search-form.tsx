@@ -63,8 +63,12 @@ export function InvoicesSearchForm({ q, pageSize }: InvoicesSearchFormProps) {
               autoComplete="off"
               disabled={pending}
               className="pl-9"
+              aria-describedby="invoices-search-hint"
             />
           </div>
+          <p id="invoices-search-hint" className="text-xs text-muted-foreground">
+            Server-side search by invoice number or customer name.
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {hasQuery ? (

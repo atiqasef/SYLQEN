@@ -53,11 +53,23 @@ export function InvoicesTable({ invoices }: InvoicesTableProps) {
                 scope="col"
                 className="px-4 py-3 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase"
               >
+                Customer
+              </th>
+              <th
+                scope="col"
+                className="px-4 py-3 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase"
+              >
                 Status
               </th>
               <th
                 scope="col"
                 className="hidden px-4 py-3 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase lg:table-cell"
+              >
+                Issued
+              </th>
+              <th
+                scope="col"
+                className="hidden px-4 py-3 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase xl:table-cell"
               >
                 Due
               </th>
@@ -83,22 +95,32 @@ export function InvoicesTable({ invoices }: InvoicesTableProps) {
                     href={`/invoices/${invoice.id}`}
                     className="block min-w-0 rounded-[var(--radius-sm)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   >
-                    <span className="block truncate font-mono text-sm font-medium text-foreground group-hover:text-primary">
+                    <span className="block truncate font-mono text-sm font-medium tracking-wide text-foreground group-hover:text-primary">
                       {invoice.invoiceNumber}
-                    </span>
-                    <span className="mt-0.5 block truncate text-xs text-muted-foreground">
-                      {invoice.customerNameSnapshot}
                     </span>
                   </Link>
                 </th>
+                <td className="max-w-[12rem] px-4 py-3.5">
+                  <span className="block truncate font-medium text-foreground">
+                    {invoice.customerNameSnapshot}
+                  </span>
+                </td>
                 <td className="px-4 py-3.5">
                   <InvoiceStatusBadge status={invoice.status} />
                 </td>
                 <td className="hidden px-4 py-3.5 tabular-nums text-muted-foreground lg:table-cell">
+                  {formatDate(invoice.issueDate)}
+                </td>
+                <td className="hidden px-4 py-3.5 tabular-nums text-muted-foreground xl:table-cell">
                   {formatDate(invoice.dueDate)}
                 </td>
-                <td className="px-4 py-3.5 text-right font-medium tabular-nums text-foreground">
-                  {formatMoney(invoice.total, invoice.currency)}
+                <td className="px-4 py-3.5 text-right">
+                  <span className="block font-semibold tabular-nums text-foreground">
+                    {formatMoney(invoice.total, invoice.currency)}
+                  </span>
+                  <span className="mt-0.5 block text-[11px] tracking-wide text-muted-foreground uppercase">
+                    {invoice.currency}
+                  </span>
                 </td>
                 <td className="px-2 py-3.5 text-muted-foreground" aria-hidden="true">
                   <span
@@ -125,18 +147,27 @@ export function InvoicesTable({ invoices }: InvoicesTableProps) {
             >
               <span className="min-w-0 flex-1 space-y-1.5">
                 <span className="flex flex-wrap items-center gap-2">
-                  <span className="font-mono text-sm font-medium text-foreground">
+                  <span className="font-mono text-sm font-medium tracking-wide text-foreground">
                     {invoice.invoiceNumber}
                   </span>
                   <InvoiceStatusBadge status={invoice.status} />
                 </span>
-                <span className="block truncate text-sm text-muted-foreground">
+                <span className="block truncate text-sm font-medium text-foreground">
                   {invoice.customerNameSnapshot}
                 </span>
-                <span className="block text-sm font-medium tabular-nums text-foreground">
-                  {formatMoney(invoice.total, invoice.currency)}
-                  <span className="ml-2 text-xs font-normal text-muted-foreground">
-                    Due {formatDate(invoice.dueDate)}
+                <span className="block text-xs text-muted-foreground">
+                  Issued {formatDate(invoice.issueDate)}
+                  <span className="mx-1.5 text-border" aria-hidden="true">
+                    ·
+                  </span>
+                  Due {formatDate(invoice.dueDate)}
+                </span>
+                <span className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 pt-0.5">
+                  <span className="text-sm font-semibold tabular-nums text-foreground">
+                    {formatMoney(invoice.total, invoice.currency)}
+                  </span>
+                  <span className="text-[11px] tracking-wide text-muted-foreground uppercase">
+                    {invoice.currency}
                   </span>
                 </span>
               </span>

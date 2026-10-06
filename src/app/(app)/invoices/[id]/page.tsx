@@ -4,10 +4,12 @@ import { notFound } from "next/navigation";
 import { ErrorState } from "@/components/feedback/error-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { INVOICE_STATUS_LABELS } from "@/features/invoices/schemas";
 import { InvoiceStatusBadge } from "@/features/invoices/invoice-status-badge";
 import { isAppError, toAppError } from "@/lib/errors/app-error";
 import { requireVerifiedPageSession } from "@/server/auth/session";
 import { getInvoiceForSession } from "@/server/invoices/service";
+import { cn } from "@/lib/utils/cn";
 
 type InvoiceDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -50,6 +52,42 @@ function formatMoney(amount: number, currency: string) {
   }
 }
 
+function invoiceMark(invoiceNumber: string) {
+  const digits = invoiceNumber.replace(/\D/g, "");
+  if (digits.length >= 2) {
+    return digits.slice(-2);
+  }
+  return invoiceNumber.slice(0, 2).toUpperCase() || "IN";
+}
+
+function DetailValue({
+  value,
+  empty = "Not provided",
+  multiline = false,
+  mono = false,
+}: {
+  value?: string | null;
+  empty?: string;
+  multiline?: boolean;
+  mono?: boolean;
+}) {
+  if (!value) {
+    return <span className="font-normal text-muted-foreground/80">{empty}</span>;
+  }
+
+  return (
+    <span
+      className={cn(
+        "font-medium text-foreground",
+        multiline && "whitespace-pre-wrap break-words",
+        mono && "font-mono tracking-wide",
+      )}
+    >
+      {value}
+    </span>
+  );
+}
+
 export default async function InvoiceDetailPage({
   params,
 }: InvoiceDetailPageProps) {
@@ -73,6 +111,17 @@ export default async function InvoiceDetailPage({
     );
   }
 
+  const formattedTotal = formatMoney(invoice.total, invoice.currency);
+  const issueLabel = formatDateOnly(invoice.issueDate);
+  const dueLabel = formatDateOnly(invoice.dueDate);
+  const metaItems = [
+    { label: "Status", value: INVOICE_STATUS_LABELS[invoice.status] },
+    { label: "Customer", value: invoice.customerNameSnapshot },
+    { label: "Issued", value: issueLabel },
+    { label: "Due", value: dueLabel },
+    { label: "Currency", value: invoice.currency },
+  ];
+
   return (
     <div className="space-y-6 sm:space-y-8">
       <section className="space-y-4" aria-labelledby="invoice-detail-heading">
@@ -87,33 +136,69 @@ export default async function InvoiceDetailPage({
               </Link>
             </li>
             <li aria-hidden="true">/</li>
-            <li className="truncate font-mono font-medium text-foreground">
+            <li className="truncate font-mono font-medium tracking-wide text-foreground">
               {invoice.invoiceNumber}
             </li>
           </ol>
         </nav>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0 space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2
-                id="invoice-detail-heading"
-                className="truncate font-mono text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem] sm:leading-tight"
-              >
-                {invoice.invoiceNumber}
-              </h2>
-              <InvoiceStatusBadge status={invoice.status} />
-              {session.user.isDemo ? (
-                <Badge variant="warning">Demo read-only</Badge>
-              ) : null}
+          <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+            <div
+              className="flex size-12 shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-border bg-muted font-mono text-sm font-semibold tracking-wide text-foreground sm:size-14 sm:text-base"
+              aria-hidden="true"
+            >
+              {invoiceMark(invoice.invoiceNumber)}
             </div>
-            <p className="text-sm text-muted-foreground">
-              {invoice.customerNameSnapshot}
-            </p>
-            <p className="text-lg font-semibold tabular-nums text-foreground">
-              {formatMoney(invoice.total, invoice.currency)}
-            </p>
+            <div className="min-w-0 space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2
+                  id="invoice-detail-heading"
+                  className="truncate font-mono text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem] sm:leading-tight"
+                >
+                  {invoice.invoiceNumber}
+                </h2>
+                <InvoiceStatusBadge status={invoice.status} />
+                {session.user.isDemo ? (
+                  <Badge variant="warning">Demo read-only</Badge>
+                ) : null}
+              </div>
+              <p className="truncate text-sm font-medium text-foreground">
+                {invoice.customerNameSnapshot}
+              </p>
+              <p className="text-lg font-semibold tabular-nums tracking-tight text-foreground sm:text-xl">
+                {formattedTotal}
+                <span className="ml-1.5 text-sm font-normal tracking-wide text-muted-foreground uppercase">
+                  {invoice.currency}
+                </span>
+              </p>
+              <ul className="flex flex-wrap gap-2 pt-0.5">
+                {metaItems.map((item) =>
+                  item.value ? (
+                    <li key={item.label}>
+                      <span className="inline-flex max-w-full items-center gap-1.5 rounded-[var(--radius-sm)] border border-border bg-muted/50 px-2 py-1 text-xs text-muted-foreground">
+                        <span className="font-medium text-foreground/80">
+                          {item.label}
+                        </span>
+                        <span
+                          className={cn(
+                            "truncate",
+                            (item.label === "Issued" || item.label === "Due") &&
+                              "tabular-nums",
+                            item.label === "Currency" &&
+                              "font-mono tracking-wide uppercase",
+                          )}
+                        >
+                          {item.value}
+                        </span>
+                      </span>
+                    </li>
+                  ) : null,
+                )}
+              </ul>
+            </div>
           </div>
+
           <div className="flex flex-wrap gap-2 sm:shrink-0">
             <Button asChild variant="outline">
               <Link href="/invoices">Back to list</Link>
@@ -146,23 +231,37 @@ export default async function InvoiceDetailPage({
               id="invoice-summary-heading"
               className="text-sm font-semibold tracking-tight text-foreground"
             >
-              Summary
+              Invoice information
             </h3>
           </div>
           <dl className="divide-y divide-border">
             {[
-              { label: "Customer", value: invoice.customerNameSnapshot },
-              { label: "Issue date", value: formatDateOnly(invoice.issueDate) },
-              { label: "Due date", value: formatDateOnly(invoice.dueDate) },
-              { label: "Currency", value: invoice.currency },
+              {
+                label: "Customer",
+                value: invoice.customerNameSnapshot,
+              },
+              { label: "Issue date", value: issueLabel },
+              { label: "Due date", value: dueLabel },
+              { label: "Currency", value: invoice.currency, mono: true },
+              {
+                label: "Status",
+                value: INVOICE_STATUS_LABELS[invoice.status],
+              },
             ].map((field) => (
               <div
                 key={field.label}
                 className="grid gap-1 px-4 py-3.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4 sm:px-5"
               >
                 <dt className="text-sm text-muted-foreground">{field.label}</dt>
-                <dd className="min-w-0 text-sm font-medium text-foreground">
-                  {field.value}
+                <dd className="min-w-0 text-sm">
+                  {field.label === "Status" ? (
+                    <InvoiceStatusBadge status={invoice.status} />
+                  ) : (
+                    <DetailValue
+                      value={field.value}
+                      mono={"mono" in field && field.mono}
+                    />
+                  )}
                 </dd>
               </div>
             ))}
@@ -180,15 +279,21 @@ export default async function InvoiceDetailPage({
             >
               Line items
             </h3>
+            <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+              Product names, SKUs, and prices are snapshots from when the invoice
+              was saved.
+            </p>
           </div>
-          <div className="overflow-x-auto">
+
+          {/* Desktop table */}
+          <div className="hidden sm:block">
             <table className="w-full min-w-0 border-collapse text-left text-sm">
               <caption className="sr-only">Invoice line items</caption>
               <thead>
                 <tr className="border-b border-border">
                   <th
                     scope="col"
-                    className="px-4 py-3 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase"
+                    className="px-4 py-3 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase sm:px-5"
                   >
                     Product
                   </th>
@@ -202,13 +307,13 @@ export default async function InvoiceDetailPage({
                     scope="col"
                     className="px-4 py-3 text-right text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase"
                   >
-                    Unit
+                    Unit price
                   </th>
                   <th
                     scope="col"
-                    className="px-4 py-3 text-right text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase"
+                    className="px-4 py-3 text-right text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase sm:px-5"
                   >
-                    Line
+                    Line total
                   </th>
                 </tr>
               </thead>
@@ -218,11 +323,11 @@ export default async function InvoiceDetailPage({
                     key={`${item.productId}-${index}`}
                     className="border-b border-border last:border-0"
                   >
-                    <th scope="row" className="px-4 py-3.5 font-normal">
+                    <th scope="row" className="px-4 py-3.5 font-normal sm:px-5">
                       <span className="block font-medium text-foreground">
                         {item.productNameSnapshot}
                       </span>
-                      <span className="mt-0.5 block font-mono text-xs text-muted-foreground">
+                      <span className="mt-0.5 block font-mono text-xs tracking-wide text-muted-foreground">
                         {item.skuSnapshot}
                       </span>
                     </th>
@@ -232,7 +337,7 @@ export default async function InvoiceDetailPage({
                     <td className="px-4 py-3.5 text-right tabular-nums text-muted-foreground">
                       {formatMoney(item.unitPrice, invoice.currency)}
                     </td>
-                    <td className="px-4 py-3.5 text-right font-medium tabular-nums text-foreground">
+                    <td className="px-4 py-3.5 text-right font-semibold tabular-nums text-foreground sm:px-5">
                       {formatMoney(item.lineTotal, invoice.currency)}
                     </td>
                   </tr>
@@ -240,42 +345,87 @@ export default async function InvoiceDetailPage({
               </tbody>
             </table>
           </div>
-          <div className="space-y-1 border-t border-border px-4 py-4 text-sm sm:px-5">
-            <div className="flex justify-between gap-4">
+
+          {/* Mobile stacked lines */}
+          <ul className="divide-y divide-border sm:hidden" aria-label="Line items">
+            {invoice.lineItems.map((item, index) => (
+              <li
+                key={`${item.productId}-${index}`}
+                className="space-y-2 px-4 py-3.5"
+              >
+                <div>
+                  <p className="font-medium text-foreground">
+                    {item.productNameSnapshot}
+                  </p>
+                  <p className="mt-0.5 font-mono text-xs tracking-wide text-muted-foreground">
+                    {item.skuSnapshot}
+                  </p>
+                </div>
+                <dl className="grid grid-cols-3 gap-2 text-sm">
+                  <div>
+                    <dt className="text-xs text-muted-foreground">Qty</dt>
+                    <dd className="tabular-nums text-foreground">
+                      {item.quantity}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs text-muted-foreground">Unit</dt>
+                    <dd className="tabular-nums text-foreground">
+                      {formatMoney(item.unitPrice, invoice.currency)}
+                    </dd>
+                  </div>
+                  <div className="text-right">
+                    <dt className="text-xs text-muted-foreground">Line</dt>
+                    <dd className="font-semibold tabular-nums text-foreground">
+                      {formatMoney(item.lineTotal, invoice.currency)}
+                    </dd>
+                  </div>
+                </dl>
+              </li>
+            ))}
+          </ul>
+
+          <div className="space-y-3 border-t border-border bg-muted/30 px-4 py-4 sm:px-5">
+            <div className="flex justify-between gap-4 text-sm">
               <span className="text-muted-foreground">Subtotal</span>
               <span className="font-medium tabular-nums text-foreground">
                 {formatMoney(invoice.subtotal, invoice.currency)}
               </span>
             </div>
-            <div className="flex justify-between gap-4 text-base font-semibold">
-              <span className="text-foreground">Total</span>
-              <span className="tabular-nums text-foreground">
-                {formatMoney(invoice.total, invoice.currency)}
-              </span>
+            <div className="flex items-baseline justify-between gap-4 border-t border-border pt-3">
+              <div>
+                <p className="text-base font-semibold text-foreground">Total</p>
+                <p className="mt-0.5 text-[11px] tracking-wide text-muted-foreground uppercase">
+                  {invoice.currency}
+                </p>
+              </div>
+              <p className="text-xl font-semibold tabular-nums tracking-tight text-foreground sm:text-2xl">
+                {formattedTotal}
+              </p>
             </div>
           </div>
         </section>
 
-        <section
-          className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-panel"
-          aria-labelledby="invoice-notes-heading"
-        >
-          <div className="border-b border-border px-4 py-3.5 sm:px-5">
-            <h3
-              id="invoice-notes-heading"
-              className="text-sm font-semibold tracking-tight text-foreground"
-            >
-              Notes
-            </h3>
-          </div>
-          <div className="px-4 py-4 sm:px-5">
-            <p className="text-sm leading-6 whitespace-pre-wrap break-words text-foreground">
-              {invoice.notes || (
-                <span className="text-muted-foreground/80">No notes</span>
-              )}
-            </p>
-          </div>
-        </section>
+        {invoice.notes ? (
+          <section
+            className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-panel"
+            aria-labelledby="invoice-notes-heading"
+          >
+            <div className="border-b border-border px-4 py-3.5 sm:px-5">
+              <h3
+                id="invoice-notes-heading"
+                className="text-sm font-semibold tracking-tight text-foreground"
+              >
+                Notes
+              </h3>
+            </div>
+            <div className="px-4 py-4 sm:px-5">
+              <p className="text-sm leading-6 whitespace-pre-wrap break-words text-foreground">
+                {invoice.notes}
+              </p>
+            </div>
+          </section>
+        ) : null}
 
         <section
           className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-panel"

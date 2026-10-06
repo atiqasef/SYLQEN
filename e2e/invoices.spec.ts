@@ -51,7 +51,12 @@ test.describe("invoices module", () => {
     for (let i = 0; i < 3; i += 1) {
       await page.getByRole("link", { name: "Add invoice" }).first().click();
       await expect(page).toHaveURL(/\/invoices\/new/);
-      await page.locator("#invoice-customer").selectOption({ label: `Invoice Customer ${stamp}` });
+      await expect(
+        page.getByRole("heading", { name: /Customer & invoice details/i }),
+      ).toBeVisible();
+      await page.locator("#invoice-customer").selectOption({
+        label: `Invoice Customer ${stamp}`,
+      });
       await page.locator("#invoice-status").selectOption("draft");
       await page.locator("#invoice-issue-date").fill("2026-01-01");
       await page.locator("#invoice-due-date").fill("2026-01-31");
@@ -60,16 +65,35 @@ test.describe("invoices module", () => {
         .first()
         .selectOption({ label: `Invoice Product ${stamp} (INV-SKU-${stamp})` });
       await page.locator('input[id^="invoice-line-qty-"]').first().fill(String(i + 1));
+
+      if (i === 0) {
+        await page.getByRole("button", { name: "Add item" }).click();
+        await expect(
+          page.locator('select[id^="invoice-line-product-"]'),
+        ).toHaveCount(2);
+        await page.getByRole("button", { name: /Remove line item 2/i }).click();
+        await expect(
+          page.locator('select[id^="invoice-line-product-"]'),
+        ).toHaveCount(1);
+      }
+
       await page.locator("#invoice-notes").fill(
         i === 1 ? "Searchable invoice note kit" : "Other invoice",
       );
+      await expect(page.getByRole("heading", { name: "Summary" })).toBeVisible();
       await page.getByRole("button", { name: "Create invoice" }).click();
       await expect(page).toHaveURL(/\/invoices\/[a-f0-9]{24}/i);
       await expect(page.getByText(/INV-00000/i).first()).toBeVisible();
+      await expect(page.getByText("Draft").first()).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "Invoice information" }),
+      ).toBeVisible();
+      await expect(page.getByRole("heading", { name: "Line items" })).toBeVisible();
       await page.getByRole("link", { name: "Back to list" }).click();
     }
 
     await expect(page.getByText(/3 invoices/i)).toBeVisible();
+    await expect(page.getByText(`Invoice Customer ${stamp}`).first()).toBeVisible();
 
     await page.locator("#invoices-search").fill("INV-000002");
     await page.getByRole("button", { name: "Search" }).click();
@@ -115,11 +139,16 @@ test.describe("invoices module", () => {
     ).toHaveCount(0);
   });
 
-  test("mobile invoices page has no horizontal overflow", async ({ page }) => {
+  test("mobile invoices pages have no horizontal overflow", async ({ page }) => {
     await exploreDemo(page);
     await page.setViewportSize({ width: 390, height: 844 });
+
     await page.goto("/invoices");
     await expect(page.locator("#invoices-heading")).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+
+    await page.goto("/invoices/new");
+    await expect(page.locator("#new-invoice-heading")).toBeVisible();
     await expectNoHorizontalOverflow(page);
   });
 });

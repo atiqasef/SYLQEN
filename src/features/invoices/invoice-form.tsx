@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import * as React from "react";
 
 import { AuthAlert } from "@/components/auth/auth-form-message";
+import { CloseIcon, PlusIcon } from "@/components/layout/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -62,6 +63,22 @@ function FieldHint({ id, children }: { id: string; children: React.ReactNode }) 
     <p id={id} className="text-xs leading-5 text-muted-foreground">
       {children}
     </p>
+  );
+}
+
+function RequiredMark() {
+  return (
+    <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+      Required
+    </span>
+  );
+}
+
+function OptionalMark() {
+  return (
+    <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
+      Optional
+    </span>
   );
 }
 
@@ -176,6 +193,10 @@ export function InvoiceForm({
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (pending) {
+      return;
+    }
+
     setPending(true);
     setError(null);
     setFieldErrors(undefined);
@@ -220,22 +241,25 @@ export function InvoiceForm({
       {error ? <AuthAlert>{error}</AuthAlert> : null}
 
       {invoiceNumber ? (
-        <p className="text-sm text-muted-foreground">
-          Invoice{" "}
-          <span className="font-mono font-medium text-foreground">
-            {invoiceNumber}
-          </span>{" "}
-          · number is assigned by the server and cannot be changed.
-        </p>
+        <div className="rounded-[var(--radius-lg)] border border-border bg-muted/40 px-4 py-3 sm:px-5">
+          <p className="text-sm text-muted-foreground">
+            Editing{" "}
+            <span className="font-mono font-medium tracking-wide text-foreground">
+              {invoiceNumber}
+            </span>
+            . The invoice number is assigned by the server and cannot be changed.
+          </p>
+        </div>
       ) : null}
 
+      {/* A. Customer & Invoice Details */}
       <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-panel">
         <div className="border-b border-border px-4 py-3.5 sm:px-5">
           <h3 className="text-sm font-semibold tracking-tight text-foreground">
-            Invoice details
+            Customer &amp; invoice details
           </h3>
           <p className="mt-1 text-xs leading-5 text-muted-foreground sm:text-sm">
-            Customer, dates, and status for this invoice.
+            Who you are billing, when, and the current status of this invoice.
           </p>
         </div>
 
@@ -248,9 +272,7 @@ export function InvoiceForm({
             <div className="space-y-2 sm:col-span-2">
               <div className="flex items-baseline justify-between gap-3">
                 <Label htmlFor="invoice-customer">Customer</Label>
-                <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-                  Required
-                </span>
+                <RequiredMark />
               </div>
               <select
                 id="invoice-customer"
@@ -260,6 +282,11 @@ export function InvoiceForm({
                 onChange={(event) => setCustomerId(event.target.value)}
                 className={selectClassName}
                 aria-invalid={Boolean(fieldError(fieldErrors, "customerId"))}
+                aria-describedby={
+                  fieldError(fieldErrors, "customerId")
+                    ? "invoice-customer-error"
+                    : "invoice-customer-hint"
+                }
               >
                 <option value="">Select a customer</option>
                 {customers.map((customer) => (
@@ -269,22 +296,26 @@ export function InvoiceForm({
                 ))}
               </select>
               {fieldError(fieldErrors, "customerId") ? (
-                <p className="text-xs text-destructive" role="alert">
+                <p
+                  id="invoice-customer-error"
+                  className="text-xs text-destructive"
+                  role="alert"
+                >
                   {fieldError(fieldErrors, "customerId")}
                 </p>
-              ) : customers.length === 0 ? (
+              ) : (
                 <FieldHint id="invoice-customer-hint">
-                  Add a customer before creating an invoice.
+                  {customers.length === 0
+                    ? "Add a customer before creating an invoice."
+                    : "Resolved on the server within your workspace."}
                 </FieldHint>
-              ) : null}
+              )}
             </div>
 
             <div className="space-y-2">
               <div className="flex items-baseline justify-between gap-3">
                 <Label htmlFor="invoice-status">Status</Label>
-                <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-                  Required
-                </span>
+                <RequiredMark />
               </div>
               <select
                 id="invoice-status"
@@ -295,6 +326,7 @@ export function InvoiceForm({
                   setStatus(event.target.value as InvoiceStatus)
                 }
                 className={selectClassName}
+                aria-describedby="invoice-status-hint"
               >
                 {INVOICE_STATUSES.map((value) => (
                   <option key={value} value={value}>
@@ -302,6 +334,9 @@ export function InvoiceForm({
                   </option>
                 ))}
               </select>
+              <FieldHint id="invoice-status-hint">
+                New invoices default to Draft.
+              </FieldHint>
             </div>
 
             <div className="space-y-2">
@@ -322,9 +357,7 @@ export function InvoiceForm({
             <div className="space-y-2">
               <div className="flex items-baseline justify-between gap-3">
                 <Label htmlFor="invoice-issue-date">Issue date</Label>
-                <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-                  Required
-                </span>
+                <RequiredMark />
               </div>
               <Input
                 id="invoice-issue-date"
@@ -335,9 +368,18 @@ export function InvoiceForm({
                 onChange={(event) => setIssueDate(event.target.value)}
                 className="tabular-nums"
                 aria-invalid={Boolean(fieldError(fieldErrors, "issueDate"))}
+                aria-describedby={
+                  fieldError(fieldErrors, "issueDate")
+                    ? "invoice-issue-date-error"
+                    : undefined
+                }
               />
               {fieldError(fieldErrors, "issueDate") ? (
-                <p className="text-xs text-destructive" role="alert">
+                <p
+                  id="invoice-issue-date-error"
+                  className="text-xs text-destructive"
+                  role="alert"
+                >
                   {fieldError(fieldErrors, "issueDate")}
                 </p>
               ) : null}
@@ -346,9 +388,7 @@ export function InvoiceForm({
             <div className="space-y-2">
               <div className="flex items-baseline justify-between gap-3">
                 <Label htmlFor="invoice-due-date">Due date</Label>
-                <span className="text-[11px] font-medium tracking-wide text-muted-foreground uppercase">
-                  Required
-                </span>
+                <RequiredMark />
               </div>
               <Input
                 id="invoice-due-date"
@@ -383,14 +423,16 @@ export function InvoiceForm({
         </fieldset>
       </div>
 
+      {/* B. Line Items */}
       <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-panel">
         <div className="flex flex-wrap items-start justify-between gap-3 border-b border-border px-4 py-3.5 sm:px-5">
-          <div>
+          <div className="min-w-0">
             <h3 className="text-sm font-semibold tracking-tight text-foreground">
               Line items
             </h3>
             <p className="mt-1 text-xs leading-5 text-muted-foreground sm:text-sm">
-              Products are resolved and priced on the server.
+              Products, quantities, and prices. Totals shown here are a preview
+              only — the server recalculates on save.
             </p>
           </div>
           <Button
@@ -399,35 +441,66 @@ export function InvoiceForm({
             size="sm"
             onClick={addLine}
             disabled={pending || products.length === 0}
+            className="shrink-0"
           >
-            Add line
+            <PlusIcon aria-hidden="true" className="size-4" />
+            Add item
           </Button>
         </div>
 
         <fieldset disabled={pending} className="space-y-4 px-4 py-5 sm:px-5">
           <legend className="sr-only">Invoice line items</legend>
+
           {fieldError(fieldErrors, "lineItems") ? (
             <p className="text-xs text-destructive" role="alert">
               {fieldError(fieldErrors, "lineItems")}
             </p>
           ) : null}
+
           {products.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               Add a product before creating an invoice.
             </p>
           ) : null}
 
-          <ul className="space-y-4">
+          {/* Desktop column headers */}
+          <div
+            className="hidden gap-3 border-b border-border pb-2 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase md:grid md:grid-cols-[minmax(0,1.6fr)_5.5rem_6.5rem_6.5rem_2.5rem]"
+            aria-hidden="true"
+          >
+            <span>Product</span>
+            <span className="text-right">Qty</span>
+            <span className="text-right">Unit price</span>
+            <span className="text-right">Line total</span>
+            <span className="sr-only">Remove</span>
+          </div>
+
+          <ul className="space-y-3 md:space-y-0 md:divide-y md:divide-border">
             {lines.map((line, index) => {
               const preview = previewLines[index];
               const product = preview?.product;
+              const productError = fieldError(
+                fieldErrors,
+                `lineItems.${index}.productId`,
+              );
+              const qtyError = fieldError(
+                fieldErrors,
+                `lineItems.${index}.quantity`,
+              );
+
               return (
                 <li
                   key={line.key}
-                  className="grid gap-3 rounded-[var(--radius-md)] border border-border p-3 sm:grid-cols-[minmax(0,1.4fr)_6rem_minmax(0,1fr)_auto] sm:items-end"
+                  className={cn(
+                    "rounded-[var(--radius-md)] border border-border p-3 md:rounded-none md:border-0 md:p-0 md:py-3.5",
+                    "md:grid md:grid-cols-[minmax(0,1.6fr)_5.5rem_6.5rem_6.5rem_2.5rem] md:items-start md:gap-3",
+                  )}
                 >
                   <div className="space-y-2">
-                    <Label htmlFor={`invoice-line-product-${line.key}`}>
+                    <Label
+                      htmlFor={`invoice-line-product-${line.key}`}
+                      className="md:sr-only"
+                    >
                       Product
                     </Label>
                     <select
@@ -437,9 +510,14 @@ export function InvoiceForm({
                         updateLine(line.key, { productId: event.target.value })
                       }
                       className={selectClassName}
-                      aria-invalid={Boolean(
-                        fieldError(fieldErrors, `lineItems.${index}.productId`),
-                      )}
+                      aria-invalid={Boolean(productError)}
+                      aria-describedby={
+                        productError
+                          ? `invoice-line-product-error-${line.key}`
+                          : product
+                            ? `invoice-line-sku-${line.key}`
+                            : undefined
+                      }
                     >
                       <option value="">Select a product</option>
                       {products.map((option) => (
@@ -448,9 +526,31 @@ export function InvoiceForm({
                         </option>
                       ))}
                     </select>
+                    {productError ? (
+                      <p
+                        id={`invoice-line-product-error-${line.key}`}
+                        className="text-xs text-destructive"
+                        role="alert"
+                      >
+                        {productError}
+                      </p>
+                    ) : product ? (
+                      <p
+                        id={`invoice-line-sku-${line.key}`}
+                        className="truncate font-mono text-xs tracking-wide text-muted-foreground"
+                      >
+                        {product.sku}
+                      </p>
+                    ) : null}
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`invoice-line-qty-${line.key}`}>Qty</Label>
+
+                  <div className="mt-3 space-y-2 md:mt-0">
+                    <Label
+                      htmlFor={`invoice-line-qty-${line.key}`}
+                      className="md:sr-only"
+                    >
+                      Quantity
+                    </Label>
                     <Input
                       id={`invoice-line-qty-${line.key}`}
                       type="number"
@@ -461,76 +561,141 @@ export function InvoiceForm({
                       onChange={(event) =>
                         updateLine(line.key, { quantity: event.target.value })
                       }
-                      className="tabular-nums"
+                      className="tabular-nums md:text-right"
+                      aria-invalid={Boolean(qtyError)}
+                      aria-describedby={
+                        qtyError
+                          ? `invoice-line-qty-error-${line.key}`
+                          : undefined
+                      }
                     />
+                    {qtyError ? (
+                      <p
+                        id={`invoice-line-qty-error-${line.key}`}
+                        className="text-xs text-destructive"
+                        role="alert"
+                      >
+                        {qtyError}
+                      </p>
+                    ) : null}
                   </div>
-                  <div className="space-y-1 text-sm">
-                    <p className="text-xs text-muted-foreground">Unit / line</p>
-                    <p className="tabular-nums text-foreground">
+
+                  <div className="mt-3 space-y-1 md:mt-0 md:pt-2.5 md:text-right">
+                    <p className="text-xs text-muted-foreground md:sr-only">
+                      Unit price
+                    </p>
+                    <p className="text-sm tabular-nums text-foreground">
                       {product
                         ? formatMoney(product.price, product.currency)
                         : "—"}
                     </p>
-                    <p className="font-medium tabular-nums text-foreground">
+                  </div>
+
+                  <div className="mt-3 space-y-1 md:mt-0 md:pt-2.5 md:text-right">
+                    <p className="text-xs text-muted-foreground md:sr-only">
+                      Line total
+                    </p>
+                    <p className="text-sm font-semibold tabular-nums text-foreground">
                       {product
                         ? formatMoney(preview?.lineTotal ?? 0, product.currency)
                         : "—"}
                     </p>
                   </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeLine(line.key)}
-                    disabled={lines.length <= 1}
-                  >
-                    Remove
-                  </Button>
+
+                  <div className="mt-3 flex justify-end md:mt-0 md:pt-1 md:justify-center">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeLine(line.key)}
+                      disabled={lines.length <= 1}
+                      aria-label={`Remove line item ${index + 1}`}
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      <CloseIcon className="size-4" aria-hidden="true" />
+                      <span className="md:sr-only">Remove</span>
+                    </Button>
+                  </div>
                 </li>
               );
             })}
           </ul>
-
-          <div className="flex flex-col items-end gap-1 border-t border-border pt-4 text-sm">
-            <p className="text-muted-foreground">
-              Subtotal{" "}
-              <span className="ml-3 font-medium tabular-nums text-foreground">
-                {formatMoney(previewSubtotal, previewCurrency)}
-              </span>
-            </p>
-            <p className="text-base font-semibold text-foreground">
-              Total{" "}
-              <span className="ml-3 tabular-nums">
-                {formatMoney(previewSubtotal, previewCurrency)}
-              </span>
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Preview only — totals are recalculated on the server.
-            </p>
-          </div>
         </fieldset>
       </div>
 
+      {/* C. Notes */}
       <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-panel">
         <div className="border-b border-border px-4 py-3.5 sm:px-5">
           <h3 className="text-sm font-semibold tracking-tight text-foreground">
             Notes
           </h3>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground sm:text-sm">
+            Optional context shown on the invoice record.
+          </p>
         </div>
         <fieldset disabled={pending} className="space-y-2 px-4 py-5 sm:px-5">
           <legend className="sr-only">Invoice notes</legend>
-          <Label htmlFor="invoice-notes">Notes</Label>
+          <div className="flex items-baseline justify-between gap-3">
+            <Label htmlFor="invoice-notes">Additional notes</Label>
+            <OptionalMark />
+          </div>
           <Textarea
             id="invoice-notes"
             name="notes"
             rows={3}
             value={notes}
             onChange={(event) => setNotes(event.target.value)}
-            placeholder="Optional notes for this invoice"
+            placeholder="Payment terms, delivery notes, or other context"
+            aria-describedby="invoice-notes-hint"
           />
+          <FieldHint id="invoice-notes-hint">
+            Visible on the invoice detail page. Not emailed in this phase.
+          </FieldHint>
         </fieldset>
       </div>
 
+      {/* D. Summary / Totals */}
+      <div
+        className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-panel"
+        aria-labelledby="invoice-form-totals-heading"
+      >
+        <div className="border-b border-border px-4 py-3.5 sm:px-5">
+          <h3
+            id="invoice-form-totals-heading"
+            className="text-sm font-semibold tracking-tight text-foreground"
+          >
+            Summary
+          </h3>
+          <p className="mt-1 text-xs leading-5 text-muted-foreground sm:text-sm">
+            Preview amounts. Authoritative totals are calculated on the server.
+          </p>
+        </div>
+        <div className="space-y-3 px-4 py-5 sm:px-5">
+          <div className="flex items-baseline justify-between gap-4 text-sm">
+            <span className="text-muted-foreground">Subtotal</span>
+            <span className="font-medium tabular-nums text-foreground">
+              {formatMoney(previewSubtotal, previewCurrency)}
+            </span>
+          </div>
+          <div className="flex items-baseline justify-between gap-4 border-t border-border pt-3">
+            <div>
+              <p className="text-base font-semibold text-foreground">Total</p>
+              <p className="mt-0.5 text-[11px] tracking-wide text-muted-foreground uppercase">
+                {previewCurrency}
+              </p>
+            </div>
+            <p className="text-xl font-semibold tabular-nums tracking-tight text-foreground sm:text-2xl">
+              {formatMoney(previewSubtotal, previewCurrency)}
+            </p>
+          </div>
+          <p className="text-xs text-muted-foreground" role="note">
+            Browser totals are for display only and cannot override server
+            calculations.
+          </p>
+        </div>
+      </div>
+
+      {/* E. Actions */}
       <div
         className={cn(
           "flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between",
@@ -544,6 +709,7 @@ export function InvoiceForm({
           type="submit"
           disabled={pending || customers.length === 0 || products.length === 0}
           className="sm:min-w-[9.5rem]"
+          aria-live="polite"
         >
           {pending
             ? mode === "create"
@@ -554,6 +720,13 @@ export function InvoiceForm({
               : "Save changes"}
         </Button>
       </div>
+      <span className="sr-only" role="status" aria-live="polite">
+        {pending
+          ? mode === "create"
+            ? "Creating invoice"
+            : "Saving invoice"
+          : ""}
+      </span>
     </form>
   );
 }
