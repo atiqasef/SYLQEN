@@ -73,6 +73,12 @@ test.describe("payments module", () => {
 
     await page.getByRole("link", { name: "Record payment" }).first().click();
     await expect(page).toHaveURL(/\/payments\/new/);
+    await expect(
+      page.getByRole("heading", { name: /Invoice & customer/i }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Balance summary" }),
+    ).toBeVisible();
     await page.locator("#payment-invoice").selectOption({ index: 1 });
     await page.locator("#payment-amount").fill("40");
     await page.locator("#payment-date").fill("2026-02-01");
@@ -81,7 +87,11 @@ test.describe("payments module", () => {
     await page.getByRole("button", { name: "Record payment" }).click();
     await expect(page).toHaveURL(/\/payments\/[a-f0-9]{24}/i);
     await expect(page.getByText(/Payment information/i)).toBeVisible();
+    await expect(page.getByText("Bank transfer").first()).toBeVisible();
     await expect(page.getByText(`PAY-REF-${stamp}`).first()).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Financial summary" }),
+    ).toBeVisible();
     await page.getByRole("link", { name: "View invoice" }).click();
     await expect(page).toHaveURL(/\/invoices\/[a-f0-9]{24}/i);
     await expect(page.getByRole("heading", { name: "Payments" })).toBeVisible();
@@ -92,6 +102,7 @@ test.describe("payments module", () => {
       .getByRole("link", { name: "Payments" })
       .click();
     await expect(page.getByText(/1 payment/i)).toBeVisible();
+    await expect(page.getByText("Bank transfer").first()).toBeVisible();
     await page.locator("#payments-search").fill(`PAY-REF-${stamp}`);
     await page.getByRole("button", { name: "Search" }).click();
     await expect(page).toHaveURL(new RegExp(`q=PAY-REF-${stamp}`));
@@ -131,11 +142,16 @@ test.describe("payments module", () => {
     ).toHaveCount(0);
   });
 
-  test("mobile payments page has no horizontal overflow", async ({ page }) => {
+  test("mobile payments pages have no horizontal overflow", async ({ page }) => {
     await exploreDemo(page);
     await page.setViewportSize({ width: 390, height: 844 });
+
     await page.goto("/payments");
     await expect(page.locator("#payments-heading")).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+
+    await page.goto("/payments/new");
+    await expect(page.locator("#new-payment-heading")).toBeVisible();
     await expectNoHorizontalOverflow(page);
   });
 });

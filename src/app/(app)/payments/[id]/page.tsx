@@ -4,10 +4,13 @@ import { notFound } from "next/navigation";
 import { ErrorState } from "@/components/feedback/error-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { PAYMENT_METHOD_LABELS } from "@/features/payments/schemas";
+import { PaymentMethodBadge } from "@/features/payments/payment-method-badge";
 import { isAppError, toAppError } from "@/lib/errors/app-error";
 import { requireVerifiedPageSession } from "@/server/auth/session";
-import { getPaymentForSession } from "@/server/payments/service";
+import {
+  getInvoicePaymentSummaryForSession,
+  getPaymentForSession,
+} from "@/server/payments/service";
 import { cn } from "@/lib/utils/cn";
 
 type PaymentDetailPageProps = {
@@ -101,7 +104,24 @@ export default async function PaymentDetailPage({
     );
   }
 
+  let invoiceSummary = null;
+  try {
+    invoiceSummary = await getInvoicePaymentSummaryForSession(
+      session,
+      payment.invoiceId,
+    );
+  } catch {
+    invoiceSummary = null;
+  }
+
   const formattedAmount = formatMoney(payment.amount, payment.currency);
+  const paymentDateLabel = formatDateOnly(payment.paymentDate);
+  const metaItems = [
+    { label: "Invoice", value: payment.invoiceNumberSnapshot },
+    { label: "Customer", value: payment.customerNameSnapshot },
+    { label: "Date", value: paymentDateLabel },
+    { label: "Currency", value: payment.currency },
+  ];
 
   return (
     <div className="space-y-6 sm:space-y-8">
@@ -124,34 +144,74 @@ export default async function PaymentDetailPage({
         </nav>
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="min-w-0 space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2
-                id="payment-detail-heading"
-                className="truncate text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem] sm:leading-tight"
-              >
-                {formattedAmount}
-              </h2>
-              {session.user.isDemo ? (
-                <Badge variant="warning">Demo read-only</Badge>
-              ) : null}
+          <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+            <div
+              className="flex size-12 shrink-0 items-center justify-center rounded-[var(--radius-md)] border border-border bg-muted text-sm font-semibold tracking-wide text-foreground sm:size-14 sm:text-base"
+              aria-hidden="true"
+            >
+              {payment.currency.slice(0, 2)}
             </div>
-            <p className="text-sm text-muted-foreground">
-              Payment for{" "}
-              <Link
-                href={`/invoices/${payment.invoiceId}`}
-                className="font-mono font-medium tracking-wide text-foreground transition-ui hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              >
-                {payment.invoiceNumberSnapshot}
-              </Link>
-              {" · "}
-              {payment.customerNameSnapshot}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              {PAYMENT_METHOD_LABELS[payment.method]} ·{" "}
-              {formatDateOnly(payment.paymentDate)}
-            </p>
+            <div className="min-w-0 space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2
+                  id="payment-detail-heading"
+                  className="truncate text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem] sm:leading-tight"
+                >
+                  {formattedAmount}
+                </h2>
+                <PaymentMethodBadge method={payment.method} />
+                {session.user.isDemo ? (
+                  <Badge variant="warning">Demo read-only</Badge>
+                ) : null}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Payment for{" "}
+                <Link
+                  href={`/invoices/${payment.invoiceId}`}
+                  className="font-mono font-medium tracking-wide text-foreground transition-ui hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {payment.invoiceNumberSnapshot}
+                </Link>
+                {" · "}
+                <span className="font-medium text-foreground">
+                  {payment.customerNameSnapshot}
+                </span>
+              </p>
+              {payment.reference ? (
+                <p className="truncate text-sm text-muted-foreground">
+                  Ref{" "}
+                  <span className="font-medium text-foreground">
+                    {payment.reference}
+                  </span>
+                </p>
+              ) : null}
+              <ul className="flex flex-wrap gap-2 pt-0.5">
+                {metaItems.map((item) =>
+                  item.value ? (
+                    <li key={item.label}>
+                      <span className="inline-flex max-w-full items-center gap-1.5 rounded-[var(--radius-sm)] border border-border bg-muted/50 px-2 py-1 text-xs text-muted-foreground">
+                        <span className="font-medium text-foreground/80">
+                          {item.label}
+                        </span>
+                        <span
+                          className={cn(
+                            "truncate",
+                            item.label === "Invoice" && "font-mono tracking-wide",
+                            item.label === "Date" && "tabular-nums",
+                            item.label === "Currency" &&
+                              "font-mono tracking-wide uppercase",
+                          )}
+                        >
+                          {item.value}
+                        </span>
+                      </span>
+                    </li>
+                  ) : null,
+                )}
+              </ul>
+            </div>
           </div>
+
           <div className="flex flex-wrap gap-2 sm:shrink-0">
             <Button asChild variant="outline">
               <Link href="/payments">Back to list</Link>
@@ -178,22 +238,13 @@ export default async function PaymentDetailPage({
           </div>
           <dl className="divide-y divide-border">
             {[
-              { label: "Amount", value: formattedAmount },
-              { label: "Currency", value: payment.currency, mono: true },
               {
                 label: "Invoice",
                 value: payment.invoiceNumberSnapshot,
                 mono: true,
               },
               { label: "Customer", value: payment.customerNameSnapshot },
-              {
-                label: "Payment date",
-                value: formatDateOnly(payment.paymentDate),
-              },
-              {
-                label: "Method",
-                value: PAYMENT_METHOD_LABELS[payment.method],
-              },
+              { label: "Payment date", value: paymentDateLabel },
               { label: "Reference", value: payment.reference },
             ].map((field) => (
               <div
@@ -218,8 +269,75 @@ export default async function PaymentDetailPage({
                 </dd>
               </div>
             ))}
+            <div className="grid gap-1 px-4 py-3.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4 sm:px-5">
+              <dt className="text-sm text-muted-foreground">Method</dt>
+              <dd className="min-w-0 text-sm">
+                <PaymentMethodBadge method={payment.method} />
+              </dd>
+            </div>
           </dl>
         </section>
+
+        {invoiceSummary ? (
+          <section
+            className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-panel"
+            aria-labelledby="payment-financial-heading"
+          >
+            <div className="border-b border-border px-4 py-3.5 sm:px-5">
+              <h3
+                id="payment-financial-heading"
+                className="text-sm font-semibold tracking-tight text-foreground"
+              >
+                Financial summary
+              </h3>
+              <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+                Invoice balance after recorded payments (server-authoritative).
+              </p>
+            </div>
+            <div className="space-y-3 px-4 py-5 sm:px-5">
+              <div className="flex justify-between gap-4 text-sm">
+                <span className="text-muted-foreground">Invoice total</span>
+                <span className="font-medium tabular-nums text-foreground">
+                  {formatMoney(
+                    invoiceSummary.invoiceTotal,
+                    invoiceSummary.currency,
+                  )}
+                </span>
+              </div>
+              <div className="flex justify-between gap-4 text-sm">
+                <span className="text-muted-foreground">Paid</span>
+                <span className="font-medium tabular-nums text-foreground">
+                  {formatMoney(
+                    invoiceSummary.amountPaid,
+                    invoiceSummary.currency,
+                  )}
+                </span>
+              </div>
+              <div className="flex items-baseline justify-between gap-4 border-t border-border pt-3">
+                <div>
+                  <p className="text-base font-semibold text-foreground">
+                    Remaining
+                  </p>
+                  <p className="mt-0.5 text-[11px] tracking-wide text-muted-foreground uppercase">
+                    {invoiceSummary.currency}
+                  </p>
+                </div>
+                <p className="text-xl font-semibold tabular-nums tracking-tight text-foreground sm:text-2xl">
+                  {formatMoney(
+                    invoiceSummary.remaining,
+                    invoiceSummary.currency,
+                  )}
+                </p>
+              </div>
+              <div className="flex justify-between gap-4 border-t border-border pt-3 text-sm">
+                <span className="text-muted-foreground">This payment</span>
+                <span className="font-semibold tabular-nums text-foreground">
+                  {formattedAmount}
+                </span>
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         {payment.notes ? (
           <section

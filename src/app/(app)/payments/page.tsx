@@ -161,8 +161,8 @@ function PaymentsPageHeader({
             {isDemo ? <Badge variant="warning">Demo read-only</Badge> : null}
           </div>
           <p className="text-sm leading-6 text-muted-foreground sm:text-[0.9375rem] sm:leading-7">
-            Record money received against workspace invoices. Amounts and
-            remaining balances are calculated on the server.
+            Track money received against workspace invoices. Search stays
+            server-side; remaining balances are calculated on the server.
           </p>
         </div>
         {canCreate ? (

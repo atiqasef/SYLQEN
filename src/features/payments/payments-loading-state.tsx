@@ -22,7 +22,7 @@ export function PaymentsLoadingState({
 
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="max-w-xl space-y-3">
-          <Skeleton className="h-8 w-40 max-w-full" />
+          <Skeleton className="h-8 w-44 max-w-full" />
           <Skeleton className="h-4 w-full max-w-md" />
           <Skeleton className="h-4 w-3/4 max-w-sm" />
         </div>
@@ -33,8 +33,8 @@ export function PaymentsLoadingState({
 
       <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-panel">
         <div className="border-b border-border px-4 py-3">
-          <Skeleton className="h-4 w-36" />
-          <Skeleton className="mt-2 h-3 w-24" />
+          <Skeleton className="h-4 w-40" />
+          <Skeleton className="mt-2 h-3 w-28" />
         </div>
         <div className="space-y-0 divide-y divide-border px-4">
           {Array.from({ length: 5 }).map((_, index) => (
@@ -43,9 +43,10 @@ export function PaymentsLoadingState({
               className="flex items-center justify-between gap-4 py-3.5"
             >
               <div className="min-w-0 flex-1 space-y-2">
-                <Skeleton className="h-4 w-28 max-w-full" />
-                <Skeleton className="h-3 w-40 max-w-full" />
+                <Skeleton className="h-4 w-32 max-w-full" />
+                <Skeleton className="h-3 w-44 max-w-full" />
               </div>
+              <Skeleton className="hidden h-5 w-16 sm:block" />
               <Skeleton className="h-4 w-20" />
             </div>
           ))}

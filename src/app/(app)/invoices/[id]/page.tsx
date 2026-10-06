@@ -432,7 +432,7 @@ export default async function InvoiceDetailPage({
                 <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
                   {paymentSummary.paymentCount === 0
                     ? "No payments recorded yet."
-                    : `${paymentSummary.paymentCount} payment${paymentSummary.paymentCount === 1 ? "" : "s"} recorded.`}
+                    : `${paymentSummary.paymentCount} payment${paymentSummary.paymentCount === 1 ? "" : "s"} recorded against this invoice.`}
                 </p>
               </div>
               {canCreatePayment && paymentSummary.remaining > 0 ? (
@@ -443,35 +443,42 @@ export default async function InvoiceDetailPage({
                 </Button>
               ) : null}
             </div>
-            <dl className="divide-y divide-border">
-              <div className="grid gap-1 px-4 py-3.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4 sm:px-5">
-                <dt className="text-sm text-muted-foreground">Invoice total</dt>
-                <dd className="text-sm font-medium tabular-nums text-foreground">
+            <div className="space-y-3 px-4 py-5 sm:px-5">
+              <div className="flex justify-between gap-4 text-sm">
+                <span className="text-muted-foreground">Invoice total</span>
+                <span className="font-medium tabular-nums text-foreground">
                   {formatMoney(
                     paymentSummary.invoiceTotal,
                     paymentSummary.currency,
                   )}
-                </dd>
+                </span>
               </div>
-              <div className="grid gap-1 px-4 py-3.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4 sm:px-5">
-                <dt className="text-sm text-muted-foreground">Paid</dt>
-                <dd className="text-sm font-medium tabular-nums text-foreground">
+              <div className="flex justify-between gap-4 text-sm">
+                <span className="text-muted-foreground">Paid</span>
+                <span className="font-medium tabular-nums text-foreground">
                   {formatMoney(
                     paymentSummary.amountPaid,
                     paymentSummary.currency,
                   )}
-                </dd>
+                </span>
               </div>
-              <div className="grid gap-1 px-4 py-3.5 sm:grid-cols-[9rem_minmax(0,1fr)] sm:gap-4 sm:px-5">
-                <dt className="text-sm text-muted-foreground">Remaining</dt>
-                <dd className="text-sm font-semibold tabular-nums text-foreground">
+              <div className="flex items-baseline justify-between gap-4 border-t border-border pt-3">
+                <div>
+                  <p className="text-base font-semibold text-foreground">
+                    Remaining
+                  </p>
+                  <p className="mt-0.5 text-[11px] tracking-wide text-muted-foreground uppercase">
+                    {paymentSummary.currency}
+                  </p>
+                </div>
+                <p className="text-xl font-semibold tabular-nums tracking-tight text-foreground sm:text-2xl">
                   {formatMoney(
                     paymentSummary.remaining,
                     paymentSummary.currency,
                   )}
-                </dd>
+                </p>
               </div>
-            </dl>
+            </div>
           </section>
         ) : null}
 

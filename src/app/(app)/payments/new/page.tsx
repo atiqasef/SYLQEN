@@ -102,7 +102,8 @@ export default async function NewPaymentPage({
           <span className="font-medium text-foreground">
             {session.workspace.name}
           </span>
-          . Currency and remaining balance come from the invoice on the server.
+          . Select an invoice, enter the amount, and the server validates the
+          remaining balance.
         </p>
       </section>
 

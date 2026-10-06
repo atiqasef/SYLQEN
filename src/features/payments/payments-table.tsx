@@ -1,10 +1,7 @@
 import Link from "next/link";
 
 import { ChevronRightIcon } from "@/components/layout/icons";
-import {
-  PAYMENT_METHOD_LABELS,
-  type PaymentMethod,
-} from "@/features/payments/schemas";
+import { PaymentMethodBadge } from "@/features/payments/payment-method-badge";
 import type { PaymentDTO } from "@/server/payments/types";
 import { cn } from "@/lib/utils/cn";
 
@@ -38,10 +35,6 @@ function formatMoney(amount: number, currency: string) {
   }
 }
 
-function methodLabel(method: PaymentMethod) {
-  return PAYMENT_METHOD_LABELS[method];
-}
-
 export function PaymentsTable({ payments }: PaymentsTableProps) {
   return (
     <>
@@ -72,13 +65,13 @@ export function PaymentsTable({ payments }: PaymentsTableProps) {
                 scope="col"
                 className="hidden px-4 py-3 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase xl:table-cell"
               >
-                Method
+                Date
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase"
+                className="hidden px-4 py-3 text-[11px] font-medium tracking-[0.08em] text-muted-foreground uppercase lg:table-cell"
               >
-                Date
+                Method
               </th>
               <th
                 scope="col"
@@ -105,24 +98,27 @@ export function PaymentsTable({ payments }: PaymentsTableProps) {
                     <span className="block truncate font-medium text-foreground group-hover:text-primary">
                       {payment.reference || "Payment"}
                     </span>
-                    <span className="mt-0.5 block truncate text-xs text-muted-foreground lg:hidden">
-                      {payment.customerNameSnapshot}
+                    <span className="mt-0.5 block truncate text-xs text-muted-foreground xl:hidden">
+                      {formatDate(payment.paymentDate)}
                     </span>
                   </Link>
                 </th>
                 <td className="px-4 py-3.5">
-                  <span className="font-mono text-sm tracking-wide text-foreground">
+                  <Link
+                    href={`/invoices/${payment.invoiceId}`}
+                    className="font-mono text-sm tracking-wide text-foreground transition-ui hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
                     {payment.invoiceNumberSnapshot}
-                  </span>
+                  </Link>
                 </td>
-                <td className="hidden max-w-[12rem] truncate px-4 py-3.5 text-muted-foreground lg:table-cell">
+                <td className="hidden max-w-[12rem] truncate px-4 py-3.5 font-medium text-foreground lg:table-cell">
                   {payment.customerNameSnapshot}
                 </td>
-                <td className="hidden px-4 py-3.5 text-muted-foreground xl:table-cell">
-                  {methodLabel(payment.method)}
-                </td>
-                <td className="px-4 py-3.5 tabular-nums text-muted-foreground">
+                <td className="hidden px-4 py-3.5 tabular-nums text-muted-foreground xl:table-cell">
                   {formatDate(payment.paymentDate)}
+                </td>
+                <td className="hidden px-4 py-3.5 lg:table-cell">
+                  <PaymentMethodBadge method={payment.method} />
                 </td>
                 <td className="px-4 py-3.5 text-right">
                   <span className="block font-semibold tabular-nums text-foreground">
@@ -157,25 +153,26 @@ export function PaymentsTable({ payments }: PaymentsTableProps) {
             >
               <span className="min-w-0 flex-1 space-y-1.5">
                 <span className="flex flex-wrap items-center gap-2">
-                  <span className="font-medium text-foreground">
+                  <span className="min-w-0 truncate font-medium text-foreground">
                     {payment.reference || "Payment"}
                   </span>
-                  <span className="text-xs text-muted-foreground">
-                    {methodLabel(payment.method)}
-                  </span>
+                  <PaymentMethodBadge method={payment.method} />
                 </span>
                 <span className="block font-mono text-sm tracking-wide text-foreground">
                   {payment.invoiceNumberSnapshot}
                 </span>
-                <span className="block truncate text-sm text-muted-foreground">
+                <span className="block truncate text-sm font-medium text-foreground">
                   {payment.customerNameSnapshot}
                 </span>
-                <span className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                <span className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 pt-0.5">
                   <span className="text-sm font-semibold tabular-nums text-foreground">
                     {formatMoney(payment.amount, payment.currency)}
                   </span>
+                  <span className="text-[11px] tracking-wide text-muted-foreground uppercase">
+                    {payment.currency}
+                  </span>
                   <span className="text-xs text-muted-foreground">
-                    {formatDate(payment.paymentDate)}
+                    · {formatDate(payment.paymentDate)}
                   </span>
                 </span>
               </span>
