@@ -16,7 +16,7 @@ const ROLE_VARIANT: Record<
 > = {
   owner: "default",
   admin: "secondary",
-  member: "outline",
+  member: "secondary",
   viewer: "muted",
 };
 
@@ -25,7 +25,10 @@ export function MemberRoleBadge({ role, className }: MemberRoleBadgeProps) {
   return (
     <Badge
       variant={ROLE_VARIANT[role]}
-      className={cn("rounded-[var(--radius-sm)] px-2 py-0.5 font-medium", className)}
+      className={cn(
+        "rounded-[var(--radius-sm)] px-2 py-0.5 font-medium tracking-wide",
+        className,
+      )}
     >
       {MEMBER_ROLE_LABELS[role]}
     </Badge>

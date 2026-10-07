@@ -1,7 +1,10 @@
+import Link from "next/link";
+
 import { EmptyState } from "@/components/feedback/empty-state";
 import { ErrorState } from "@/components/feedback/error-state";
 import { TeamIcon } from "@/components/layout/icons";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { MembersTable } from "@/features/members/members-table";
 import { isAppError, toAppError } from "@/lib/errors/app-error";
 import { requireVerifiedPageSession } from "@/server/auth/session";
@@ -12,6 +15,7 @@ export default async function TeamPage() {
 
   const canUpdate = session.membership.permissions.includes("members.update");
   const canRemove = session.membership.permissions.includes("members.remove");
+  const canManage = canUpdate || canRemove;
 
   let list;
   try {
@@ -20,7 +24,11 @@ export default async function TeamPage() {
     const appError = toAppError(error);
     return (
       <div className="space-y-6 sm:space-y-8">
-        <TeamPageHeader isDemo={session.user.isDemo} />
+        <TeamPageHeader
+          workspaceName={session.workspace.name}
+          isDemo={session.user.isDemo}
+          canManage={canManage}
+        />
         <ErrorState
           title="Unable to load team"
           description={
@@ -29,61 +37,108 @@ export default async function TeamPage() {
               : "Something went wrong while loading team members. Please try again."
           }
         />
+        <Button asChild variant="outline">
+          <Link href="/team">Reload team</Link>
+        </Button>
       </div>
     );
   }
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      <TeamPageHeader isDemo={session.user.isDemo} />
+      <TeamPageHeader
+        workspaceName={session.workspace.name}
+        isDemo={session.user.isDemo}
+        canManage={canManage}
+      />
 
       {list.total === 0 ? (
         <EmptyState
           icon={<TeamIcon className="size-8" />}
           title="No team members"
-          description="Workspace membership could not be loaded for this account."
+          description="This workspace does not have any membership records yet. Membership is created when a workspace is set up."
         />
       ) : (
-        <>
-          <p className="text-sm text-muted-foreground">
-            {list.total} {list.total === 1 ? "member" : "members"} ·{" "}
-            {list.ownerCount} {list.ownerCount === 1 ? "owner" : "owners"}
-          </p>
-          <MembersTable
-            members={list.items}
-            ownerCount={list.ownerCount}
-            canUpdate={canUpdate}
-            canRemove={canRemove}
-          />
-        </>
+        <section
+          className="space-y-4"
+          aria-labelledby="team-results-heading"
+        >
+          <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-panel">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3 sm:px-5">
+              <div>
+                <h3
+                  id="team-results-heading"
+                  className="text-sm font-semibold tracking-tight text-foreground"
+                >
+                  Workspace members
+                </h3>
+                <p className="mt-0.5 text-sm text-muted-foreground">
+                  <span className="font-medium tabular-nums text-foreground">
+                    {list.total}
+                  </span>{" "}
+                  {list.total === 1 ? "member" : "members"}
+                  <span className="text-muted-foreground/80">
+                    {" "}
+                    ·{" "}
+                    <span className="tabular-nums">{list.ownerCount}</span>{" "}
+                    {list.ownerCount === 1 ? "owner" : "owners"}
+                  </span>
+                </p>
+              </div>
+            </div>
+            <div className="sm:px-1">
+              <MembersTable
+                members={list.items}
+                ownerCount={list.ownerCount}
+                canUpdate={canUpdate}
+                canRemove={canRemove}
+              />
+            </div>
+          </div>
+        </section>
       )}
     </div>
   );
 }
 
-function TeamPageHeader({ isDemo }: { isDemo: boolean }) {
+function TeamPageHeader({
+  workspaceName,
+  isDemo,
+  canManage,
+}: {
+  workspaceName: string;
+  isDemo: boolean;
+  canManage: boolean;
+}) {
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-      <div className="space-y-2">
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="secondary">Team</Badge>
-          {isDemo ? <Badge variant="warning">Demo account</Badge> : null}
-        </div>
-        <div className="max-w-2xl space-y-1.5">
-          <h2
-            id="team-heading"
-            className="text-2xl font-semibold tracking-tight text-foreground"
-          >
-            Workspace members
-          </h2>
-          <p className="text-sm leading-6 text-muted-foreground">
-            Manage who can access this workspace and which role they hold.
-            {isDemo
-              ? " Demo accounts can view the team but cannot change membership."
-              : " Owners can update roles and remove members."}
+    <section className="space-y-3" aria-labelledby="team-heading">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 max-w-2xl space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <h2
+              id="team-heading"
+              className="text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem] sm:leading-tight"
+            >
+              Team
+            </h2>
+            {isDemo ? <Badge variant="warning">Demo read-only</Badge> : null}
+          </div>
+          <p className="text-sm leading-6 text-muted-foreground sm:text-[0.9375rem] sm:leading-7">
+            People with access to{" "}
+            <span className="font-medium text-foreground">{workspaceName}</span>
+            . Roles control what each person can view or change.
           </p>
         </div>
       </div>
-    </div>
+      {isDemo && !canManage ? (
+        <p
+          role="status"
+          className="rounded-[var(--radius-md)] border border-border bg-muted/60 px-3 py-2 text-sm leading-6 text-muted-foreground"
+        >
+          Demo accounts can view the team and roles, but cannot change membership
+          or remove members.
+        </p>
+      ) : null}
+    </section>
   );
 }

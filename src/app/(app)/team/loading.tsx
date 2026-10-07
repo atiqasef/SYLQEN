@@ -1,5 +1,5 @@
-import { LoadingState } from "@/components/feedback/loading-state";
+import { MembersLoadingState } from "@/features/members/members-loading-state";
 
 export default function TeamLoading() {
-  return <LoadingState label="Loading team" />;
+  return <MembersLoadingState label="Loading team" />;
 }
