@@ -167,7 +167,7 @@ test.describe("financial dashboard", () => {
     await expect(
       page.getByRole("heading", { name: /Payment revenue/i }),
     ).toBeVisible();
-    await expect(page.getByText("Demo account", { exact: true })).toBeVisible();
+    await expect(page.getByText("Demo read-only", { exact: true })).toBeVisible();
     await expectNoHorizontalOverflow(page);
 
     await page.setViewportSize({ width: 390, height: 844 });

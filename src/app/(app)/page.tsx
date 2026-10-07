@@ -1,6 +1,8 @@
 import Link from "next/link";
 
+import { EmptyState } from "@/components/feedback/empty-state";
 import { ErrorState } from "@/components/feedback/error-state";
+import { FinanceIcon } from "@/components/layout/icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -49,7 +51,7 @@ export default async function OverviewPage({ searchParams }: OverviewPageProps) 
   } catch (error) {
     const appError = toAppError(error);
     return (
-      <div className="space-y-8 sm:space-y-10">
+      <div className="space-y-6 sm:space-y-8">
         <OverviewHeader
           name={session.user.name}
           workspaceName={session.workspace.name}
@@ -81,8 +83,8 @@ export default async function OverviewPage({ searchParams }: OverviewPageProps) 
     snapshot.recentPayments.length > 0;
 
   return (
-    <div className="space-y-8 sm:space-y-10">
-      <section className="space-y-4" aria-labelledby="overview-heading">
+    <div className="space-y-6 sm:space-y-8">
+      <section className="space-y-3" aria-labelledby="overview-heading">
         <OverviewHeader
           name={session.user.name}
           workspaceName={session.workspace.name}
@@ -130,22 +132,21 @@ export default async function OverviewPage({ searchParams }: OverviewPageProps) 
       ) : null}
 
       {!hasActivity ? (
-        <Card>
-          <CardHeader className="p-5 sm:p-6">
-            <CardTitle>No financial activity yet</CardTitle>
-            <CardDescription>
-              Create invoices and record payments to populate this overview.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-wrap gap-2 p-5 pt-0 sm:p-6 sm:pt-0">
-            <Button asChild>
-              <Link href="/invoices/new">Add invoice</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href="/payments/new">Record payment</Link>
-            </Button>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={<FinanceIcon className="size-8" />}
+          title="No financial activity yet"
+          description="Create invoices and record payments to populate this overview."
+          action={
+            <div className="flex flex-wrap justify-center gap-2">
+              <Button asChild>
+                <Link href="/invoices/new">Add invoice</Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/payments/new">Record payment</Link>
+              </Button>
+            </div>
+          }
+        />
       ) : null}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
@@ -216,23 +217,29 @@ function OverviewHeader({
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge variant="secondary">Overview</Badge>
-        {isDemo ? <Badge variant="warning">Demo account</Badge> : null}
-      </div>
-      <div className="max-w-2xl space-y-2">
         <h2
           id="overview-heading"
           className="text-2xl font-semibold tracking-tight text-foreground sm:text-[1.75rem] sm:leading-tight"
         >
           Welcome, {name}
         </h2>
-        <p className="text-sm leading-6 text-muted-foreground sm:text-[0.9375rem] sm:leading-7">
-          Financial overview for{" "}
-          <span className="font-medium text-foreground">{workspaceName}</span>{" "}
-          · signed in as{" "}
-          <span className="font-medium text-foreground">{role}</span>.
-        </p>
+        {isDemo ? <Badge variant="warning">Demo read-only</Badge> : null}
       </div>
+      <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-[0.9375rem] sm:leading-7">
+        Financial overview for{" "}
+        <span className="font-medium text-foreground">{workspaceName}</span> ·
+        signed in as{" "}
+        <span className="font-medium text-foreground">{role}</span>.
+      </p>
+      {isDemo ? (
+        <p
+          role="status"
+          className="rounded-[var(--radius-md)] border border-border bg-muted/60 px-3 py-2 text-sm leading-6 text-muted-foreground"
+        >
+          Demo accounts can view financial overview data, but cannot create or
+          change records.
+        </p>
+      ) : null}
     </div>
   );
 }

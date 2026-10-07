@@ -214,7 +214,7 @@ export default async function PaymentDetailPage({
 
           <div className="flex flex-wrap gap-2 sm:shrink-0">
             <Button asChild variant="outline">
-              <Link href="/payments">Back to list</Link>
+              <Link href="/payments">Back to payments</Link>
             </Button>
             <Button asChild variant="outline">
               <Link href={`/invoices/${payment.invoiceId}`}>View invoice</Link>

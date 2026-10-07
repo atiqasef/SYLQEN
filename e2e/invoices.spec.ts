@@ -89,7 +89,7 @@ test.describe("invoices module", () => {
         page.getByRole("heading", { name: "Invoice information" }),
       ).toBeVisible();
       await expect(page.getByRole("heading", { name: "Line items" })).toBeVisible();
-      await page.getByRole("link", { name: "Back to list" }).click();
+      await page.getByRole("link", { name: "Back to invoices" }).click();
     }
 
     await expect(page.getByText(/3 invoices/i)).toBeVisible();

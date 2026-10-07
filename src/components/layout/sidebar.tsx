@@ -210,7 +210,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
                 {siteConfig.name}
               </span>
               <span className="block text-[11px] text-sidebar-muted">
-                Business OS
+                {siteConfig.tagline}
               </span>
             </span>
           </Link>
@@ -245,10 +245,10 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
         <div className="border-t border-sidebar-border px-3.5 py-3">
           <p className="text-xs font-medium text-sidebar-foreground">
-            Foundation phase
+            Workspace tools
           </p>
           <p className="mt-1 text-xs leading-5 text-sidebar-muted">
-            Modules are placeholders until later phases.
+            CRM, finance, and team access for {siteConfig.name}.
           </p>
         </div>
       </aside>

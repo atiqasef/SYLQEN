@@ -1,10 +1,7 @@
-import Link from "next/link";
-
 import { EmptyState } from "@/components/feedback/empty-state";
 import { ErrorState } from "@/components/feedback/error-state";
 import { TeamIcon } from "@/components/layout/icons";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { MembersTable } from "@/features/members/members-table";
 import { isAppError, toAppError } from "@/lib/errors/app-error";
 import { requireVerifiedPageSession } from "@/server/auth/session";
@@ -37,9 +34,6 @@ export default async function TeamPage() {
               : "Something went wrong while loading team members. Please try again."
           }
         />
-        <Button asChild variant="outline">
-          <Link href="/team">Reload team</Link>
-        </Button>
       </div>
     );
   }

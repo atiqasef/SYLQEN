@@ -35,7 +35,7 @@ export function AuthShell({
               {siteConfig.name}
             </span>
             <span className="block truncate text-[11px] text-muted-foreground">
-              Business Operating System
+              {siteConfig.tagline}
             </span>
           </span>
         </Link>

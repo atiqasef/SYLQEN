@@ -150,7 +150,7 @@ export default async function CustomerDetailPage({
 
           <div className="flex flex-wrap gap-2 sm:shrink-0">
             <Button asChild variant="outline">
-              <Link href="/customers">Back to list</Link>
+              <Link href="/customers">Back to customers</Link>
             </Button>
             {canUpdate ? (
               <Button asChild>

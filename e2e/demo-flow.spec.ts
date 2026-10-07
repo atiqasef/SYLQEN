@@ -12,7 +12,7 @@ test.describe("demo flow", () => {
 
     await exploreDemo(page);
 
-    await expect(page.getByText("Demo account", { exact: true })).toBeVisible();
+    await expect(page.getByText("Demo read-only", { exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: /Welcome, E2E Demo/i })).toBeVisible();
     await expect(page.getByText(/as viewer/i)).toBeVisible();
     await expect(
@@ -23,7 +23,7 @@ test.describe("demo flow", () => {
     await expect(page.getByText("Viewer", { exact: true }).first()).toBeVisible();
 
     await page.reload();
-    await expect(page.getByText("Demo account", { exact: true })).toBeVisible();
+    await expect(page.getByText("Demo read-only", { exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: /Welcome, E2E Demo/i })).toBeVisible();
 
     await signOut(page);

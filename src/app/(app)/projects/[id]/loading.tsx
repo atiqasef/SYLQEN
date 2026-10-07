@@ -1,5 +1,5 @@
-import { ProjectsLoadingState } from "@/features/projects/projects-loading-state";
+import { DetailLoadingState } from "@/components/feedback/detail-loading-state";
 
 export default function ProjectDetailLoading() {
-  return <ProjectsLoadingState label="Loading project" />;
+  return <DetailLoadingState label="Loading project" />;
 }

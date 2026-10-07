@@ -32,11 +32,11 @@ export function InvoicesLoadingState({
       <Skeleton className="h-[7.5rem] w-full rounded-[var(--radius-lg)]" />
 
       <div className="overflow-hidden rounded-[var(--radius-lg)] border border-border bg-card shadow-panel">
-        <div className="border-b border-border px-4 py-3">
+        <div className="space-y-2 border-b border-border px-4 py-3 sm:px-5">
           <Skeleton className="h-4 w-36" />
-          <Skeleton className="mt-2 h-3 w-24" />
+          <Skeleton className="h-3 w-24" />
         </div>
-        <div className="space-y-0 divide-y divide-border px-4">
+        <div className="space-y-0 divide-y divide-border px-4 sm:px-5">
           {Array.from({ length: 5 }).map((_, index) => (
             <div
               key={index}

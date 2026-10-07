@@ -39,7 +39,7 @@ test.describe("customers module", () => {
       await expect(
         page.getByRole("heading", { name: `Customer ${i} ${stamp}` }),
       ).toBeVisible();
-      await page.getByRole("link", { name: "Back to list" }).click();
+      await page.getByRole("link", { name: "Back to customers" }).click();
     }
 
     await expect(page.getByText(/3 customers/i)).toBeVisible();

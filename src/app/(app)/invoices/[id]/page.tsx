@@ -211,7 +211,7 @@ export default async function InvoiceDetailPage({
 
           <div className="flex flex-wrap gap-2 sm:shrink-0">
             <Button asChild variant="outline">
-              <Link href="/invoices">Back to list</Link>
+              <Link href="/invoices">Back to invoices</Link>
             </Button>
             {canUpdate ? (
               <Button asChild>

@@ -1,5 +1,5 @@
-import { CustomersLoadingState } from "@/features/customers/customers-loading-state";
+import { DetailLoadingState } from "@/components/feedback/detail-loading-state";
 
 export default function CustomerDetailLoading() {
-  return <CustomersLoadingState label="Loading customer" />;
+  return <DetailLoadingState label="Loading customer" />;
 }

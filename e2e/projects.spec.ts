@@ -42,7 +42,7 @@ test.describe("projects module", () => {
       await expect(
         page.getByRole("heading", { name: `Project ${i} ${stamp}` }),
       ).toBeVisible();
-      await page.getByRole("link", { name: "Back to list" }).click();
+      await page.getByRole("link", { name: "Back to projects" }).click();
     }
 
     await expect(page.getByText(/3 projects/i)).toBeVisible();

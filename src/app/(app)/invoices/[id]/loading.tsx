@@ -1,5 +1,5 @@
-import { InvoicesLoadingState } from "@/features/invoices/invoices-loading-state";
+import { DetailLoadingState } from "@/components/feedback/detail-loading-state";
 
 export default function InvoiceDetailLoading() {
-  return <InvoicesLoadingState label="Loading invoice" />;
+  return <DetailLoadingState label="Loading invoice" />;
 }

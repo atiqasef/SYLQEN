@@ -1,5 +1,5 @@
-import { PaymentsLoadingState } from "@/features/payments/payments-loading-state";
+import { DetailLoadingState } from "@/components/feedback/detail-loading-state";
 
 export default function PaymentDetailLoading() {
-  return <PaymentsLoadingState label="Loading payment" />;
+  return <DetailLoadingState label="Loading payment" />;
 }

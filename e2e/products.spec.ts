@@ -41,7 +41,7 @@ test.describe("products module", () => {
       await expect(
         page.getByRole("heading", { name: `Product ${i} ${stamp}` }),
       ).toBeVisible();
-      await page.getByRole("link", { name: "Back to list" }).click();
+      await page.getByRole("link", { name: "Back to products" }).click();
     }
 
     await expect(page.getByText(/3 products/i)).toBeVisible();

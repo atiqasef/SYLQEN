@@ -19,14 +19,11 @@ export function LoadingState({
       role="status"
       aria-live="polite"
       aria-busy="true"
-      className={cn("space-y-8 sm:space-y-10", className)}
+      className={cn("space-y-6 sm:space-y-8", className)}
     >
       <span className="sr-only">{label}</span>
 
-      <div className="space-y-4">
-        <div className="flex flex-wrap gap-2">
-          <Skeleton className="h-6 w-20 rounded-full" />
-        </div>
+      <div className="space-y-3">
         <div className="max-w-2xl space-y-3">
           <Skeleton className="h-8 w-64 max-w-full sm:h-9 sm:w-80" />
           <Skeleton className="h-4 w-full max-w-xl" />

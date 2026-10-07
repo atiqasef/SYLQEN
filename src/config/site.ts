@@ -1,6 +1,7 @@
 export const siteConfig = {
   name: "SYLQEN",
   shortName: "SYLQEN",
+  tagline: "Business Operating System",
   description:
     "AI-powered Business Operating System for operations, CRM, finance, teams, and automation.",
   url: "https://sylqen.vercel.app",
