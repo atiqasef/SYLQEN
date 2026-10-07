@@ -60,6 +60,7 @@ export type DashboardFinancialSnapshot = {
   counts: {
     invoiceCountInPeriod: number;
     paymentCountInPeriod: number;
+    paidInvoiceCount: number;
     outstandingCount: number;
     overdueCount: number;
   };

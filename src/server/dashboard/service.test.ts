@@ -216,6 +216,7 @@ describe("dashboard financial service", () => {
     expect(usd?.totalPaid).toBe(60);
     expect(usd?.outstanding).toBe(0);
     expect(snapshot.counts.outstandingCount).toBe(0);
+    expect(snapshot.counts.paidInvoiceCount).toBe(1);
   });
 
   it("keeps currency metrics separate", async () => {

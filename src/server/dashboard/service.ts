@@ -40,6 +40,7 @@ export async function getDashboardFinancialSnapshotForSession(
   session: SessionContext,
   rawQuery: unknown,
   now: Date = new Date(),
+  options?: { outstandingLimit?: number },
 ): Promise<DashboardFinancialSnapshot> {
   assertDashboardRead(session);
   await Promise.all([ensureInvoiceIndexes(), ensurePaymentIndexes()]);
@@ -53,6 +54,7 @@ export async function getDashboardFinancialSnapshotForSession(
   const period = dashboardPeriodBounds(rangeDays, now);
   const todayStart = utcTodayStart(now);
   const workspaceId = session.workspace.id;
+  const outstandingLimit = options?.outstandingLimit ?? 8;
 
   const [invoiced, paid, outstandingBundle, recentPayments, recentInvoices] =
     await Promise.all([
@@ -71,6 +73,7 @@ export async function getDashboardFinancialSnapshotForSession(
         start: period.start,
         endExclusive: period.endExclusive,
         todayStart,
+        limit: outstandingLimit,
       }),
       listRecentPaymentsForDashboard({ workspaceId, limit: 5 }),
       listRecentInvoicesForDashboard({ workspaceId, limit: 5 }),
@@ -111,6 +114,7 @@ export async function getDashboardFinancialSnapshotForSession(
     counts: {
       invoiceCountInPeriod,
       paymentCountInPeriod,
+      paidInvoiceCount: outstandingBundle.paidInvoiceCount,
       outstandingCount: outstandingBundle.outstandingCount,
       overdueCount: outstandingBundle.overdueCount,
     },

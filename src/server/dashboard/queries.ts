@@ -242,13 +242,17 @@ export async function aggregateOutstandingAndOverdue(options: {
   start: Date;
   endExclusive: Date;
   todayStart: Date;
+  /** Max outstanding rows returned (sorted overdue-first). Default 8. */
+  limit?: number;
 }): Promise<{
   metrics: DashboardCurrencyMetrics[];
   outstandingInvoices: DashboardOutstandingInvoice[];
   outstandingCount: number;
   overdueCount: number;
+  paidInvoiceCount: number;
 }> {
   const rows = await loadInvoiceBalances(options);
+  const limit = options.limit ?? 8;
   const metricRows: Array<{
     currency: string;
     outstandingCents?: number;
@@ -258,11 +262,13 @@ export async function aggregateOutstandingAndOverdue(options: {
   const outstandingInvoices: DashboardOutstandingInvoice[] = [];
   let outstandingCount = 0;
   let overdueCount = 0;
+  let paidInvoiceCount = 0;
 
   for (const row of rows) {
     const amountPaid = centsToMoney(row.paidCents);
     const remaining = remainingFromTotals(row.total, amountPaid);
     if (remaining <= 0) {
+      paidInvoiceCount += 1;
       continue;
     }
 
@@ -303,9 +309,10 @@ export async function aggregateOutstandingAndOverdue(options: {
 
   return {
     metrics: mergeCurrencyMetrics(metricRows),
-    outstandingInvoices: outstandingInvoices.slice(0, 8),
+    outstandingInvoices: outstandingInvoices.slice(0, limit),
     outstandingCount,
     overdueCount,
+    paidInvoiceCount,
   };
 }
 

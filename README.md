@@ -40,6 +40,7 @@ The project emphasizes production-minded engineering: trusted sessions, server-e
 - **Invoices** — line items with product snapshots, server-calculated totals, atomic invoice numbers
 - **Payments** — record against invoices, remaining balance, overpayment rejection, paid settlement
 - **Financial overview** — KPI cards, payment trend, outstanding/overdue, recent activity (7 / 30 / 90 day ranges)
+- **Finance** — command center for invoicing, payments, and prioritized receivables (composes the same server snapshot)
 
 Metrics are **currency-aware**. Totals are not mixed across currencies; there is no FX conversion.
 
@@ -276,6 +277,7 @@ docs/             Architecture, security, development, AI
 - Invoices, payments, financial overview
 - Team member list / role update / remove (with owner protections)
 - Settings (workspace name, account display name, theme preference, access summary)
+- Finance command center
 - Demo read-only mode
 - Global UX consistency polish
 - Automated unit, integration, and E2E tests

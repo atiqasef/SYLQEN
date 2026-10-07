@@ -14,6 +14,7 @@ features/
   dashboard/
   members/
   settings/
+  finance/
 ```
 
 Typical shape:

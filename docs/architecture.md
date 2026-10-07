@@ -235,6 +235,16 @@ No payment update/delete, gateways, webhooks, refunds, or subscriptions in this 
 
 Demo: read/search/detail allowed; create forbidden via `payments.create`.
 
+## Finance module
+
+Route:
+
+- `/finance` — financial command center composing the same workspace-scoped snapshot as Overview
+
+Sections: KPI overview, revenue/invoicing summary, payment trend + recent payments, prioritized receivables (overdue → due soon → outstanding), recent activity timeline.
+
+No separate finance collection. Permissions reuse `invoices.read` + `payments.read`. Invoice/payment CRUD stays under `/invoices` and `/payments`.
+
 ## Dashboard financial intelligence
 
 Route:

@@ -52,6 +52,15 @@ Open [http://localhost:3000](http://localhost:3000) — unauthenticated visitors
    - `EMAIL_PROVIDER=dev` captures messages in memory
    - `EMAIL_CAPTURE_TO_DISK=true` writes `.local/emails/*.json` for manual link copying
 
+## Finance module (local)
+
+1. Sign in as a normal user with at least one invoice (preferably overdue for receivables)
+2. Open **Finance** from the primary nav
+3. Confirm KPIs, revenue summary, receivables priority, recent activity, and date range links (`/finance?range=7`)
+4. Sign in via **Explore Demo** and confirm Finance is readable with demo restrictions intact
+
+Coverage: Vitest (`src/features/finance/`, `src/app/(app)/finance/page.test.tsx`) and Playwright (`e2e/finance.spec.ts`). Reuses `getDashboardFinancialSnapshotForSession`.
+
 ## Settings module (local)
 
 1. Sign in as a workspace owner

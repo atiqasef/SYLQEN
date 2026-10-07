@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import OverviewPage from "@/app/(app)/page";
+import FinancePage from "@/app/(app)/finance/page";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 vi.mock("@/server/auth/session", () => ({
@@ -23,18 +23,13 @@ vi.mock("@/server/auth/session", () => ({
       workspaceId: "ws_1",
       userId: "user_1",
       role: "owner",
-      permissions: [
-        "workspace.read",
-        "workspace.update",
-        "invoices.read",
-        "payments.read",
-      ],
+      permissions: ["invoices.read", "payments.read"],
     },
   })),
 }));
 
-vi.mock("@/server/dashboard/service", () => ({
-  getDashboardFinancialSnapshotForSession: vi.fn(async () => ({
+vi.mock("@/server/finance/service", () => ({
+  getFinanceSnapshotForSession: vi.fn(async () => ({
     period: {
       rangeDays: 30,
       startDateOnly: "2026-02-15",
@@ -50,10 +45,7 @@ vi.mock("@/server/dashboard/service", () => ({
       },
     ],
     primaryCurrency: "USD",
-    paymentTrend: [
-      { date: "2026-03-01", amount: 200 },
-      { date: "2026-03-10", amount: 250 },
-    ],
+    paymentTrend: [{ date: "2026-03-10", amount: 250 }],
     outstandingInvoices: [
       {
         id: "inv_outstanding",
@@ -102,46 +94,31 @@ vi.mock("@/server/dashboard/service", () => ({
   })),
 }));
 
-describe("OverviewPage", () => {
-  it("renders financial intelligence overview", async () => {
-    const ui = await OverviewPage({
+describe("FinancePage", () => {
+  it("renders finance command center sections", async () => {
+    const ui = await FinancePage({
       searchParams: Promise.resolve({}),
     });
     render(<TooltipProvider>{ui}</TooltipProvider>);
 
-    expect(
-      screen.getByRole("heading", { name: /Welcome, Owner Example/i }),
-    ).toBeInTheDocument();
-    expect(screen.getAllByText(/Example Workspace/i).length).toBeGreaterThan(0);
+    expect(screen.getByRole("heading", { name: "Finance" })).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: /Financial overview/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByLabelText(/Total invoiced:/i),
-    ).toBeInTheDocument();
-    expect(screen.getByLabelText(/Total paid:/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Outstanding:/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Overdue:/i)).toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: /Payment revenue/i }),
+      screen.getByRole("heading", { name: /Revenue & invoicing/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: /Outstanding invoices/i }),
+      screen.getByRole("heading", { name: /Receivables/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: /Recent payments/i }),
+      screen.getByRole("heading", { name: /Recent activity/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: /Recent invoices/i }),
+      screen.getByRole("navigation", { name: "Finance date range" }),
     ).toBeInTheDocument();
     expect(
       screen.getAllByRole("link", { name: /INV-000010/i })[0],
     ).toHaveAttribute("href", "/invoices/inv_outstanding");
-    expect(
-      screen.getByRole("link", {
-        name: /View payment .* for INV-000009/i,
-      }),
-    ).toHaveAttribute("href", "/payments/pay_1");
-    expect(screen.getAllByText("Standard").length).toBeGreaterThan(0);
   });
 });

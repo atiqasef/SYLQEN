@@ -9,19 +9,29 @@ import { cn } from "@/lib/utils/cn";
 
 type DashboardRangeSelectorProps = {
   rangeDays: DashboardRangeDays;
+  /** Route path for range links. Defaults to Overview (`/`). */
+  basePath?: string;
+  /** Accessible name for the range control. */
+  ariaLabel?: string;
 };
 
 export function DashboardRangeSelector({
   rangeDays,
+  basePath = "/",
+  ariaLabel = "Dashboard date range",
 }: DashboardRangeSelectorProps) {
+  const path = basePath.replace(/\/$/, "") || "/";
+
   return (
-    <nav
-      aria-label="Dashboard date range"
-      className="flex flex-wrap items-center gap-1.5"
-    >
+    <nav aria-label={ariaLabel} className="flex flex-wrap items-center gap-1.5">
       {DASHBOARD_RANGE_DAYS.map((days) => {
         const active = days === rangeDays;
-        const href = days === 30 ? "/" : `/?range=${days}`;
+        const href =
+          days === 30
+            ? path
+            : path === "/"
+              ? `/?range=${days}`
+              : `${path}?range=${days}`;
         return (
           <Link
             key={days}

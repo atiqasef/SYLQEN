@@ -51,10 +51,24 @@ function resolveShellMeta(pathname: string, session: SessionContext) {
     };
   }
 
+  if (pathname.startsWith("/finance")) {
+    return {
+      title: "Finance",
+      description: `${session.workspace.name} · financial command center`,
+    };
+  }
+
   if (pathname.startsWith("/team")) {
     return {
       title: "Team",
       description: `${session.workspace.name} · workspace members`,
+    };
+  }
+
+  if (pathname.startsWith("/settings")) {
+    return {
+      title: "Settings",
+      description: `${session.workspace.name} · workspace & account`,
     };
   }
 
