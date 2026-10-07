@@ -51,6 +51,13 @@ function resolveShellMeta(pathname: string, session: SessionContext) {
     };
   }
 
+  if (pathname.startsWith("/team")) {
+    return {
+      title: "Team",
+      description: `${session.workspace.name} · workspace members`,
+    };
+  }
+
   return {
     title: "Overview",
     description: `${session.workspace.name} · ${session.membership.role}`,

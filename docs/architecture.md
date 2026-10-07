@@ -25,6 +25,7 @@ src/
     invoices/        Invoice repository + service + actions
     payments/        Payment repository + service + actions
     dashboard/       Financial overview read queries + service
+    members/         Workspace team membership service + actions
     db/              MongoDB connection + health
     email/           Email provider boundary (dev/resend)
     workspaces/      Workspace + membership persistence
@@ -68,6 +69,8 @@ Collections:
 
 Roles: `owner`, `admin`, `member`, `viewer`
 
+Team management (Phase 10A) assigns `owner` | `member` | `viewer`. The stored `admin` role remains in the permission map (full access) for compatibility but is not offered in the Team UI.
+
 Permissions:
 
 - `workspace.read` / `workspace.update`
@@ -78,7 +81,38 @@ Permissions:
 - `invoices.read` / `invoices.create` / `invoices.update`
 - `payments.read` / `payments.create`
 
+Role → permission mapping (centralized in `effectivePermissions`):
+
+- **owner / admin** — all permissions, including member management
+- **member** — business create/update + `members.read` (no invite/update/remove)
+- **viewer** — read permissions only (`workspace.read`, `members.read`, domain `.read`)
+
 Demo accounts are force-capped to viewer permissions in `effectivePermissions`.
+
+## Workspace team members
+
+Route:
+
+- `/team` — authenticated workspace member list + owner management controls
+
+Model (existing `memberships` collection):
+
+- Fields: `workspaceId`, `userId`, `role`, timestamps
+- Identity (name/email) is resolved from Better Auth `user` records — never duplicated into memberships
+- Indexes: unique `{ workspaceId, userId }`, `{ workspaceId, createdAt }`, `{ userId }`
+
+Operations (server-enforced):
+
+- List / get members (`members.read`)
+- Update role (`members.update`) among `owner` | `member` | `viewer`
+- Remove member (`members.remove`)
+
+Invariants:
+
+- Workspace stays scoped to `session.workspace.id` (never client-supplied)
+- At least one `owner` must remain (final-owner demote/remove blocked)
+- Removed memberships lose workspace access on the next session resolution
+- Email invitations are deferred; architecture leaves `members.invite` for a later phase
 
 ## Customers module
 

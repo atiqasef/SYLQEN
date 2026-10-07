@@ -12,7 +12,9 @@ import type {
 const WORKSPACES = "workspaces";
 const MEMBERSHIPS = "memberships";
 
-export async function ensureWorkspaceIndexes() {
+let workspaceIndexesPromise: Promise<void> | undefined;
+
+async function createWorkspaceIndexes() {
   const db = getDb();
   await Promise.all([
     db.collection(WORKSPACES).createIndexes([
@@ -25,9 +27,29 @@ export async function ensureWorkspaceIndexes() {
         unique: true,
         name: "memberships_workspace_user_unique",
       },
+      {
+        key: { workspaceId: 1, createdAt: 1 },
+        name: "memberships_workspace_createdAt",
+      },
       { key: { userId: 1 }, name: "memberships_userId" },
     ]),
   ]);
+}
+
+export async function ensureWorkspaceIndexes() {
+  if (!workspaceIndexesPromise) {
+    workspaceIndexesPromise = createWorkspaceIndexes().catch((error: unknown) => {
+      workspaceIndexesPromise = undefined;
+      throw error;
+    });
+  }
+
+  await workspaceIndexesPromise;
+}
+
+/** Test helper: clear process-scoped index promise between cases. */
+export function resetWorkspaceIndexesForTests() {
+  workspaceIndexesPromise = undefined;
 }
 
 function slugify(input: string): string {
@@ -133,4 +155,103 @@ export async function updateMembershipRole(options: {
   );
 
   return result.matchedCount > 0;
+}
+
+export async function listMembershipsInWorkspace(options: {
+  workspaceId: string;
+}): Promise<MembershipDocument[]> {
+  const db = getDb();
+  return db
+    .collection<MembershipDocument>(MEMBERSHIPS)
+    .find({ workspaceId: options.workspaceId })
+    .sort({ createdAt: 1 })
+    .toArray();
+}
+
+export async function findMembershipByIdInWorkspace(options: {
+  workspaceId: string;
+  membershipId: string;
+}): Promise<MembershipDocument | null> {
+  if (!ObjectId.isValid(options.membershipId)) {
+    return null;
+  }
+
+  const db = getDb();
+  return db.collection<MembershipDocument>(MEMBERSHIPS).findOne({
+    _id: new ObjectId(options.membershipId),
+    workspaceId: options.workspaceId,
+  });
+}
+
+export async function countOwnersInWorkspace(
+  workspaceId: string,
+): Promise<number> {
+  const db = getDb();
+  return db.collection<MembershipDocument>(MEMBERSHIPS).countDocuments({
+    workspaceId,
+    role: "owner",
+  });
+}
+
+export async function insertMembership(options: {
+  workspaceId: string;
+  userId: string;
+  role: Role;
+}): Promise<MembershipDocument> {
+  await ensureWorkspaceIndexes();
+
+  const db = getDb();
+  const now = new Date();
+  const membership: MembershipDocument = {
+    _id: new ObjectId(),
+    workspaceId: options.workspaceId,
+    userId: options.userId,
+    role: options.role,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await db.collection<MembershipDocument>(MEMBERSHIPS).insertOne(membership);
+  return membership;
+}
+
+export async function deleteMembershipInWorkspace(options: {
+  workspaceId: string;
+  membershipId: string;
+}): Promise<boolean> {
+  if (!ObjectId.isValid(options.membershipId)) {
+    return false;
+  }
+
+  const db = getDb();
+  const result = await db.collection<MembershipDocument>(MEMBERSHIPS).deleteOne({
+    _id: new ObjectId(options.membershipId),
+    workspaceId: options.workspaceId,
+  });
+
+  return result.deletedCount > 0;
+}
+
+export async function updateMembershipRoleInWorkspace(options: {
+  workspaceId: string;
+  membershipId: string;
+  role: Role;
+}): Promise<MembershipDocument | null> {
+  if (!ObjectId.isValid(options.membershipId)) {
+    return null;
+  }
+
+  const db = getDb();
+  const result = await db
+    .collection<MembershipDocument>(MEMBERSHIPS)
+    .findOneAndUpdate(
+      {
+        _id: new ObjectId(options.membershipId),
+        workspaceId: options.workspaceId,
+      },
+      { $set: { role: options.role, updatedAt: new Date() } },
+      { returnDocument: "after" },
+    );
+
+  return result ?? null;
 }

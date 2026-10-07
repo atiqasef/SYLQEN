@@ -99,6 +99,21 @@ describe("RBAC permissions", () => {
     ).toBe(false);
   });
 
+  it("keeps members from managing workspace membership", () => {
+    expect(
+      canPerform({ role: "member", isDemo: false, permission: "members.read" }),
+    ).toBe(true);
+    expect(
+      canPerform({ role: "member", isDemo: false, permission: "members.update" }),
+    ).toBe(false);
+    expect(
+      canPerform({ role: "member", isDemo: false, permission: "members.remove" }),
+    ).toBe(false);
+    expect(
+      canPerform({ role: "member", isDemo: false, permission: "members.invite" }),
+    ).toBe(false);
+  });
+
   it("allows members to manage customers, products, projects, invoices, and payments", () => {
     expect(
       canPerform({ role: "member", isDemo: false, permission: "customers.create" }),
