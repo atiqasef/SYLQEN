@@ -8,6 +8,7 @@ import {
   paymentListQuerySchema,
 } from "@/features/payments/schemas";
 import type { SessionContext } from "@/server/auth/types";
+import { emitPaymentReceived } from "@/server/automations/events";
 import {
   findInvoiceInWorkspace,
   updateInvoiceStatusInWorkspace,
@@ -257,6 +258,8 @@ export async function createPaymentForSession(
       status: "paid",
     });
   }
+
+  await emitPaymentReceived(created);
 
   return toPaymentDTO(created);
 }

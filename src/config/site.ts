@@ -29,7 +29,7 @@ export const primaryNav: NavItem[] = [
   { title: "Finance", href: "/finance" },
   { title: "Team", href: "/team" },
   { title: "Analytics", href: "/analytics" },
-  { title: "Automations", href: "/automations", comingSoon: true, disabled: true },
+  { title: "Automations", href: "/automations" },
 ];
 
 export const secondaryNav: NavItem[] = [

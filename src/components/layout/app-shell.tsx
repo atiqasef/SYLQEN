@@ -65,6 +65,13 @@ function resolveShellMeta(pathname: string, session: SessionContext) {
     };
   }
 
+  if (pathname.startsWith("/automations")) {
+    return {
+      title: "Automations",
+      description: `${session.workspace.name} · operational rules`,
+    };
+  }
+
   if (pathname.startsWith("/team")) {
     return {
       title: "Team",

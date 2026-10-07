@@ -22,6 +22,7 @@ describe("RBAC permissions", () => {
       "projects.read",
       "invoices.read",
       "payments.read",
+      "automations.read",
     ]);
     expect(canPerform({ role: "viewer", isDemo: false, permission: "members.invite" })).toBe(
       false,
@@ -54,6 +55,7 @@ describe("RBAC permissions", () => {
       "projects.read",
       "invoices.read",
       "payments.read",
+      "automations.read",
     ]);
     expect(
       canPerform({
@@ -145,5 +147,31 @@ describe("RBAC permissions", () => {
     expect(
       canPerform({ role: "member", isDemo: false, permission: "payments.create" }),
     ).toBe(true);
+    expect(
+      canPerform({ role: "member", isDemo: false, permission: "automations.create" }),
+    ).toBe(true);
+    expect(
+      canPerform({ role: "member", isDemo: false, permission: "automations.update" }),
+    ).toBe(true);
+  });
+
+  it("keeps viewers and demo from mutating automations", () => {
+    expect(
+      canPerform({ role: "viewer", isDemo: false, permission: "automations.read" }),
+    ).toBe(true);
+    expect(
+      canPerform({
+        role: "viewer",
+        isDemo: false,
+        permission: "automations.create",
+      }),
+    ).toBe(false);
+    expect(
+      canPerform({
+        role: "owner",
+        isDemo: true,
+        permission: "automations.update",
+      }),
+    ).toBe(false);
   });
 });

@@ -54,6 +54,7 @@ Metrics are **currency-aware**. Totals are not mixed across currencies; there is
 - Demo accounts forced to read-only (viewer-capped) permissions
 - **Settings** — workspace rename (`workspace.update`), account display name, device theme preference, session access summary
 - **Integrations** — read-only hub for platform integrations (Stripe reserved, Resend email, AI abstraction) plus clearly marked planned providers
+- **Automations** — declarative Trigger → Conditions → Action rules with execution history and internal notifications
 
 ### Platform
 
@@ -65,7 +66,7 @@ Metrics are **currency-aware**. Totals are not mixed across currencies; there is
 
 ### Explicitly not claimed as shipped
 
-Nav placeholders may show upcoming modules (Automations). Those surfaces are **not** implemented product features. Real AI product surfaces, live Stripe checkout/billing, email invitations, client portals, and delete/bulk workflows are out of current scope.
+Real AI product surfaces, live Stripe checkout/billing, email invitations, client portals, background job workers, and delete/bulk workflows are out of current scope.
 
 ---
 
@@ -282,6 +283,7 @@ docs/             Architecture, security, development, AI
 - Finance command center
 - Analytics (trends, rankings, signals)
 - Integrations hub (catalog + derived platform status)
+- Automations engine (declarative rules + execution history)
 - Demo read-only mode
 - Global UX consistency polish
 - Automated unit, integration, and E2E tests

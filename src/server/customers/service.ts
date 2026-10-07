@@ -21,6 +21,7 @@ import type {
   CustomerListResult,
 } from "@/server/customers/types";
 import type { SessionContext } from "@/server/auth/types";
+import { emitCustomerCreated } from "@/server/automations/events";
 
 function assertPermission(
   session: SessionContext,
@@ -122,6 +123,8 @@ export async function createCustomerForSession(
     createdByUserId: session.user.id,
     ...input,
   });
+
+  await emitCustomerCreated(created);
 
   return toCustomerDTO(created);
 }

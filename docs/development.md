@@ -70,6 +70,17 @@ Coverage: Vitest (`src/features/finance/`, `src/app/(app)/finance/page.test.tsx`
 
 Coverage: Vitest (`src/features/analytics/`, `src/server/analytics/service.test.ts`, `src/app/(app)/analytics/page.test.tsx`) and Playwright (`e2e/analytics.spec.ts`). Reuses dashboard financial aggregations; adds bounded ranking/trend queries.
 
+## Automations module (local)
+
+1. Sign in and open **Automations**
+2. Create a rule (e.g. Customer created → notification)
+3. Create a customer and confirm an execution / notification appears
+4. Edit/disable the automation; confirm demo cannot create/update
+
+Coverage: Vitest (`src/features/automations/`, `src/server/automations/`) and Playwright (`e2e/automations.spec.ts`).
+
+Notes: engine is synchronous/lightweight; no cron for overdue scanning; external integration actions are deferred.
+
 ## Integrations module (local)
 
 1. Sign in and open **Integrations** from the System nav

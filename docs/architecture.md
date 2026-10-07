@@ -15,7 +15,7 @@ src/
   components/
     auth/            Auth experience UI
     ui/ layout/ feedback/ providers/
-  features/          Domain UI modules (customers, products, projects, invoices, payments, finance, analytics, integrations, …)
+  features/          Domain UI modules (customers, products, projects, invoices, payments, finance, analytics, integrations, automations, …)
   lib/
     auth.ts          Better Auth server instance
     auth-client.ts   Better Auth React client
@@ -273,6 +273,27 @@ Current cards:
 Planned cards (visibility only): Slack, Google Calendar, QuickBooks.
 
 Permission: `workspace.read`. Demo remains read-only.
+
+## Automations module
+
+Routes:
+
+- `/automations` — list + recent automation notifications
+- `/automations/new` — create
+- `/automations/[id]` — detail + execution history
+- `/automations/[id]/edit` — edit / enable / disable
+
+Model: workspace-scoped declarative rules (`automations` collection). No eval, no arbitrary code, no visual canvas.
+
+Triggers (v1): `invoice.overdue`, `payment.received`, `customer.created`, `project.status_changed`.
+
+Conditions: flat AND list (max 5). Actions (v1): `notification.create` → `automation_notifications` (internal, not a full inbox product). Task/email/Slack/webhook actions deferred.
+
+Execution: synchronous in-process after trusted domain mutations (`emitAutomationEvent`). History in `automation_executions` with unique `(workspaceId, automationId, eventKey)` for basic duplicate protection.
+
+Invoice overdue: evaluated when invoices are created/updated (due date / status). **Scheduled overnight scanning is deferred** — no cron/queues/workers.
+
+Permissions: `automations.read|create|update`. Demo read-only.
 
 ## Dashboard financial intelligence
 

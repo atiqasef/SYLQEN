@@ -17,6 +17,7 @@ import {
 } from "@/server/projects/repository";
 import type { ProjectDTO, ProjectListResult } from "@/server/projects/types";
 import type { SessionContext } from "@/server/auth/types";
+import { emitProjectStatusChanged } from "@/server/automations/events";
 
 function assertPermission(
   session: SessionContext,
@@ -136,6 +137,8 @@ export async function updateProjectForSession(
     });
   }
 
+  const previousStatus = existing.status;
+
   const updated = await updateProjectInWorkspace({
     workspaceId: session.workspace.id,
     projectId,
@@ -147,6 +150,13 @@ export async function updateProjectForSession(
       code: "NOT_FOUND",
       message: "Project not found during update",
       userMessage: "Project not found.",
+    });
+  }
+
+  if (previousStatus !== updated.status) {
+    await emitProjectStatusChanged({
+      project: updated,
+      previousStatus,
     });
   }
 

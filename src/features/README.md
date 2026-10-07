@@ -17,6 +17,7 @@ features/
   finance/
   analytics/
   integrations/
+  automations/
 ```
 
 Typical shape:

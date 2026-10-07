@@ -28,6 +28,7 @@ import type {
 } from "@/server/invoices/types";
 import { findProductsByIdsInWorkspace } from "@/server/products/repository";
 import type { SessionContext } from "@/server/auth/types";
+import { emitInvoiceOverdueIfNeeded } from "@/server/automations/events";
 
 function assertPermission(
   session: SessionContext,
@@ -226,6 +227,9 @@ export async function createInvoiceForSession(
       invoiceNumber,
       ...payload,
     });
+
+    await emitInvoiceOverdueIfNeeded(created);
+
     return toInvoiceDTO(created);
   } catch (error) {
     if (
@@ -285,6 +289,8 @@ export async function updateInvoiceForSession(
       userMessage: "Invoice not found.",
     });
   }
+
+  await emitInvoiceOverdueIfNeeded(updated);
 
   return toInvoiceDTO(updated);
 }
