@@ -43,14 +43,32 @@ Open [http://localhost:3000](http://localhost:3000) — unauthenticated visitors
 
 ## Auth flows to verify locally
 
-1. Register with any email provider address
-2. Open verification email:
+1. Register with any email address (verification is optional and does not block access in the portfolio stage)
+2. Confirm default workspace creation after sign-up / first verified session path
+3. Sign out / sign in
+4. Optional: Explore Demo when `DEMO_EMAIL` / `DEMO_PASSWORD` are set
+5. Optional: Google sign-in when Google credentials are set
+6. Optional email tooling:
    - `EMAIL_PROVIDER=dev` captures messages in memory
-   - set `EMAIL_CAPTURE_TO_DISK=true` to write `.local/emails/*.json` for manual link copying
-3. Verify email and confirm default workspace creation
-4. Sign out / sign in
-5. Optional: Explore Demo when demo env vars are set
-6. Optional: Google sign-in when Google credentials are set
+   - `EMAIL_CAPTURE_TO_DISK=true` writes `.local/emails/*.json` for manual link copying
+
+## Dashboard (local)
+
+1. Sign in and open **Overview**
+2. Confirm KPI cards, date range presets (7 / 30 / 90 days), payment trend, outstanding and recent lists
+3. Sign in via **Explore Demo** and confirm the same read path with mutations still blocked
+
+Coverage: Vitest (`src/server/dashboard/`) and Playwright (`e2e/dashboard.spec.ts`).
+
+## Team module (local)
+
+1. Sign in as a workspace owner
+2. Open **Team** from the primary nav
+3. List members; update roles among owner / member / viewer; remove a non-final owner
+4. Confirm the last owner cannot be demoted or removed
+5. Sign in via **Explore Demo** and confirm management controls are unavailable / blocked
+
+Coverage: Vitest (`src/server/members/`) and Playwright (`e2e/team.spec.ts`).
 
 ## Customers module (local)
 

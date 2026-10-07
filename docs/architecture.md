@@ -1,6 +1,8 @@
 # SYLQEN Architecture
 
-Phase 1 established the scalable foundation. Phase 2 adds identity, verification, sessions, and multi-tenant workspace core.
+SYLQEN uses a server-first, multi-tenant architecture: UI routes stay thin, domain services own business rules, and repositories enforce workspace scoping against MongoDB.
+
+For a product-level overview, see the [README](../README.md).
 
 ## Directory structure
 
@@ -49,7 +51,7 @@ User
 
 - Provider: **Better Auth**
 - Methods: email/password + Google OAuth (when configured)
-- Email verification required before application access
+- Email verification is **optional** in the current portfolio stage (does not block app access); a policy flag exists to re-enable mandatory verification later
 - Password hashing/session crypto remain inside Better Auth
 
 ## Workspaces

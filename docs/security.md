@@ -1,6 +1,6 @@
 # SYLQEN Security Principles
 
-These principles apply from Phase 1 onward and are enforced in Phase 2 identity/workspace code.
+Security in SYLQEN is enforced on the server: trusted sessions, membership-derived roles, workspace-scoped data access, and fail-closed cross-tenant behavior. UI visibility is never the authorization boundary.
 
 ## Never trust browser-supplied tenant identity
 
@@ -31,8 +31,8 @@ Cross-workspace access must fail closed with a safe `FORBIDDEN` response.
 
 ## Email verification
 
-- Ownership is proven by clicking a verification link, not by email-format checks
-- Any legitimate provider (Gmail, Outlook, Yahoo, custom domains) is acceptable
+- In the current portfolio stage, verification is optional and does not gate sign-in
+- When mandatory verification is re-enabled, ownership is proven by clicking a verification link, not by email-format checks
 - Verification and reset tokens are never written to application logs
 
 ## Demo account

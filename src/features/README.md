@@ -1,22 +1,33 @@
 # Features
 
-Feature modules belong here as the product grows.
+Domain UI modules live here. Trusted mutations and queries stay in `src/server/<domain>`.
 
-Recommended shape for a future module (for example `customers`):
+Current modules:
 
 ```text
-features/customers/
+features/
+  customers/
+  products/
+  projects/
+  invoices/
+  payments/
+  dashboard/
+  members/
+```
+
+Typical shape:
+
+```text
+features/<domain>/
   components/
-  hooks/
   schemas/
-  server/
-  types.ts
+  *-loading-state.tsx
   index.ts
 ```
 
 Rules:
 
-- Keep UI specific to a domain inside the feature folder.
-- Put shared UI primitives in `src/components/ui`.
-- Put trusted server operations in `src/server` or `features/<name>/server`.
-- Do not fetch tenant identity from the browser for authorization decisions.
+- Keep domain-specific UI inside the feature folder.
+- Put shared primitives in `src/components/ui`.
+- Put trusted server operations in `src/server/<domain>`.
+- Never authorize from browser-supplied workspace or user identity.

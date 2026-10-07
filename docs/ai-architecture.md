@@ -49,4 +49,4 @@ Location: `src/server/ai`
 
 - AI keys are server-only
 - Prompts may contain customer data later; treat logs carefully
-- Authorization for AI usage should check session permissions (`ai:use`) once auth exists
+- When AI product surfaces ship, authorization must check session permissions on the server (UI gating alone is insufficient)
