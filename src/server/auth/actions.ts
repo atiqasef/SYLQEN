@@ -29,8 +29,7 @@ export async function exploreDemoAction(): Promise<ActionResult> {
     });
     return {
       ok: false,
-      error:
-        "Demo access is not configured for this environment. Set DEMO_EMAIL and DEMO_PASSWORD in Vercel Production.",
+      error: "Demo access is not available in this environment.",
       code: "DEMO_UNAVAILABLE",
     };
   }

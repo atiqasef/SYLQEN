@@ -265,6 +265,7 @@ export function AutomationForm({
                 className="grid gap-2 rounded-[var(--radius-md)] border border-border p-3 sm:grid-cols-[1fr_auto]"
               >
                 <ConditionEditor
+                  index={index}
                   condition={condition}
                   triggerType={triggerType}
                   disabled={disabled}
@@ -402,23 +403,29 @@ export function AutomationForm({
 }
 
 function ConditionEditor({
+  index,
   condition,
   triggerType,
   disabled,
   onChange,
 }: {
+  index: number;
   condition: AutomationCondition;
   triggerType: AutomationTriggerType;
   disabled: boolean;
   onChange: (next: AutomationCondition) => void;
 }) {
   const fields = allowedConditionFieldsForTrigger(triggerType);
+  const fieldId = `condition-field-${index}`;
+  const operatorId = `condition-operator-${index}`;
+  const valueId = `condition-value-${index}`;
 
   return (
     <div className="grid gap-2 sm:grid-cols-3">
       <div className="space-y-1">
-        <Label>Field</Label>
+        <Label htmlFor={fieldId}>Field</Label>
         <select
+          id={fieldId}
           className={selectClassName}
           disabled={disabled}
           value={condition.field}
@@ -439,14 +446,15 @@ function ConditionEditor({
         </select>
       </div>
       <div className="space-y-1">
-        <Label>Operator</Label>
-        <Input value={condition.operator} disabled readOnly />
+        <Label htmlFor={operatorId}>Operator</Label>
+        <Input id={operatorId} value={condition.operator} disabled readOnly />
       </div>
       <div className="space-y-1">
-        <Label>Value</Label>
+        <Label htmlFor={valueId}>Value</Label>
         {condition.field === "project.status" ||
         condition.field === "project.previous_status" ? (
           <select
+            id={valueId}
             className={selectClassName}
             disabled={disabled}
             value={condition.value}
@@ -464,9 +472,10 @@ function ConditionEditor({
             ))}
           </select>
         ) : condition.operator === "exists" ? (
-          <Input value="must exist" disabled readOnly />
+          <Input id={valueId} value="must exist" disabled readOnly />
         ) : (
           <Input
+            id={valueId}
             disabled={disabled}
             value={String(condition.value)}
             onChange={(e) => {

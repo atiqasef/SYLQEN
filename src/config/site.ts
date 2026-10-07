@@ -3,7 +3,7 @@ export const siteConfig = {
   shortName: "SYLQEN",
   tagline: "Business Operating System",
   description:
-    "AI-powered Business Operating System for operations, CRM, finance, teams, and automation.",
+    "AI-ready Business Operating System for operations, CRM, finance, teams, and automation.",
   url: "https://sylqen.vercel.app",
 } as const;
 
@@ -11,14 +11,11 @@ export type NavItem = {
   title: string;
   href: string;
   disabled?: boolean;
-  /** Placeholder until the module is implemented */
+  /** Reserved for future unavailable modules; unused while all routes ship. */
   comingSoon?: boolean;
 };
 
-/**
- * Shell navigation placeholders. Links that are not yet implemented
- * remain visible but clearly marked as upcoming.
- */
+/** Primary authenticated shell navigation. */
 export const primaryNav: NavItem[] = [
   { title: "Overview", href: "/" },
   { title: "Customers", href: "/customers" },

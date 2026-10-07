@@ -143,7 +143,7 @@ export function LoginForm({ googleEnabled, demoEnabled }: LoginFormProps) {
           Demo access is read-only and clearly marked.{" "}
           {demoEnabled
             ? "No personal data is used."
-            : "Configure DEMO_EMAIL and DEMO_PASSWORD to enable."}
+            : "Demo access is not available in this environment."}
         </p>
       </div>
 

@@ -27,6 +27,11 @@ src/
     invoices/        Invoice repository + service + actions
     payments/        Payment repository + service + actions
     dashboard/       Financial overview read queries + service
+    finance/         Finance page composition over dashboard snapshot
+    analytics/       Analytics aggregations + signals
+    integrations/    Static catalog + deployment-derived status
+    automations/     Rules engine, repository, actions
+    settings/        Workspace + account settings services
     members/         Workspace team membership service + actions
     db/              MongoDB connection + health
     email/           Email provider boundary (dev/resend)
@@ -84,6 +89,7 @@ Permissions:
 - `projects.read` / `projects.create` / `projects.update`
 - `invoices.read` / `invoices.create` / `invoices.update`
 - `payments.read` / `payments.create`
+- `automations.read` / `automations.create` / `automations.update`
 
 Role → permission mapping (centralized in `effectivePermissions`):
 

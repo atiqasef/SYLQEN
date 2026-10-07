@@ -1,6 +1,7 @@
 import "server-only";
 
 import type { AutomationAction } from "@/features/automations/schemas";
+import { AppError } from "@/lib/errors/app-error";
 import { insertAutomationNotification } from "@/server/automations/repository";
 import type {
   AutomationDocument,
@@ -37,9 +38,12 @@ export async function runAutomationAction(options: {
       };
     }
     default: {
-      throw new Error(
-        `Unsupported automation action: ${(options.action as { type: string }).type}`,
-      );
+      throw new AppError({
+        code: "INTERNAL_ERROR",
+        message: `Unsupported automation action: ${(options.action as { type: string }).type}`,
+        userMessage:
+          "This automation action is not supported. Update the automation and try again.",
+      });
     }
   }
 }

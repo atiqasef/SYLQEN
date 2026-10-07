@@ -112,7 +112,7 @@ Deep dive: [docs/architecture.md](docs/architecture.md)
 
 ## Multi-tenancy
 
-Every customer, product, project, invoice, payment, and membership record is scoped by `workspaceId` resolved from the trusted session.
+Every customer, product, project, invoice, payment, membership, automation, and automation-execution record is scoped by `workspaceId` resolved from the trusted session.
 
 ```text
 Session → user → membership → role → permissions → resource access
@@ -164,7 +164,7 @@ See [docs/ai-architecture.md](docs/ai-architecture.md).
 
 1. Open [https://sylqen.vercel.app](https://sylqen.vercel.app)
 2. Choose **Explore Demo** on the login screen
-3. Browse Overview, Customers, Products, Projects, Invoices, Payments, and Team in **read-only** mode
+3. Browse Overview, Customers, Products, Projects, Invoices, Payments, Finance, Analytics, Team, Settings, Integrations, and Automations in **read-only** mode
 
 Create/edit/record actions are blocked server-side for demo identities. Passwords and secrets are not documented here.
 

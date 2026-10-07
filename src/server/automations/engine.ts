@@ -1,5 +1,6 @@
 import "server-only";
 
+import { isAppError } from "@/lib/errors/app-error";
 import { evaluateConditions } from "@/server/automations/conditions";
 import { runAutomationAction } from "@/server/automations/action-runners";
 import {
@@ -14,6 +15,9 @@ import type {
   AutomationEventContext,
 } from "@/server/automations/types";
 import { logger } from "@/server/logging/logger";
+
+const AUTOMATION_ACTION_FAILED_MESSAGE =
+  "Automation action failed. Check the automation configuration and try again.";
 
 /**
  * Process a domain event for workspace automations.
@@ -123,9 +127,11 @@ async function runSingleAutomation(options: {
     });
   } catch (error) {
     const completedAt = new Date();
-    const message =
-      error instanceof Error ? error.message : "Automation action failed";
-    const safeMessage = message.slice(0, 240);
+    const internalMessage =
+      error instanceof Error ? error.message : "unknown";
+    const safeMessage = (
+      isAppError(error) ? error.userMessage : AUTOMATION_ACTION_FAILED_MESSAGE
+    ).slice(0, 240);
     await updateExecutionResult({
       workspaceId: context.workspaceId,
       executionId: reservation.doc._id,
@@ -144,7 +150,7 @@ async function runSingleAutomation(options: {
       workspaceId: context.workspaceId,
       automationId,
       eventKey: context.eventKey,
-      error: safeMessage,
+      error: internalMessage,
     });
   }
 }
