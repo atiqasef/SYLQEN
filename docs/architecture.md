@@ -24,6 +24,7 @@ src/
     projects/        Project repository + service + actions
     invoices/        Invoice repository + service + actions
     payments/        Payment repository + service + actions
+    dashboard/       Financial overview read queries + service
     db/              MongoDB connection + health
     email/           Email provider boundary (dev/resend)
     workspaces/      Workspace + membership persistence
@@ -196,6 +197,35 @@ No payment update/delete, gateways, webhooks, refunds, or subscriptions in this 
 
 Demo: read/search/detail allowed; create forbidden via `payments.create`.
 
+## Dashboard financial intelligence
+
+Route:
+
+- `/` — authenticated overview with workspace-scoped financial KPIs
+
+Read path:
+
+```text
+Overview page
+  → getDashboardFinancialSnapshotForSession(session, range)
+  → Mongo aggregations on invoices + payments
+```
+
+Metrics (server-side, cents-safe, never mixed across currencies):
+
+- **Total invoiced** — sum of non-draft invoice totals with `issueDate` in the selected UTC period
+- **Total paid** — sum of payment amounts with `paymentDate` in the period
+- **Outstanding** — remaining balance (`total − paid`) for non-draft invoices issued in the period
+- **Overdue** — outstanding amount on invoices that are `status: overdue` or whose `dueDate` is before today UTC
+
+Date range presets: last 7 / 30 / 90 days (default 30). Bounds are UTC calendar midnights.
+
+UI panels: KPI cards, payment revenue trend (SVG bars, no chart library), outstanding invoices (prioritize overdue), recent payments, recent invoices. Lists are bounded; KPIs use aggregation pipelines with `$lookup` for payment sums.
+
+Currency strategy: metrics grouped by invoice/payment currency; primary KPI currency is the one with the highest invoiced total. No FX conversion.
+
+Demo: same read path; mutations remain blocked by viewer-capped permissions.
+
 ## Tenant isolation
 
 Authorization path:
@@ -215,6 +245,7 @@ Never authorize from browser-supplied tenant IDs alone.
 
 - `getSession` is wrapped in React `cache()` so multiple callers in one request share one Better Auth + workspace resolution.
 - Customer/product/project/invoice/payment `createIndexes` is guarded process-wide; it is not re-run on every list/detail call after the first successful ensure in a warm runtime.
+- Dashboard financial snapshot loads invoice/payment aggregates and recent lists in parallel; trend series runs only for the primary currency.
 
 ## Email
 

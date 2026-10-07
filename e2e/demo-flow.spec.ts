@@ -15,14 +15,12 @@ test.describe("demo flow", () => {
     await expect(page.getByText("Demo account", { exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { name: /Welcome, E2E Demo/i })).toBeVisible();
     await expect(page.getByText(/as viewer/i)).toBeVisible();
-
-    const emailInput = page.locator("#demo-email");
-    const workspaceInput = page.locator("#demo-workspace");
-    await expect(emailInput).toHaveJSProperty("readOnly", true);
-    await expect(workspaceInput).toHaveJSProperty("readOnly", true);
     await expect(
-      page.getByText(/Demo accounts are read-only/i),
+      page.getByRole("heading", { name: /Financial overview/i }),
     ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Session" })).toBeVisible();
+    await expect(page.getByText("Demo", { exact: true }).first()).toBeVisible();
+    await expect(page.getByText("Viewer", { exact: true }).first()).toBeVisible();
 
     await page.reload();
     await expect(page.getByText("Demo account", { exact: true })).toBeVisible();
