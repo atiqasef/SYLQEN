@@ -254,8 +254,22 @@ For portfolio demo:
 
 Never commit real secrets.
 
-## Architecture docs
+## Demo behavior (summary)
 
+- **Explore Demo** signs into an environment-configured demo identity
+- Demo users are force-capped to viewer/read-only permissions on the server
+- List/detail reads work across major modules; create/edit/record mutations are rejected
+- Do not publish demo passwords in public docs; configure them only in local/Vercel env
+- Playwright uses local fixture credentials against an ephemeral stack — never production
+
+## Portfolio screenshots
+
+Image assets are not required for local development. When capturing visuals for the README, follow [screenshots.md](./screenshots.md).
+
+## Documentation
+
+- [Case study](./case-study.md)
 - [Architecture](./architecture.md)
 - [Security](./security.md)
 - [AI architecture](./ai-architecture.md)
+- [Screenshot plan](./screenshots.md)

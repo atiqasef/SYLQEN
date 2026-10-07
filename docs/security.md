@@ -24,14 +24,13 @@ Cross-workspace access must fail closed with a safe `FORBIDDEN` response.
 ## Authentication
 
 - Better Auth handles password hashing, sessions, verification tokens, and OAuth
-- Email/password accounts require email verification before app access
 - Google OAuth uses server-side client secrets only
 - Auth cookies are managed by Better Auth (`nextCookies` for server actions)
 - Proxy/middleware cookie checks are optimistic only; layouts re-validate sessions
 
 ## Email verification
 
-- In the current portfolio stage, verification is optional and does not gate sign-in
+- In the current portfolio stage, verification is **optional** and does not gate app access
 - When mandatory verification is re-enabled, ownership is proven by clicking a verification link, not by email-format checks
 - Verification and reset tokens are never written to application logs
 
@@ -63,4 +62,8 @@ The logger redacts keys that look like passwords, secrets, tokens, API keys, coo
 
 Every tenant-scoped record must carry workspace identity. Isolation is enforced in server data access, not in the UI.
 
-Customer, product, project, invoice, and payment records are scoped by `workspaceId` from the trusted session. List/get/create/update ignore any browser-supplied workspace/owner identifiers. Cross-workspace access returns `NOT_FOUND` (no existence leak across tenants for foreign IDs). Product SKUs and invoice numbers are unique per workspace via compound unique indexes. Invoice totals, product prices/names/SKUs, invoice numbers, payment amounts, and remaining balances are never trusted from browser input.
+Customer, product, project, invoice, payment, membership, automation, automation-execution, and automation-notification records are scoped by `workspaceId` from the trusted session. List/get/create/update ignore any browser-supplied workspace/owner identifiers. Cross-workspace access returns `NOT_FOUND` (no existence leak across tenants for foreign IDs). Product SKUs and invoice numbers are unique per workspace via compound unique indexes. Invoice totals, product prices/names/SKUs, invoice numbers, payment amounts, and remaining balances are never trusted from browser input.
+
+Integrations status is derived server-side from deployment configuration. API keys and secrets are never returned in integration DTOs. Automation execution history stores user-safe failure messages; internals stay in structured logs.
+
+Portfolio narrative: [case-study.md](./case-study.md).

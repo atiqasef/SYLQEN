@@ -1,72 +1,149 @@
 # SYLQEN
 
-**AI-ready Business Operating System** — a multi-tenant SaaS workspace for customers, products, projects, invoices, payments, financial visibility, and team access control.
+**AI-ready Business Operating System for modern businesses.**
 
-SYLQEN is a production-style portfolio application that shows how modern full-stack engineering can unify day-to-day business operations in one coherent product — with server-side authorization, workspace isolation, cents-safe money handling, and automated tests.
+SYLQEN is a production-oriented, multi-tenant SaaS platform designed to centralize business operations, financial workflows, analytics, team management, integrations, and automation.
+
+It is built as a portfolio case study in server-first SaaS engineering: trusted sessions, workspace isolation, RBAC, cents-safe money handling, validated mutations, and automated tests — not as a marketing shell around unfinished screens.
 
 | | |
 | --- | --- |
 | **Live demo** | [https://sylqen.vercel.app](https://sylqen.vercel.app) |
 | **Repository** | [github.com/atiqasef/SYLQEN](https://github.com/atiqasef/SYLQEN) |
+| **Case study** | [docs/case-study.md](docs/case-study.md) |
+| **Architecture** | [docs/architecture.md](docs/architecture.md) |
 
-Use **Explore Demo** on the login page for a read-only walkthrough. Demo credentials are environment-configured and are not published in this README.
-
----
-
-## Why SYLQEN
-
-Many small teams run customers, projects, and money across spreadsheets and disconnected tools. SYLQEN demonstrates a single workspace where:
-
-- operational records stay organized and searchable
-- invoices and payments stay financially consistent
-- dashboards surface currency-aware visibility without inventing FX rates
-- team roles control who can read vs mutate
-- architecture stays ready for future AI assistance without vendor lock-in
-
-The project emphasizes production-minded engineering: trusted sessions, server-enforced permissions, clear domain boundaries, and a calm enterprise UI.
+Use **Explore Demo** on the login page for a read-only walkthrough. Demo credentials are environment-configured and are not published here.
 
 ---
 
-## What is implemented
+## Why I built SYLQEN
 
-### Business operations
+Small teams often run customers, projects, and money across spreadsheets and disconnected tools. The harder engineering problem is not drawing a dashboard — it is designing a system that keeps tenant data isolated, authorization trustworthy, and financial records consistent under real product pressure.
 
-- **Customers** — create, search, paginate, detail, edit (workspace-scoped)
-- **Products** — SKU uniqueness, pricing, currency, catalog search
-- **Projects** — status lifecycle, client context, date validation
+SYLQEN was built to practice and demonstrate that work:
 
-### Financial operations
+- **Multi-tenant SaaS architecture** — every business record is workspace-scoped from a trusted server session
+- **Server-side authorization** — UI gating is never the security boundary; permissions are enforced in services
+- **Domain modeling** — customers, products, projects, invoices, and payments as coherent, validated modules
+- **Financial integrity** — cents-safe arithmetic, product snapshots on invoice lines, currency-aware reporting without invented FX
+- **RBAC** — owner / member / viewer roles with fail-closed demos and last-owner protections
+- **Server-first design** — sensitive logic, secrets, and tenancy stay on the server
+- **Validation** — Zod at mutation boundaries with safe user-facing errors
+- **Production deployment** — Vercel + MongoDB Atlas with region-aligned compute where configured
+- **Performance discipline** — request-scoped session caching, bounded lists, server pagination/search, parallel dashboard reads
+- **Testing strategy** — Vitest for domain/isolation rules; Playwright for real browser workflows
+- **Extensibility** — AI provider abstraction and a declarative automation engine without coupling to vendors or workers prematurely
 
-- **Invoices** — line items with product snapshots, server-calculated totals, atomic invoice numbers
-- **Payments** — record against invoices, remaining balance, overpayment rejection, paid settlement
-- **Financial overview** — KPI cards, payment trend, outstanding/overdue, recent activity (7 / 30 / 90 day ranges)
-- **Finance** — command center for invoicing, payments, and prioritized receivables (composes the same server snapshot)
-- **Analytics** — decision-support trends (invoiced vs paid), customer/product rankings from invoice snapshots, project status mix, and rule-based business signals
+The goal is to show engineering judgment: ship a coherent product, keep claims honest, and leave clear seams for future Stripe, AI, and background work.
 
-Metrics are **currency-aware**. Totals are not mixed across currencies; there is no FX conversion.
+---
 
-### Team & access
+## Business modules
 
-- Workspace membership list (`/team`)
-- Roles offered in UI: **Owner**, **Member**, **Viewer** (legacy `admin` remains in the permission map for compatibility)
-- Permission-aware UI with **server-side authorization as the source of truth**
-- Multi-tenant workspace isolation on every domain record
-- Demo accounts forced to read-only (viewer-capped) permissions
-- **Settings** — workspace rename (`workspace.update`), account display name, device theme preference, session access summary
-- **Integrations** — read-only hub for platform integrations (Stripe reserved, Resend email, AI abstraction) plus clearly marked planned providers
-- **Automations** — declarative Trigger → Conditions → Action rules with execution history and internal notifications
+### Core Business
 
-### Platform
+Customers, Products, Projects, Invoices, and Payments — the operational records and money flows a business runs day to day.
 
-- Better Auth (email/password; Google OAuth when configured)
-- Responsive authenticated app shell
-- Loading / empty / error / not-found patterns
-- Light & dark themes
-- Vitest + Playwright + typecheck + ESLint + production build
+### Intelligence
 
-### Explicitly not claimed as shipped
+Finance and Analytics — currency-aware visibility, receivables priority, trends, rankings, and rule-based signals composed from the same trusted workspace data.
 
-Real AI product surfaces, live Stripe checkout/billing, email invitations, client portals, background job workers, and delete/bulk workflows are out of current scope.
+### Operations
+
+Team, Settings, Integrations, and Automations — access control, workspace configuration, integration status, and declarative Trigger → Conditions → Action rules.
+
+| Module | What it does |
+| --- | --- |
+| **Customers** | Workspace-scoped CRM records with search, pagination, detail, and edit |
+| **Products** | Catalog with SKU uniqueness, pricing, and currency |
+| **Projects** | Status lifecycle with client context and date validation |
+| **Invoices** | Line items with product snapshots, server-calculated totals, atomic invoice numbers |
+| **Payments** | Internal payment recording against invoices (not Stripe Checkout) |
+| **Finance** | Command center for KPIs, payment trend, and prioritized receivables |
+| **Analytics** | Invoiced vs paid trends, rankings, project mix, business signals |
+| **Team** | Membership list with owner-managed roles and last-owner protections |
+| **Settings** | Workspace rename, account display name, theme, access summary |
+| **Integrations** | Read-only hub: Stripe reserved, Resend/AI status, planned providers |
+| **Automations** | Declarative rules with execution history and internal notifications |
+
+**Explicitly not shipped:** live OpenAI/Claude product surfaces, live Stripe Checkout/subscription billing, email invitations, client portals, background job workers/cron, full notification inbox UI, Slack/email/webhook automation actions.
+
+---
+
+## Architecture highlights
+
+```text
+UI (RSC / client islands)
+  → Server Actions / thin app layer
+  → Domain services
+  → Workspace-scoped repositories
+  → MongoDB (native driver)
+```
+
+| Choice | Why it matters |
+| --- | --- |
+| **Next.js App Router + React 19** | Server Components keep data fetching and auth close to the request |
+| **TypeScript (strict)** | Catch tenancy and money-shape mistakes at compile time |
+| **Tailwind CSS 4** | Consistent, maintainable UI without a heavy design-system dependency |
+| **MongoDB Atlas + native driver** | Explicit workspace filters and indexes — no ORM tenancy surprises |
+| **Better Auth** | Session crypto, password hashing, and OAuth stay in a dedicated auth layer |
+| **Zod** | Predictable validation at server boundaries |
+| **Feature + service/repository layout** | UI in `src/features`, trusted logic in `src/server/<domain>` |
+| **RBAC** | Centralized `effectivePermissions` with demo viewer caps |
+| **AI provider abstraction** | Future models without rewriting business modules |
+| **Automation engine** | Sync, bounded rules with idempotent execution records |
+| **Vitest + Playwright** | Fast domain confidence + real browser flows |
+| **Vercel** | Production Next.js hosting aligned with Atlas region in this deployment |
+
+Deep dive: [docs/architecture.md](docs/architecture.md) · Case study: [docs/case-study.md](docs/case-study.md)
+
+---
+
+## Security & multi-tenancy
+
+- Workspace identity comes from the **trusted server session** — browser-supplied `workspaceId` / `userId` values are never authoritative
+- Every tenant-scoped query includes session-derived `workspaceId`
+- Role permissions are evaluated with `requirePermission` / `canPerform` on the server
+- Cross-workspace access fails closed (`NOT_FOUND` / `FORBIDDEN` — no existence leaks)
+- Mutations are validated with Zod; money totals and remaining balances are re-checked server-side
+- Demo identities are force-capped to read-only permissions regardless of stored role
+- Secrets stay in environment configuration; integration DTOs never serialize API keys
+- User-facing errors use safe messages; internals go to structured, redacted logs
+
+Full principles: [docs/security.md](docs/security.md)
+
+---
+
+## Key engineering decisions
+
+### Native MongoDB driver instead of Mongoose
+
+Repositories own query shape, compound indexes, and workspace filters explicitly. That keeps multi-tenant access patterns visible in code review instead of hidden behind ORM defaults.
+
+### Server-first architecture
+
+Authorization, money math, invoice numbering, and automation emission run on the server. The client submits intent; the server decides truth.
+
+### Workspace-scoped repositories and services
+
+List/get/create/update paths ignore client-supplied tenant IDs. Accidental cross-workspace reads fail closed rather than “almost working” with a wrong filter.
+
+### AI provider abstraction
+
+`src/server/ai` defines `AIProvider` with a mock implementation. AI is disabled by default. Anthropic/OpenAI are not wired. Enabling AI without a real provider still returns clearly labeled mock output — never presented as live model inference.
+
+### Idempotent automation execution
+
+Executions use a unique `(workspaceId, automationId, eventKey)` key so duplicate domain events do not double-apply the same rule. Failures are recorded safely and do not break the primary business mutation.
+
+### Server-side pagination and search
+
+Lists never load full collections into the browser. Search uses bounded, escaped regex with page size caps.
+
+### UTC financial calculations
+
+Dashboard, Finance, and Analytics period bounds use UTC calendar midnights so reporting is consistent across client timezones. Currencies are never mixed; there is no FX conversion.
 
 ---
 
@@ -87,117 +164,100 @@ Verified from `package.json`:
 | Tests | Vitest, Testing Library, Playwright |
 | Deploy | Vercel (`https://sylqen.vercel.app`) |
 
-**Why these choices (short):** App Router + server-first keeps secrets and authorization off the client. The native Mongo driver keeps tenancy queries explicit. Zod validates boundaries. Better Auth owns session crypto. Vitest covers domain/isolation; Playwright covers real browser flows against an ephemeral local stack.
-
 ---
 
-## Architecture
+## Engineering quality
 
-```text
-UI (RSC / client islands)
-  → Server Actions / thin app layer
-  → Domain services
-  → Workspace-scoped repositories
-  → MongoDB
-```
+Verified locally at the Phase 18 polish milestone (and unchanged by this documentation phase):
 
-- Business logic stays on the server (`src/server`)
-- Workspace identity comes from the authenticated session — never trusted from the browser alone
-- Validation happens at server boundaries
-- Features are organized by domain (`src/features` UI + `src/server/<domain>` logic)
-
-Deep dive: [docs/architecture.md](docs/architecture.md)
-
----
-
-## Multi-tenancy
-
-Every customer, product, project, invoice, payment, membership, automation, and automation-execution record is scoped by `workspaceId` resolved from the trusted session.
-
-```text
-Session → user → membership → role → permissions → resource access
-```
-
-Cross-workspace access fails closed (safe `NOT_FOUND` / `FORBIDDEN` — no existence leaks). UI hiding is never the security boundary.
-
-Details: [docs/security.md](docs/security.md)
-
----
-
-## RBAC
-
-| Role | Intent |
+| Signal | Status |
 | --- | --- |
-| **Owner** | Full workspace access, including member management |
-| **Member** | Create/update business records; can read members |
-| **Viewer** | Read-only across domains |
-| **admin** (legacy) | Same permission set as owner; not offered in Team UI |
+| Vitest | **58** files / **220** tests |
+| Playwright | **38** tests |
+| TypeScript | `npm run typecheck` |
+| ESLint | `npm run lint` |
+| Production build | `npm run build` |
 
-Demo users are permanently capped to viewer permissions in `effectivePermissions`, regardless of stored role. Owner invariants prevent removing or demoting the last owner.
+Also practiced in product UX: responsive shell/list patterns, accessible labels/focus where audited, loading / empty / error / not-found states, and production QA without inventing metrics.
+
+```bash
+npm run test:run
+npm run typecheck
+npm run lint
+npm run build
+npx playwright install chromium   # once
+npm run test:e2e
+```
+
+Playwright runs against an ephemeral local server + in-memory Mongo — never against production.
 
 ---
 
-## Financial correctness
+## Production deployment
 
-- Invoice line totals and invoice totals are calculated **server-side** from resolved products
-- Money uses **cents-safe** integer arithmetic
-- Line items snapshot product name/SKU/unit price so later catalog edits do not rewrite history
-- Invoice numbers (`INV-000001`, …) come from an atomic per-workspace counter
-- Payments check invoice ownership, currency match, and remaining balance
-- Overdue/outstanding dashboard logic uses server aggregations; currencies stay separated
+| Piece | Detail |
+| --- | --- |
+| App | Next.js on **Vercel** |
+| Database | **MongoDB Atlas** |
+| Region practice | Function region aligned with Atlas cluster region (portfolio deployment: Vercel `bom1`, Atlas `ap-south-1`) |
+| Config | Environment variables only — see [docs/development.md](docs/development.md#vercel-configuration) |
 
-No payment gateway, refunds, tax engine, PDF export, or FX conversion in the current product.
+Required production variables include Mongo connection, Better Auth secret/URL, and public app URL. Optional: Google OAuth, Resend, demo account. **No secrets are published in this repository.**
+
+---
+
+## Demo
+
+1. Open [https://sylqen.vercel.app](https://sylqen.vercel.app)
+2. Choose **Explore Demo** on the login screen
+3. Browse Overview, Customers, Products, Projects, Invoices, Payments, Finance, Analytics, Team, Settings, Integrations, and Automations
+
+The demo workspace is intentionally **read-only** for protected mutations. Create/edit/record actions are blocked on the server for demo identities. Credentials and secrets are not documented here.
+
+---
+
+## Screenshots
+
+Screenshot assets are not checked into the repository yet. Capture targets and naming conventions live in [docs/screenshots.md](docs/screenshots.md).
+
+Recommended portfolio set: Dashboard, Customers, Invoices, Payments, Finance, Analytics, Team, Automations, Integrations, Settings.
 
 ---
 
 ## AI-ready (not AI-product)
 
-`src/server/ai` defines a provider abstraction (`AIProvider`) with a mock implementation. AI is **disabled by default** (`AI_ENABLED=false`). Anthropic/OpenAI are not wired; enabling AI without a real provider still uses the labeled mock and never pretends mock text is live model output.
+`src/server/ai` defines a provider abstraction with a mock implementation. AI is **disabled by default**. Live OpenAI/Claude integration is **not** shipped. The Integrations hub surfaces AI Assistant as architecture status, not as a connected vendor product.
 
-This keeps future assistance features from coupling business logic to a vendor SDK. No AI API keys are required to run the app.
-
-See [docs/ai-architecture.md](docs/ai-architecture.md).
+Details: [docs/ai-architecture.md](docs/ai-architecture.md)
 
 ---
 
-## Demo experience
+## Automations (accurate scope)
 
-1. Open [https://sylqen.vercel.app](https://sylqen.vercel.app)
-2. Choose **Explore Demo** on the login screen
-3. Browse Overview, Customers, Products, Projects, Invoices, Payments, Finance, Analytics, Team, Settings, Integrations, and Automations in **read-only** mode
+Shipped:
 
-Create/edit/record actions are blocked server-side for demo identities. Passwords and secrets are not documented here.
+- Triggers: `invoice.overdue`, `payment.received`, `customer.created`, `project.status_changed`
+- Flat AND conditions
+- Action: `notification.create` (internal records — not a full notification inbox product)
+- Idempotent execution + execution history
+- Safe failure handling that does not break primary mutations
+
+Not shipped: cron/background overdue scanner, queues/workers, Slack/email/webhook/task actions.
+
+`invoice.overdue` is evaluated when invoices are created/updated; overnight scanning is deferred.
 
 ---
 
-## Testing & quality
+## Integrations (accurate scope)
 
-| Check | Command |
+| Entry | State |
 | --- | --- |
-| Unit / integration | `npm run test:run` |
-| E2E (build + Playwright) | `npm run test:e2e` |
-| Types | `npm run typecheck` |
-| Lint | `npm run lint` |
-| Production build | `npm run build` |
+| **Stripe** | Reserved / planned payments infrastructure — no live Checkout or subscription billing |
+| **Resend** | Transactional email via existing provider abstraction when configured |
+| **AI Assistant** | Provider abstraction / mock — no workspace API keys |
+| **Slack, Google Calendar, QuickBooks** | Planned visibility only |
 
-Coverage focus (high level): domain services, workspace isolation, permissions/demo read-only, money/invoice/payment rules, and major UI flows (auth, dashboard, CRUD modules, team). Playwright runs against an ephemeral local server + in-memory Mongo — never against production.
-
-No coverage percentage is claimed here.
-
----
-
-## Security (summary)
-
-- Server-derived session + membership for authorization
-- Workspace isolation in repositories/services
-- Zod validation at mutation boundaries
-- Demo write rejection on the server
-- Secrets via environment only (`.env.example` committed; `.env*` with values never committed)
-- Safe user-facing errors; structured logging with redaction
-
-Not claimed: SOC 2, GDPR certification, penetration testing, or enterprise compliance seals.
-
-Full principles: [docs/security.md](docs/security.md)
+The **Payments** module is the internal business payment domain (cash, bank transfer, card, other). It is not Stripe Checkout.
 
 ---
 
@@ -210,32 +270,13 @@ git clone https://github.com/atiqasef/SYLQEN.git
 cd SYLQEN
 npm install
 cp .env.example .env.local
-# set MONGODB_URI, BETTER_AUTH_SECRET, BETTER_AUTH_URL, NEXT_PUBLIC_APP_URL
+# configure Mongo + Better Auth URL/secret + public app URL
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000). Full env and module walkthroughs: [docs/development.md](docs/development.md).
 
-Optional: Google OAuth, Resend, and demo account vars — see [docs/development.md](docs/development.md) and [`.env.example`](.env.example).
-
-In the current portfolio stage, **email verification is optional** and does not block app access. Resend remains available when mandatory verification is re-enabled.
-
-```bash
-npm run test:run
-npm run typecheck
-npm run lint
-npm run build
-npx playwright install chromium   # once
-npm run test:e2e
-```
-
----
-
-## Deployment
-
-Deployed on **Vercel** at [https://sylqen.vercel.app](https://sylqen.vercel.app).
-
-Production needs at least: `MONGODB_URI`, `MONGODB_DB_NAME`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `NEXT_PUBLIC_APP_URL`. Portfolio demo needs `DEMO_EMAIL` / `DEMO_PASSWORD`. Full checklist: [docs/development.md](docs/development.md#vercel-configuration).
+In the current portfolio stage, **email verification is optional** and does not block app access.
 
 ---
 
@@ -244,67 +285,40 @@ Production needs at least: `MONGODB_URI`, `MONGODB_DB_NAME`, `BETTER_AUTH_SECRET
 ```text
 src/app/          Routes (auth + authenticated app)
 src/features/     Domain UI (forms, tables, loading shells)
-src/server/       Trusted services, repositories, auth, AI boundary
+src/server/       Trusted services, repositories, auth, AI, automations
 src/components/   Shared UI, layout, feedback
 src/lib/          Auth client/server helpers, utilities
 src/config/       Site + env configuration
 e2e/              Playwright specs + ephemeral server harness
-docs/             Architecture, security, development, AI
+docs/             Architecture, security, development, AI, case study
 ```
 
 ---
 
-## Technical decisions
+## Future scope
 
-| Decision | Reasoning |
-| --- | --- |
-| Next.js App Router + RSC | Server-first data and auth close to the request |
-| Native MongoDB driver | Explicit workspace filters; no ORM tenancy surprises |
-| Session-derived workspace | Browser tenant IDs are never authoritative |
-| Zod at boundaries | Predictable validation without leaking internals |
-| Cents-safe money | Avoid floating-point invoice/payment drift |
-| Product snapshots on invoices | Historical integrity when catalog prices change |
-| Currency-aware dashboard | Honest reporting without fake FX |
-| Vitest + Playwright | Fast domain tests + real browser confidence |
-| Self-hosted fonts | Stable typography without runtime font CDN coupling |
-| AI provider interface | Future models without rewriting business modules |
+Clearly deferred — **not implemented**:
 
----
-
-## Roadmap
-
-### Implemented
-
-- Auth + workspaces + RBAC
-- Customers, products, projects
-- Invoices, payments, financial overview
-- Team member list / role update / remove (with owner protections)
-- Settings (workspace name, account display name, theme preference, access summary)
-- Finance command center
-- Analytics (trends, rankings, signals)
-- Integrations hub (catalog + derived platform status)
-- Automations engine (declarative rules + execution history)
-- Demo read-only mode
-- Global UX consistency polish
-- Automated unit, integration, and E2E tests
-
-### Future scope (not built)
-
+- Live Stripe Checkout / subscription billing
+- Real AI provider integration and product surfaces
+- Background workers / cron (including overdue scanning)
+- Richer notification product UI
+- External automation actions (email, Slack, webhooks, tasks)
+- Per-workspace OAuth installs
 - Email invitations & richer org admin
-- Live Stripe Checkout / subscription billing product flows
-- Per-workspace OAuth installs (Slack, Google Calendar, QuickBooks, etc.)
-- Mandatory email verification in production (policy flag exists)
-- Real AI assistance features on top of the existing abstraction
+- API key / developer platform
 - PDF invoices, tax/discounts, deletes/bulk actions, client portal
 
 ---
 
 ## Documentation
 
+- [Case study](docs/case-study.md)
 - [Architecture](docs/architecture.md)
 - [Security](docs/security.md)
 - [AI architecture](docs/ai-architecture.md)
 - [Development](docs/development.md)
+- [Screenshot plan](docs/screenshots.md)
 
 ---
 

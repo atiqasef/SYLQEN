@@ -2,7 +2,7 @@
 
 SYLQEN uses a server-first, multi-tenant architecture: UI routes stay thin, domain services own business rules, and repositories enforce workspace scoping against MongoDB.
 
-For a product-level overview, see the [README](../README.md).
+For a product-level overview, see the [README](../README.md). For the portfolio narrative, see the [case study](./case-study.md).
 
 ## Directory structure
 
@@ -361,9 +361,40 @@ Never authorize from browser-supplied tenant IDs alone.
 - `dev` provider for local/test capture
 - `resend` provider for deployed email delivery
 
+## Production deployment alignment
+
+| Piece | Detail |
+| --- | --- |
+| Hosting | Next.js on Vercel (`https://sylqen.vercel.app`) |
+| Database | MongoDB Atlas via the native Node.js driver |
+| Region practice | Align Vercel Function region with Atlas cluster region (portfolio deployment: `bom1` / `ap-south-1`) |
+| Secrets | Environment variables only — never serialized to client DTOs |
+
+Region pins are deployment configuration, not application code. See [development.md](./development.md#vercel-configuration).
+
+## Authenticated route map
+
+| Area | Routes |
+| --- | --- |
+| Overview | `/` |
+| Customers | `/customers`, `/customers/new`, `/customers/[id]`, `/customers/[id]/edit` |
+| Products | `/products`, `/products/new`, `/products/[id]`, `/products/[id]/edit` |
+| Projects | `/projects`, `/projects/new`, `/projects/[id]`, `/projects/[id]/edit` |
+| Invoices | `/invoices`, `/invoices/new`, `/invoices/[id]`, `/invoices/[id]/edit` |
+| Payments | `/payments`, `/payments/new`, `/payments/[id]` |
+| Finance | `/finance` |
+| Analytics | `/analytics` |
+| Team | `/team` |
+| Settings | `/settings` |
+| Integrations | `/integrations`, `/integrations/[slug]` |
+| Automations | `/automations`, `/automations/new`, `/automations/[id]`, `/automations/[id]/edit` |
+
+Auth routes: `/login`, `/register`, `/forgot-password`, `/reset-password`, `/verify-email`. Better Auth handler: `/api/auth/[...all]`.
+
 ## Adding future modules
 
 1. Create `src/features/<module>/`
 2. Keep route entry points thin
 3. Scope every query by session workspace id
 4. Call `requirePermission(...)` before mutations
+5. Add Vitest coverage for isolation/permissions before expanding surface area

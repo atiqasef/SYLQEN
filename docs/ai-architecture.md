@@ -1,6 +1,8 @@
 # SYLQEN AI Architecture
 
-SYLQEN is AI-ready from Phase 1 without requiring an API key or vendor SDK.
+SYLQEN is **AI-ready**, not an AI product with a live production provider. The abstraction exists without requiring an API key or vendor SDK.
+
+Portfolio positioning: [case-study.md](./case-study.md) · Integrations hub surfaces AI Assistant status from this boundary.
 
 ## Goals
 
