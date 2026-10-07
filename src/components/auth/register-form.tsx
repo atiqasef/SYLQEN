@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import * as React from "react";
 
 import { AuthAlert } from "@/components/auth/auth-form-message";
+import { FacebookButton } from "@/components/auth/facebook-button";
 import { GoogleButton } from "@/components/auth/google-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,9 +18,13 @@ const PASSWORD_HINT =
 
 type RegisterFormProps = {
   googleEnabled: boolean;
+  facebookEnabled: boolean;
 };
 
-export function RegisterForm({ googleEnabled }: RegisterFormProps) {
+export function RegisterForm({
+  googleEnabled,
+  facebookEnabled,
+}: RegisterFormProps) {
   const router = useRouter();
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
@@ -28,7 +33,8 @@ export function RegisterForm({ googleEnabled }: RegisterFormProps) {
   const [error, setError] = React.useState<string | null>(null);
   const [pending, setPending] = React.useState(false);
   const [googlePending, setGooglePending] = React.useState(false);
-  const busy = pending || googlePending;
+  const [facebookPending, setFacebookPending] = React.useState(false);
+  const busy = pending || googlePending || facebookPending;
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -81,19 +87,34 @@ export function RegisterForm({ googleEnabled }: RegisterFormProps) {
 
   return (
     <div className="space-y-5">
-      <GoogleButton
-        enabled={googleEnabled}
-        label="Continue with Google"
-        callbackURL="/"
-        disabled={pending}
-        onBusyChange={(next) => {
-          setGooglePending(next);
-          if (next) {
-            setError(null);
-          }
-        }}
-        onError={setError}
-      />
+      <div className="space-y-3">
+        <GoogleButton
+          enabled={googleEnabled}
+          label="Continue with Google"
+          callbackURL="/"
+          disabled={pending || facebookPending}
+          onBusyChange={(next) => {
+            setGooglePending(next);
+            if (next) {
+              setError(null);
+            }
+          }}
+          onError={setError}
+        />
+        <FacebookButton
+          enabled={facebookEnabled}
+          label="Continue with Facebook"
+          callbackURL="/"
+          disabled={pending || googlePending}
+          onBusyChange={(next) => {
+            setFacebookPending(next);
+            if (next) {
+              setError(null);
+            }
+          }}
+          onError={setError}
+        />
+      </div>
 
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
         <div className="h-px flex-1 bg-border" aria-hidden="true" />

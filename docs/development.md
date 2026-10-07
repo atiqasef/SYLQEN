@@ -27,6 +27,8 @@ Optional:
 ```bash
 GOOGLE_CLIENT_ID=...
 GOOGLE_CLIENT_SECRET=...
+FACEBOOK_CLIENT_ID=...
+FACEBOOK_CLIENT_SECRET=...
 EMAIL_PROVIDER=resend
 RESEND_API_KEY=...
 DEMO_EMAIL=demo@sylqen.app
@@ -47,7 +49,7 @@ Open [http://localhost:3000](http://localhost:3000) — unauthenticated visitors
 2. Confirm default workspace creation after sign-up / first verified session path
 3. Sign out / sign in
 4. Optional: Explore Demo when demo credentials are set in the environment
-5. Optional: Google sign-in when Google OAuth credentials are set (see below)
+5. Optional: Google / Facebook sign-in when the matching OAuth credentials are set (see below)
 6. Optional email tooling:
    - `EMAIL_PROVIDER=dev` captures messages in memory
    - `EMAIL_CAPTURE_TO_DISK=true` writes `.local/emails/*.json` for manual link copying
@@ -77,6 +79,35 @@ GOOGLE_CLIENT_SECRET=
 | Button says “Google sign-in not configured” | Missing `GOOGLE_CLIENT_ID` or `GOOGLE_CLIENT_SECRET` in the runtime env |
 | `redirect_uri_mismatch` from Google | Redirect URI in Cloud Console does not exactly match `/api/auth/callback/google` for the current origin |
 | Works locally but not on Vercel | Production env vars not set, or production redirect URI not added in Google Cloud |
+
+Credentials must remain server-side. Do not put the client secret in client components, README, or test fixtures intended for browsers.
+
+## Facebook OAuth setup
+
+Facebook sign-in uses Better Auth `socialProviders.facebook` with server-only environment variables. Email/password, Google (when configured), and Explore Demo remain available when Facebook is unset.
+
+1. In the [Meta Developer Portal](https://developers.facebook.com/), create (or select) an app and enable Facebook Login.
+2. Add Valid OAuth Redirect URIs (exact match required):
+   - Local: `http://localhost:3000/api/auth/callback/facebook`
+   - Production: `https://sylqen.vercel.app/api/auth/callback/facebook`
+3. From **App Settings → Basic**, copy App ID → `FACEBOOK_CLIENT_ID` and App Secret → `FACEBOOK_CLIENT_SECRET`.
+4. Set in `.env.local` / Vercel (never commit real values; never use `NEXT_PUBLIC_` for the secret):
+
+```bash
+FACEBOOK_CLIENT_ID=
+FACEBOOK_CLIENT_SECRET=
+```
+
+5. Restart `npm run dev` (or redeploy). Login and Register show **Continue with Facebook** when both values are present.
+6. New Facebook users follow the existing Better Auth user-create hook → default workspace bootstrap. Returning users keep the normal session flow.
+
+### Troubleshooting
+
+| Symptom | Likely cause |
+| --- | --- |
+| Button says “Facebook sign-in not configured” | Missing `FACEBOOK_CLIENT_ID` or `FACEBOOK_CLIENT_SECRET` in the runtime env |
+| Redirect / OAuth error from Meta | Redirect URI in Meta does not exactly match `/api/auth/callback/facebook` for the current origin |
+| Works locally but not on Vercel | Production env vars not set, or production redirect URI not added in Meta |
 
 Credentials must remain server-side. Do not put the client secret in client components, README, or test fixtures intended for browsers.
 
@@ -268,6 +299,13 @@ For Google login (optional):
 - `GOOGLE_CLIENT_SECRET` (server-only — never `NEXT_PUBLIC_`)
 - Authorized redirect URI: `https://sylqen.vercel.app/api/auth/callback/google`
 - Local redirect URI: `http://localhost:3000/api/auth/callback/google`
+
+For Facebook login (optional):
+
+- `FACEBOOK_CLIENT_ID`
+- `FACEBOOK_CLIENT_SECRET` (server-only — never `NEXT_PUBLIC_`)
+- Valid OAuth Redirect URI: `https://sylqen.vercel.app/api/auth/callback/facebook`
+- Local redirect URI: `http://localhost:3000/api/auth/callback/facebook`
 
 For email verification in production:
 

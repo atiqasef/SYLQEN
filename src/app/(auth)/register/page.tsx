@@ -1,6 +1,9 @@
 import { AuthShell } from "@/components/auth/auth-shell";
 import { RegisterForm } from "@/components/auth/register-form";
-import { isGoogleOAuthConfigured } from "@/config/env";
+import {
+  isFacebookOAuthConfigured,
+  isGoogleOAuthConfigured,
+} from "@/config/env";
 import { redirectIfAuthenticated } from "@/server/auth/session";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +20,10 @@ export default async function RegisterPage() {
       title="Create your SYLQEN account"
       description="Register with email and password to start your workspace."
     >
-      <RegisterForm googleEnabled={isGoogleOAuthConfigured()} />
+      <RegisterForm
+        googleEnabled={isGoogleOAuthConfigured()}
+        facebookEnabled={isFacebookOAuthConfigured()}
+      />
     </AuthShell>
   );
 }

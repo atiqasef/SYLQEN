@@ -55,7 +55,7 @@ User
 ## Authentication
 
 - Provider: **Better Auth**
-- Methods: email/password + Google OAuth (when configured)
+- Methods: email/password + Google / Facebook OAuth (when each is configured)
 - Email verification is **optional** in the current portfolio stage (does not block app access); a policy flag exists to re-enable mandatory verification later
 - Password hashing/session crypto remain inside Better Auth
 

@@ -9,7 +9,7 @@ import {
   isEmailDeliveryConfigured,
 } from "@/config/env";
 import { EMAIL_VERIFICATION_REQUIRED } from "@/lib/auth-policy";
-import { buildGoogleSocialProviders } from "@/lib/auth-social";
+import { buildSocialProviders } from "@/lib/auth-social";
 import {
   getEmailDeliveryDiagnostics,
   resetPasswordEmailContent,
@@ -144,7 +144,7 @@ function createAuth() {
         }
       },
     },
-    socialProviders: buildGoogleSocialProviders(),
+    socialProviders: buildSocialProviders(),
     databaseHooks: {
       user: {
         create: {

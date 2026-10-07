@@ -4,6 +4,7 @@ import {
   getServerEnv,
   isDemoConfigured,
   isEmailDeliveryConfigured,
+  isFacebookOAuthConfigured,
   isGoogleOAuthConfigured,
   resetServerEnvCache,
 } from "@/config/env";
@@ -18,6 +19,8 @@ describe("getServerEnv", () => {
     delete process.env.RESEND_API_KEY;
     delete process.env.GOOGLE_CLIENT_ID;
     delete process.env.GOOGLE_CLIENT_SECRET;
+    delete process.env.FACEBOOK_CLIENT_ID;
+    delete process.env.FACEBOOK_CLIENT_SECRET;
     delete process.env.DEMO_EMAIL;
     delete process.env.DEMO_PASSWORD;
   });
@@ -36,17 +39,21 @@ describe("getServerEnv", () => {
     expect(env.AI_ENABLED).toBe(true);
   });
 
-  it("reports Google OAuth and demo configuration boundaries", () => {
+  it("reports Google/Facebook OAuth and demo configuration boundaries", () => {
     expect(isGoogleOAuthConfigured()).toBe(false);
+    expect(isFacebookOAuthConfigured()).toBe(false);
     expect(isDemoConfigured()).toBe(false);
 
     process.env.GOOGLE_CLIENT_ID = "google-client";
     process.env.GOOGLE_CLIENT_SECRET = "google-secret";
+    process.env.FACEBOOK_CLIENT_ID = "facebook-client";
+    process.env.FACEBOOK_CLIENT_SECRET = "facebook-secret";
     process.env.DEMO_EMAIL = "demo@sylqen.app";
     process.env.DEMO_PASSWORD = "demo-password-value";
     resetServerEnvCache();
 
     expect(isGoogleOAuthConfigured()).toBe(true);
+    expect(isFacebookOAuthConfigured()).toBe(true);
     expect(isDemoConfigured()).toBe(true);
   });
 

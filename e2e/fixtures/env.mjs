@@ -55,6 +55,8 @@ export function buildE2EServerEnv(mongoUri) {
     "RESEND_API_KEY",
     "GOOGLE_CLIENT_ID",
     "GOOGLE_CLIENT_SECRET",
+    "FACEBOOK_CLIENT_ID",
+    "FACEBOOK_CLIENT_SECRET",
     "EMAIL_FROM",
     "STRIPE_SECRET_KEY",
     "STRIPE_WEBHOOK_SECRET",

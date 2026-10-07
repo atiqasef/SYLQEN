@@ -35,17 +35,23 @@ test.describe("authentication UI", () => {
     await expect(page).toHaveURL(/\/login/);
   });
 
-  test("login keeps Google placeholder, email, and demo controls without real OAuth", async ({
+  test("login keeps social placeholders, email, and demo controls without real OAuth", async ({
     page,
   }) => {
     await page.goto("/login");
 
-    // E2E server intentionally omits Google credentials — no real OAuth.
+    // E2E server intentionally omits social credentials — no real OAuth.
     const google = page.getByRole("button", {
       name: "Google sign-in not configured",
     });
     await expect(google).toBeVisible();
     await expect(google).toBeDisabled();
+
+    const facebook = page.getByRole("button", {
+      name: "Facebook sign-in not configured",
+    });
+    await expect(facebook).toBeVisible();
+    await expect(facebook).toBeDisabled();
 
     await expect(
       page.getByRole("button", { name: "Continue with email" }),
@@ -55,7 +61,7 @@ test.describe("authentication UI", () => {
     ).toBeVisible();
   });
 
-  test("register shows Google placeholder without initiating real OAuth", async ({
+  test("register shows social placeholders without initiating real OAuth", async ({
     page,
   }) => {
     await page.goto("/register");
@@ -65,6 +71,12 @@ test.describe("authentication UI", () => {
     });
     await expect(google).toBeVisible();
     await expect(google).toBeDisabled();
+
+    const facebook = page.getByRole("button", {
+      name: "Facebook sign-in not configured",
+    });
+    await expect(facebook).toBeVisible();
+    await expect(facebook).toBeDisabled();
     await expect(
       page.getByRole("button", { name: "Create account" }),
     ).toBeVisible();
