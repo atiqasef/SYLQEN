@@ -75,6 +75,9 @@ describe("getSession request memoization", () => {
 
   it("deduplicates Better Auth + workspace lookups through React.cache wiring", async () => {
     const workspaceId = "507f1f77bcf86cd799439011";
+    headersMock.mockResolvedValue(
+      new Headers({ cookie: "better-auth.session_token=memo-token" }),
+    );
     getSessionMock.mockResolvedValue({
       user: {
         id: "user_1",

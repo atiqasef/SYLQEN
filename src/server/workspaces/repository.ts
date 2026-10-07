@@ -116,6 +116,89 @@ export async function findMembershipsForUser(
     .toArray();
 }
 
+type PrimaryWorkspaceAggregateRow = {
+  membership: MembershipDocument;
+  workspace: WorkspaceDocument | null;
+};
+
+/**
+ * Resolve the user's earliest membership and its workspace in one round-trip.
+ * Workspace identity still comes from the membership record (server-side), never
+ * from browser-supplied IDs.
+ */
+export async function findPrimaryMembershipWithWorkspace(
+  userId: string,
+): Promise<{
+  workspace: WorkspaceDocument;
+  membership: MembershipDocument;
+} | null> {
+  const db = getDb();
+  const rows = await db
+    .collection<MembershipDocument>(MEMBERSHIPS)
+    .aggregate<PrimaryWorkspaceAggregateRow>([
+      { $match: { userId } },
+      { $sort: { createdAt: 1 } },
+      { $limit: 1 },
+      {
+        $lookup: {
+          from: WORKSPACES,
+          let: { workspaceId: "$workspaceId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $ne: ["$$workspaceId", null] },
+                    { $ne: ["$$workspaceId", ""] },
+                    {
+                      $eq: [
+                        "$_id",
+                        {
+                          $convert: {
+                            input: "$$workspaceId",
+                            to: "objectId",
+                            onError: null,
+                            onNull: null,
+                          },
+                        },
+                      ],
+                    },
+                  ],
+                },
+              },
+            },
+            { $limit: 1 },
+          ],
+          as: "workspaceDocs",
+        },
+      },
+      {
+        $project: {
+          membership: {
+            _id: "$_id",
+            workspaceId: "$workspaceId",
+            userId: "$userId",
+            role: "$role",
+            createdAt: "$createdAt",
+            updatedAt: "$updatedAt",
+          },
+          workspace: { $arrayElemAt: ["$workspaceDocs", 0] },
+        },
+      },
+    ])
+    .toArray();
+
+  const row = rows[0];
+  if (!row?.membership || !row.workspace) {
+    return null;
+  }
+
+  return {
+    membership: row.membership,
+    workspace: row.workspace,
+  };
+}
+
 export async function findMembership(options: {
   userId: string;
   workspaceId: string;

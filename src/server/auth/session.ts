@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { getAuth } from "@/lib/auth";
 import { AppError } from "@/lib/errors/app-error";
 import { effectivePermissions } from "@/server/auth/permissions";
+import { hasBetterAuthSessionCookie } from "@/server/auth/session-cookie";
 import type { SessionContext } from "@/server/auth/types";
 import { connectMongo, isMongoConfigured } from "@/server/db/mongodb";
 import {
@@ -38,16 +39,26 @@ function mapUser(sessionUser: {
  * Wrapped in React `cache()` so layout + page (and nested helpers) that call
  * getSession / requireVerifiedPageSession share one DB round-trip within the
  * same RSC/server request. Not a cross-request or global session cache.
+ *
+ * Anonymous requests without a Better Auth session cookie short-circuit before
+ * Mongo/Better Auth work. Cookie presence alone never grants access.
  */
 export const getSession = cache(async (): Promise<SessionContext | null> => {
   if (!isMongoConfigured()) {
     return null;
   }
 
+  const requestHeaders = await headers();
+
+  // No session cookie ⇒ no authenticated user. Skip Mongo + Better Auth.
+  if (!hasBetterAuthSessionCookie(requestHeaders)) {
+    return null;
+  }
+
   await connectMongo();
 
   const session = await getAuth().api.getSession({
-    headers: await headers(),
+    headers: requestHeaders,
   });
 
   if (!session?.user) {

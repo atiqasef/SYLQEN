@@ -282,7 +282,10 @@ Never authorize from browser-supplied tenant IDs alone.
 ## Request performance (auth hot path)
 
 - `getSession` is wrapped in React `cache()` so multiple callers in one request share one Better Auth + workspace resolution.
+- Anonymous requests without a Better Auth session cookie short-circuit before Mongo/`getSession` work. Cookie presence still requires Better Auth verification.
+- Primary workspace resolution loads the earliest membership and its workspace in a single Mongo aggregation (not two serial queries).
 - Customer/product/project/invoice/payment `createIndexes` is guarded process-wide; it is not re-run on every list/detail call after the first successful ensure in a warm runtime.
+- Invoices include `{ workspaceId, issueDate }` for dashboard period aggregations.
 - Dashboard financial snapshot loads invoice/payment aggregates and recent lists in parallel; trend series runs only for the primary currency.
 
 ## Email

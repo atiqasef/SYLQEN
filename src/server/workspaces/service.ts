@@ -9,7 +9,7 @@ import {
   createWorkspaceWithOwner,
   ensureWorkspaceIndexes,
   findMembership,
-  findMembershipsForUser,
+  findPrimaryMembershipWithWorkspace,
   findWorkspaceById,
   updateWorkspaceName,
 } from "@/server/workspaces/repository";
@@ -39,13 +39,9 @@ export async function ensureDefaultWorkspaceForUser(options: {
 }): Promise<{ workspace: WorkspaceDocument; membership: MembershipDocument }> {
   await ensureWorkspaceIndexes();
 
-  const existing = await findMembershipsForUser(options.userId);
-  const first = existing[0];
-  if (first) {
-    const workspace = await findWorkspaceById(first.workspaceId);
-    if (workspace) {
-      return { workspace, membership: first };
-    }
+  const existing = await findPrimaryMembershipWithWorkspace(options.userId);
+  if (existing) {
+    return existing;
   }
 
   const workspaceName = `${options.name.trim() || "My"} Workspace`;
@@ -95,18 +91,7 @@ export async function getPrimaryWorkspaceForUser(userId: string): Promise<{
   workspace: WorkspaceDocument;
   membership: MembershipDocument;
 } | null> {
-  const memberships = await findMembershipsForUser(userId);
-  const membership = memberships[0];
-  if (!membership) {
-    return null;
-  }
-
-  const workspace = await findWorkspaceById(membership.workspaceId);
-  if (!workspace) {
-    return null;
-  }
-
-  return { workspace, membership };
+  return findPrimaryMembershipWithWorkspace(userId);
 }
 
 /**

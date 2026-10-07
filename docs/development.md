@@ -135,6 +135,9 @@ Coverage: Vitest (`src/server/payments/service.test.ts`, `src/features/payments/
 - Session/workspace resolution uses React `cache()` for **request-scoped** deduplication (layout + page share one lookup). Not a cross-request cache.
 - Customer/product/project/invoice/payment Mongo indexes are ensured with a **process-level** shared promise. Prefer confirming indexes in Atlas for production; the runtime ensure is a safety net, not a migration framework.
 - Align Vercel function region with the Atlas cluster region in the Vercel/Atlas dashboards (no region pin is committed in-repo).
+  - Verify Atlas: Cluster → Configuration → Region.
+  - Verify Vercel: Project → Settings → Functions → Function Region (or deployment `X-Vercel-Id` middle segment, e.g. `sin1::iad1::…` means edge `sin1` / compute `iad1`).
+  - Pin Vercel Functions to the same region as Atlas; do not move Atlas blindly.
 
 ## Scripts
 

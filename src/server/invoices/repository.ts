@@ -50,6 +50,12 @@ async function createInvoiceIndexes() {
       key: { workspaceId: 1, customerNameSnapshot: 1 },
       name: "invoices_workspace_customerName",
     },
+    // Dashboard financial aggregations match workspaceId + issueDate ranges
+    // (status $ne "draft" is applied after the date predicate).
+    {
+      key: { workspaceId: 1, issueDate: -1 },
+      name: "invoices_workspace_issueDate",
+    },
   ]);
 }
 

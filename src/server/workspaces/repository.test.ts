@@ -6,8 +6,11 @@ import { setMongoClientForTests } from "@/server/db/mongodb";
 import {
   createWorkspaceWithOwner,
   findMembership,
+  findPrimaryMembershipWithWorkspace,
   findWorkspaceById,
+  insertMembership,
 } from "@/server/workspaces/repository";
+import { getPrimaryWorkspaceForUser } from "@/server/workspaces/service";
 
 describe("workspace repository", () => {
   let memory: MongoMemoryServer;
@@ -56,5 +59,45 @@ describe("workspace repository", () => {
       created.workspace._id.toHexString(),
     );
     expect(workspace?.name).toBe("Acme Operations");
+  });
+
+  it("resolves primary membership + workspace in one lookup and isolates tenants", async () => {
+    const workspaceA = await createWorkspaceWithOwner({
+      name: "Workspace A",
+      ownerId: "user_primary_a",
+    });
+    const workspaceB = await createWorkspaceWithOwner({
+      name: "Workspace B",
+      ownerId: "user_primary_b",
+    });
+
+    await insertMembership({
+      workspaceId: workspaceA.workspace._id.toHexString(),
+      userId: "user_member_a",
+      role: "member",
+    });
+
+    const primary = await findPrimaryMembershipWithWorkspace("user_primary_a");
+    expect(primary?.workspace.name).toBe("Workspace A");
+    expect(primary?.membership.userId).toBe("user_primary_a");
+    expect(primary?.membership.role).toBe("owner");
+
+    const viaService = await getPrimaryWorkspaceForUser("user_member_a");
+    expect(viaService?.workspace._id.toHexString()).toBe(
+      workspaceA.workspace._id.toHexString(),
+    );
+    expect(viaService?.membership.role).toBe("member");
+
+    const foreign = await findPrimaryMembershipWithWorkspace("user_primary_b");
+    expect(foreign?.workspace._id.toHexString()).toBe(
+      workspaceB.workspace._id.toHexString(),
+    );
+    expect(foreign?.workspace._id.toHexString()).not.toBe(
+      workspaceA.workspace._id.toHexString(),
+    );
+
+    await expect(
+      findPrimaryMembershipWithWorkspace("user_missing"),
+    ).resolves.toBeNull();
   });
 });
