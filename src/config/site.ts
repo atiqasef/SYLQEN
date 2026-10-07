@@ -28,7 +28,7 @@ export const primaryNav: NavItem[] = [
   { title: "Payments", href: "/payments" },
   { title: "Finance", href: "/finance" },
   { title: "Team", href: "/team" },
-  { title: "Analytics", href: "/analytics", comingSoon: true, disabled: true },
+  { title: "Analytics", href: "/analytics" },
   { title: "Automations", href: "/automations", comingSoon: true, disabled: true },
 ];
 

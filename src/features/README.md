@@ -15,6 +15,7 @@ features/
   members/
   settings/
   finance/
+  analytics/
 ```
 
 Typical shape:

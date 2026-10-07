@@ -61,6 +61,15 @@ Open [http://localhost:3000](http://localhost:3000) — unauthenticated visitors
 
 Coverage: Vitest (`src/features/finance/`, `src/app/(app)/finance/page.test.tsx`) and Playwright (`e2e/finance.spec.ts`). Reuses `getDashboardFinancialSnapshotForSession`.
 
+## Analytics module (local)
+
+1. Sign in with customers, products, projects, invoices, and (optionally) payments
+2. Open **Analytics** from the primary nav
+3. Confirm executive overview, invoiced vs paid chart, signals, customer/product/project sections, and date range links (`/analytics?range=7`)
+4. Sign in via **Explore Demo** and confirm Analytics is readable with demo restrictions intact
+
+Coverage: Vitest (`src/features/analytics/`, `src/server/analytics/service.test.ts`, `src/app/(app)/analytics/page.test.tsx`) and Playwright (`e2e/analytics.spec.ts`). Reuses dashboard financial aggregations; adds bounded ranking/trend queries.
+
 ## Settings module (local)
 
 1. Sign in as a workspace owner

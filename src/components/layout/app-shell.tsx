@@ -58,6 +58,13 @@ function resolveShellMeta(pathname: string, session: SessionContext) {
     };
   }
 
+  if (pathname.startsWith("/analytics")) {
+    return {
+      title: "Analytics",
+      description: `${session.workspace.name} · performance & trends`,
+    };
+  }
+
   if (pathname.startsWith("/team")) {
     return {
       title: "Team",

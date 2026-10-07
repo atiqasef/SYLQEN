@@ -41,6 +41,7 @@ The project emphasizes production-minded engineering: trusted sessions, server-e
 - **Payments** — record against invoices, remaining balance, overpayment rejection, paid settlement
 - **Financial overview** — KPI cards, payment trend, outstanding/overdue, recent activity (7 / 30 / 90 day ranges)
 - **Finance** — command center for invoicing, payments, and prioritized receivables (composes the same server snapshot)
+- **Analytics** — decision-support trends (invoiced vs paid), customer/product rankings from invoice snapshots, project status mix, and rule-based business signals
 
 Metrics are **currency-aware**. Totals are not mixed across currencies; there is no FX conversion.
 
@@ -63,7 +64,7 @@ Metrics are **currency-aware**. Totals are not mixed across currencies; there is
 
 ### Explicitly not claimed as shipped
 
-Nav placeholders may show upcoming modules (Finance, Analytics, Automations, Settings, Integrations). Those surfaces are **not** implemented product features. Real AI product surfaces, Stripe billing, email invitations, client portals, and delete/bulk workflows are out of current scope.
+Nav placeholders may show upcoming modules (Automations, Integrations). Those surfaces are **not** implemented product features. Real AI product surfaces, Stripe billing, email invitations, client portals, and delete/bulk workflows are out of current scope.
 
 ---
 
@@ -278,6 +279,7 @@ docs/             Architecture, security, development, AI
 - Team member list / role update / remove (with owner protections)
 - Settings (workspace name, account display name, theme preference, access summary)
 - Finance command center
+- Analytics (trends, rankings, signals)
 - Demo read-only mode
 - Global UX consistency polish
 - Automated unit, integration, and E2E tests
