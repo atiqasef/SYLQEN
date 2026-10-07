@@ -79,6 +79,13 @@ function resolveShellMeta(pathname: string, session: SessionContext) {
     };
   }
 
+  if (pathname.startsWith("/integrations")) {
+    return {
+      title: "Integrations",
+      description: `${session.workspace.name} · external services`,
+    };
+  }
+
   return {
     title: "Overview",
     description: `${session.workspace.name} · ${session.membership.role}`,

@@ -70,6 +70,15 @@ Coverage: Vitest (`src/features/finance/`, `src/app/(app)/finance/page.test.tsx`
 
 Coverage: Vitest (`src/features/analytics/`, `src/server/analytics/service.test.ts`, `src/app/(app)/analytics/page.test.tsx`) and Playwright (`e2e/analytics.spec.ts`). Reuses dashboard financial aggregations; adds bounded ranking/trend queries.
 
+## Integrations module (local)
+
+1. Sign in and open **Integrations** from the System nav
+2. Confirm Stripe, Resend, and AI Assistant cards plus Planned section
+3. Open a detail page (`/integrations/resend`) and confirm capabilities, configuration summary, and security note (no secrets)
+4. Sign in via **Explore Demo** and confirm Integrations is readable with demo restrictions intact
+
+Coverage: Vitest (`src/server/integrations/`, `src/app/(app)/integrations/page.test.tsx`) and Playwright (`e2e/integrations.spec.ts`). No Mongo collection — static catalog + env-derived status.
+
 ## Settings module (local)
 
 1. Sign in as a workspace owner

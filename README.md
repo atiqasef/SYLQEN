@@ -53,6 +53,7 @@ Metrics are **currency-aware**. Totals are not mixed across currencies; there is
 - Multi-tenant workspace isolation on every domain record
 - Demo accounts forced to read-only (viewer-capped) permissions
 - **Settings** — workspace rename (`workspace.update`), account display name, device theme preference, session access summary
+- **Integrations** — read-only hub for platform integrations (Stripe reserved, Resend email, AI abstraction) plus clearly marked planned providers
 
 ### Platform
 
@@ -64,7 +65,7 @@ Metrics are **currency-aware**. Totals are not mixed across currencies; there is
 
 ### Explicitly not claimed as shipped
 
-Nav placeholders may show upcoming modules (Automations, Integrations). Those surfaces are **not** implemented product features. Real AI product surfaces, Stripe billing, email invitations, client portals, and delete/bulk workflows are out of current scope.
+Nav placeholders may show upcoming modules (Automations). Those surfaces are **not** implemented product features. Real AI product surfaces, live Stripe checkout/billing, email invitations, client portals, and delete/bulk workflows are out of current scope.
 
 ---
 
@@ -280,6 +281,7 @@ docs/             Architecture, security, development, AI
 - Settings (workspace name, account display name, theme preference, access summary)
 - Finance command center
 - Analytics (trends, rankings, signals)
+- Integrations hub (catalog + derived platform status)
 - Demo read-only mode
 - Global UX consistency polish
 - Automated unit, integration, and E2E tests
@@ -287,8 +289,8 @@ docs/             Architecture, security, development, AI
 ### Future scope (not built)
 
 - Email invitations & richer org admin
-- Integrations product surfaces
-- Stripe or other payment providers
+- Live Stripe Checkout / subscription billing product flows
+- Per-workspace OAuth installs (Slack, Google Calendar, QuickBooks, etc.)
 - Mandatory email verification in production (policy flag exists)
 - Real AI assistance features on top of the existing abstraction
 - PDF invoices, tax/discounts, deletes/bulk actions, client portal

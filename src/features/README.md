@@ -16,6 +16,7 @@ features/
   settings/
   finance/
   analytics/
+  integrations/
 ```
 
 Typical shape:

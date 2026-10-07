@@ -15,7 +15,7 @@ src/
   components/
     auth/            Auth experience UI
     ui/ layout/ feedback/ providers/
-  features/          Domain UI modules (customers, products, projects, invoices, payments, finance, analytics, …)
+  features/          Domain UI modules (customers, products, projects, invoices, payments, finance, analytics, integrations, …)
   lib/
     auth.ts          Better Auth server instance
     auth-client.ts   Better Auth React client
@@ -254,6 +254,25 @@ Route:
 Sections: executive overview (period activity + entity counts), invoiced vs paid trend (daily for 7/30, weekly for 90), rule-based business signals, customer rankings (invoiced + outstanding), product rankings from invoice line-item snapshots, project status mix and due-soon/overdue list.
 
 No analytics collection or BI warehouse. Monetary series stay on the primary currency (highest invoiced total); other currencies are listed separately without FX. Permissions compose `invoices.read`, `payments.read`, `customers.read`, `products.read`, and `projects.read`.
+
+## Integrations module
+
+Routes:
+
+- `/integrations` — read-only integrations hub
+- `/integrations/[slug]` — detail for a catalog entry
+
+Architecture: static server catalog (`src/server/integrations/catalog.ts`) + deployment-derived status flags (no integrations Mongo collection, no per-workspace OAuth). Secrets never serialize to the client.
+
+Current cards:
+
+- **Stripe** — reserved payments infrastructure (env slots + provider-agnostic payments domain). Live Checkout/subscriptions are not shipped.
+- **Resend** — transactional email via existing email provider abstraction (system-configured).
+- **AI Assistant** — existing `AIProvider` abstraction / mock provider (no workspace API keys).
+
+Planned cards (visibility only): Slack, Google Calendar, QuickBooks.
+
+Permission: `workspace.read`. Demo remains read-only.
 
 ## Dashboard financial intelligence
 
