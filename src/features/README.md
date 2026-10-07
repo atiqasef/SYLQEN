@@ -13,6 +13,7 @@ features/
   payments/
   dashboard/
   members/
+  settings/
 ```
 
 Typical shape:

@@ -56,7 +56,7 @@ User
 
 ## Workspaces
 
-After verified registration (or verified social sign-in):
+After registration (or verified social sign-in):
 
 1. Create default workspace
 2. Attach owner membership
@@ -66,6 +66,8 @@ Collections:
 
 - `workspaces` — `name`, `slug`, `ownerId`, timestamps
 - `memberships` — `workspaceId`, `userId`, `role`, timestamps
+
+Settings (`/settings`) can rename the workspace when the session has `workspace.update`. Slug remains stable. Account display name updates go through Better Auth / the `user` collection for the signed-in user only; email stays read-only in Settings.
 
 ## RBAC
 

@@ -50,6 +50,7 @@ Metrics are **currency-aware**. Totals are not mixed across currencies; there is
 - Permission-aware UI with **server-side authorization as the source of truth**
 - Multi-tenant workspace isolation on every domain record
 - Demo accounts forced to read-only (viewer-capped) permissions
+- **Settings** — workspace rename (`workspace.update`), account display name, device theme preference, session access summary
 
 ### Platform
 
@@ -274,6 +275,7 @@ docs/             Architecture, security, development, AI
 - Customers, products, projects
 - Invoices, payments, financial overview
 - Team member list / role update / remove (with owner protections)
+- Settings (workspace name, account display name, theme preference, access summary)
 - Demo read-only mode
 - Global UX consistency polish
 - Automated unit, integration, and E2E tests
@@ -281,7 +283,7 @@ docs/             Architecture, security, development, AI
 ### Future scope (not built)
 
 - Email invitations & richer org admin
-- Settings / integrations product surfaces
+- Integrations product surfaces
 - Stripe or other payment providers
 - Mandatory email verification in production (policy flag exists)
 - Real AI assistance features on top of the existing abstraction

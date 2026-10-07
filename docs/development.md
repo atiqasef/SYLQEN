@@ -52,6 +52,17 @@ Open [http://localhost:3000](http://localhost:3000) — unauthenticated visitors
    - `EMAIL_PROVIDER=dev` captures messages in memory
    - `EMAIL_CAPTURE_TO_DISK=true` writes `.local/emails/*.json` for manual link copying
 
+## Settings module (local)
+
+1. Sign in as a workspace owner
+2. Open **Settings** from the System nav (or Account menu → Settings)
+3. Rename the workspace; confirm the shell shows the new name and the slug stays unchanged
+4. Update display name; confirm email remains read-only
+5. Change theme preference (device-local via next-themes)
+6. Sign in via **Explore Demo** and confirm workspace/account saves are blocked while theme still works
+
+Coverage: Vitest (`src/server/workspaces/workspace-settings.test.ts`, `src/server/settings/account-service.test.ts`, `src/features/settings/schemas.test.ts`) and Playwright (`e2e/settings.spec.ts`).
+
 ## Dashboard (local)
 
 1. Sign in and open **Overview**

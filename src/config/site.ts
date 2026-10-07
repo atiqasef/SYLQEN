@@ -33,6 +33,6 @@ export const primaryNav: NavItem[] = [
 ];
 
 export const secondaryNav: NavItem[] = [
-  { title: "Settings", href: "/settings", comingSoon: true, disabled: true },
+  { title: "Settings", href: "/settings" },
   { title: "Integrations", href: "/integrations", comingSoon: true, disabled: true },
 ];

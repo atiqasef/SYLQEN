@@ -18,9 +18,12 @@ test.describe("navigation", () => {
     ).toBeVisible();
 
     await page.getByRole("button", { name: "Account menu" }).click();
-    await expect(
-      page.getByRole("menuitem", { name: "Account settings (coming soon)" }),
-    ).toBeDisabled();
+    await expect(page.getByRole("menuitem", { name: "Settings" })).toBeVisible();
+    await page.getByRole("menuitem", { name: "Settings" }).click();
+    await expect(page).toHaveURL(/\/settings/);
+    await expect(page.locator("#settings-heading")).toHaveText("Settings");
+
+    await page.getByRole("button", { name: "Account menu" }).click();
     await expect(page.getByRole("menuitem", { name: "Sign out" })).toBeVisible();
 
     await signOut(page);

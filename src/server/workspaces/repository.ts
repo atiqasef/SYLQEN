@@ -140,6 +140,30 @@ export async function findWorkspaceById(
   });
 }
 
+/**
+ * Update workspace display name. Slug stays stable as the workspace identifier.
+ * Scoped by workspace `_id` only — callers must authorize from session context.
+ */
+export async function updateWorkspaceName(options: {
+  workspaceId: string;
+  name: string;
+}): Promise<WorkspaceDocument | null> {
+  if (!ObjectId.isValid(options.workspaceId)) {
+    return null;
+  }
+
+  const db = getDb();
+  const result = await db
+    .collection<WorkspaceDocument>(WORKSPACES)
+    .findOneAndUpdate(
+      { _id: new ObjectId(options.workspaceId) },
+      { $set: { name: options.name, updatedAt: new Date() } },
+      { returnDocument: "after" },
+    );
+
+  return result ?? null;
+}
+
 export async function updateMembershipRole(options: {
   membershipId: string;
   role: Role;
