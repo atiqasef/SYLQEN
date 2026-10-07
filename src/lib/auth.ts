@@ -7,9 +7,9 @@ import {
   getServerEnv,
   getTrustedOrigins,
   isEmailDeliveryConfigured,
-  isGoogleOAuthConfigured,
 } from "@/config/env";
 import { EMAIL_VERIFICATION_REQUIRED } from "@/lib/auth-policy";
+import { buildGoogleSocialProviders } from "@/lib/auth-social";
 import {
   getEmailDeliveryDiagnostics,
   resetPasswordEmailContent,
@@ -75,20 +75,6 @@ async function deliverAuthEmail(input: {
     });
     throw error;
   }
-}
-
-function buildSocialProviders() {
-  const env = getServerEnv();
-  if (!isGoogleOAuthConfigured()) {
-    return {};
-  }
-
-  return {
-    google: {
-      clientId: env.GOOGLE_CLIENT_ID!,
-      clientSecret: env.GOOGLE_CLIENT_SECRET!,
-    },
-  };
 }
 
 /**
@@ -158,7 +144,7 @@ function createAuth() {
         }
       },
     },
-    socialProviders: buildSocialProviders(),
+    socialProviders: buildGoogleSocialProviders(),
     databaseHooks: {
       user: {
         create: {

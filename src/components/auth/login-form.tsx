@@ -27,15 +27,15 @@ export function LoginForm({ googleEnabled, demoEnabled }: LoginFormProps) {
   const [error, setError] = React.useState<string | null>(null);
   const [pending, setPending] = React.useState(false);
   const [demoPending, setDemoPending] = React.useState(false);
+  const [googlePending, setGooglePending] = React.useState(false);
 
-  const busy = pending || demoPending;
+  const busy = pending || demoPending || googlePending;
+  const nextPath = getSafeNextPath(searchParams.get("next"));
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setPending(true);
     setError(null);
-
-    const nextPath = getSafeNextPath(searchParams.get("next"));
 
     const result = await authClient.signIn.email({
       email,
@@ -71,7 +71,18 @@ export function LoginForm({ googleEnabled, demoEnabled }: LoginFormProps) {
 
   return (
     <div className="space-y-5">
-      <GoogleButton enabled={googleEnabled} />
+      <GoogleButton
+        enabled={googleEnabled}
+        callbackURL={nextPath}
+        disabled={pending || demoPending}
+        onBusyChange={(next) => {
+          setGooglePending(next);
+          if (next) {
+            setError(null);
+          }
+        }}
+        onError={setError}
+      />
 
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
         <div className="h-px flex-1 bg-border" aria-hidden="true" />

@@ -46,11 +46,39 @@ Open [http://localhost:3000](http://localhost:3000) — unauthenticated visitors
 1. Register with any email address (verification is optional and does not block access in the portfolio stage)
 2. Confirm default workspace creation after sign-up / first verified session path
 3. Sign out / sign in
-4. Optional: Explore Demo when `DEMO_EMAIL` / `DEMO_PASSWORD` are set
-5. Optional: Google sign-in when Google credentials are set
+4. Optional: Explore Demo when demo credentials are set in the environment
+5. Optional: Google sign-in when Google OAuth credentials are set (see below)
 6. Optional email tooling:
    - `EMAIL_PROVIDER=dev` captures messages in memory
    - `EMAIL_CAPTURE_TO_DISK=true` writes `.local/emails/*.json` for manual link copying
+
+## Google OAuth setup
+
+Google sign-in uses Better Auth `socialProviders.google` with server-only environment variables. Email/password and Explore Demo remain available when Google is unset.
+
+1. In [Google Cloud Console](https://console.cloud.google.com/), create an OAuth 2.0 Client ID (Web application).
+2. Add authorized redirect URIs (exact match required):
+   - Local: `http://localhost:3000/api/auth/callback/google`
+   - Production: `https://sylqen.vercel.app/api/auth/callback/google`
+3. Set in `.env.local` / Vercel (never commit real values; never use `NEXT_PUBLIC_` for the secret):
+
+```bash
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+```
+
+4. Restart `npm run dev` (or redeploy). Login and Register show **Continue with Google** when both values are present.
+5. New Google users follow the existing Better Auth user-create hook → default workspace bootstrap. Returning users keep the normal session flow.
+
+### Troubleshooting
+
+| Symptom | Likely cause |
+| --- | --- |
+| Button says “Google sign-in not configured” | Missing `GOOGLE_CLIENT_ID` or `GOOGLE_CLIENT_SECRET` in the runtime env |
+| `redirect_uri_mismatch` from Google | Redirect URI in Cloud Console does not exactly match `/api/auth/callback/google` for the current origin |
+| Works locally but not on Vercel | Production env vars not set, or production redirect URI not added in Google Cloud |
+
+Credentials must remain server-side. Do not put the client secret in client components, README, or test fixtures intended for browsers.
 
 ## Finance module (local)
 
@@ -234,11 +262,12 @@ Set at least:
 - `BETTER_AUTH_URL=https://sylqen.vercel.app`
 - `NEXT_PUBLIC_APP_URL=https://sylqen.vercel.app`
 
-For Google login:
+For Google login (optional):
 
 - `GOOGLE_CLIENT_ID`
-- `GOOGLE_CLIENT_SECRET`
+- `GOOGLE_CLIENT_SECRET` (server-only — never `NEXT_PUBLIC_`)
 - Authorized redirect URI: `https://sylqen.vercel.app/api/auth/callback/google`
+- Local redirect URI: `http://localhost:3000/api/auth/callback/google`
 
 For email verification in production:
 

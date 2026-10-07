@@ -34,4 +34,39 @@ test.describe("authentication UI", () => {
     await expect(alert).not.toHaveText("");
     await expect(page).toHaveURL(/\/login/);
   });
+
+  test("login keeps Google placeholder, email, and demo controls without real OAuth", async ({
+    page,
+  }) => {
+    await page.goto("/login");
+
+    // E2E server intentionally omits Google credentials — no real OAuth.
+    const google = page.getByRole("button", {
+      name: "Google sign-in not configured",
+    });
+    await expect(google).toBeVisible();
+    await expect(google).toBeDisabled();
+
+    await expect(
+      page.getByRole("button", { name: "Continue with email" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Explore Demo" }),
+    ).toBeVisible();
+  });
+
+  test("register shows Google placeholder without initiating real OAuth", async ({
+    page,
+  }) => {
+    await page.goto("/register");
+
+    const google = page.getByRole("button", {
+      name: "Google sign-in not configured",
+    });
+    await expect(google).toBeVisible();
+    await expect(google).toBeDisabled();
+    await expect(
+      page.getByRole("button", { name: "Create account" }),
+    ).toBeVisible();
+  });
 });

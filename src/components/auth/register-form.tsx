@@ -27,6 +27,8 @@ export function RegisterForm({ googleEnabled }: RegisterFormProps) {
   const [confirmPassword, setConfirmPassword] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
   const [pending, setPending] = React.useState(false);
+  const [googlePending, setGooglePending] = React.useState(false);
+  const busy = pending || googlePending;
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -79,7 +81,19 @@ export function RegisterForm({ googleEnabled }: RegisterFormProps) {
 
   return (
     <div className="space-y-5">
-      <GoogleButton enabled={googleEnabled} label="Continue with Google" />
+      <GoogleButton
+        enabled={googleEnabled}
+        label="Continue with Google"
+        callbackURL="/"
+        disabled={pending}
+        onBusyChange={(next) => {
+          setGooglePending(next);
+          if (next) {
+            setError(null);
+          }
+        }}
+        onError={setError}
+      />
 
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
         <div className="h-px flex-1 bg-border" aria-hidden="true" />
@@ -102,7 +116,7 @@ export function RegisterForm({ googleEnabled }: RegisterFormProps) {
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder="Ada Lovelace"
-            disabled={pending}
+            disabled={busy}
           />
         </div>
 
@@ -116,7 +130,7 @@ export function RegisterForm({ googleEnabled }: RegisterFormProps) {
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             placeholder="you@company.com"
-            disabled={pending}
+            disabled={busy}
           />
         </div>
 
@@ -131,7 +145,7 @@ export function RegisterForm({ googleEnabled }: RegisterFormProps) {
             placeholder="Create a password"
             toggleLabelShow="Show password"
             toggleLabelHide="Hide password"
-            disabled={pending}
+            disabled={busy}
             aria-describedby="password-hint"
             aria-invalid={
               error?.toLowerCase().includes("password") || undefined
@@ -156,7 +170,7 @@ export function RegisterForm({ googleEnabled }: RegisterFormProps) {
             placeholder="Repeat your password"
             toggleLabelShow="Show confirm password"
             toggleLabelHide="Hide confirm password"
-            disabled={pending}
+            disabled={busy}
             aria-invalid={
               error?.toLowerCase().includes("match") || undefined
             }
@@ -165,7 +179,7 @@ export function RegisterForm({ googleEnabled }: RegisterFormProps) {
 
         {error ? <AuthAlert>{error}</AuthAlert> : null}
 
-        <Button type="submit" className="w-full" disabled={pending}>
+        <Button type="submit" className="w-full" disabled={busy}>
           {pending ? "Creating account…" : "Create account"}
         </Button>
       </form>
